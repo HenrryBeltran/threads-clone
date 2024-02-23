@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
   const { isAuthenticated } = getKindeServerSession();
-  const auth = await isAuthenticated();
+  const isLoggedIn = await isAuthenticated();
 
-  if (auth) {
+  if (!isLoggedIn) {
     redirect("/api/auth/login");
   }
 
