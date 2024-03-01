@@ -1,0 +1,16 @@
+{
+  "id": "mig_cnd1624n6qa117d13k90",
+  "parentID": "mig_cnd0rgkn6qa117d13k70",
+  "checksum": "1:2577dec562b28bd21f23dfa987c467d95f3327ae8923c844404775f349ea86aa",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "profile_picture",
+          "type": "file[]"
+        },
+        "table": "user"
+      }
+    }
+  ]
+}

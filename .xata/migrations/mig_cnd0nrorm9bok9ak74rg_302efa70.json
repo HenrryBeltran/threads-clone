@@ -1,0 +1,17 @@
+{
+  "id": "mig_cnd0nrorm9bok9ak74rg",
+  "parentID": "mig_cnd0mqkn6qa117d13k0g",
+  "checksum": "1:302efa702380ea6c2da6ee8d253302878365d7d01b6918657b46f881a91144da",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "auth_id",
+          "type": "string",
+          "unique": true
+        },
+        "table": "user"
+      }
+    }
+  ]
+}

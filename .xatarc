@@ -1,0 +1,6 @@
+{
+  "databaseURL": "https://Henrry-s-workspace-eilp77.us-east-1.xata.sh/db/threads-clone",
+  "codegen": {
+    "output": "src/db/xata.ts"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "mig_cnh4uhq839898kdt3edg",
+  "parentID": "mig_cnh4uc7hbks91u39u8t0",
+  "checksum": "1:15666e3f1df7a2010fcbfcb43b54afe3759753154cccd676558e7149410a2705",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "profile_picture",
+          "type": "file"
+        },
+        "table": "user"
+      }
+    }
+  ]
+}
