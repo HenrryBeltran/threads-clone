@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 import { xata } from "@/db";
 import { getAuth } from "@/lib/getAuth";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
@@ -14,6 +15,7 @@ export default async function Home() {
 
   return (
     <main className="relative">
+      <Navbar />
       <section className="mx-auto flex min-h-svh max-w-sm items-start justify-between gap-4 pt-12">
         <div className="flex flex-row-reverse items-center gap-2">
           <Suspense
