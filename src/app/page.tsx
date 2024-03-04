@@ -1,18 +1,9 @@
 import Navbar from "@/components/Navbar";
 import { xata } from "@/db";
-import { getAuth } from "@/lib/getAuth";
-import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import Image from "next/image";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 export default async function Home() {
-  const user = await getAuth();
-
-  if (!user) {
-    redirect("/account/register");
-  }
-
   return (
     <main className="relative">
       <Navbar />
@@ -23,10 +14,9 @@ export default async function Home() {
               <div className="h-16 w-16 rounded-full border border-muted-foreground" />
             }
           >
-            <UserProfile id={user.id} />
+            {/* <UserProfile id={user.id} /> */}
           </Suspense>
         </div>
-        <LogoutLink className="mt-5 underline">Log out</LogoutLink>
       </section>
     </main>
   );
