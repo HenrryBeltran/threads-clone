@@ -17,12 +17,20 @@ export default function NavbarMenu() {
           <MenuIcon className="h-6 w-6 fill-neutral-400/85 transition-colors duration-200 group-hover:fill-foreground" />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="" align="end" side="top">
+      <PopoverContent
+        className="relative w-fit border-none bg-transparent shadow-none"
+        align="end"
+        side="top"
+      >
         {!appearanceModal ? (
           <MenuOptions setAppearance={setAppearance} />
         ) : (
           <AppearanceOption setAppearance={setAppearance} />
         )}
+        <div
+          data-appearance={appearanceModal}
+          className="absolute right-0 top-0 h-32 w-32 rounded-xl border-[0.5px] border-muted bg-card shadow-xl transition-all data-[appearance=true]:w-[418px]"
+        ></div>
       </PopoverContent>
     </Popover>
   );
@@ -34,7 +42,7 @@ type OptionsProps = {
 
 function MenuOptions({ setAppearance }: OptionsProps) {
   return (
-    <ul>
+    <ul className="relative z-[60]">
       <li>
         <button onClick={() => setAppearance(true)}>Appearance</button>
       </li>
@@ -49,15 +57,15 @@ function MenuOptions({ setAppearance }: OptionsProps) {
 }
 
 function AppearanceOption({ setAppearance }: OptionsProps) {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
-    <div className="w-96">
+    <div className="relative z-[60] w-96">
       <button onClick={() => setAppearance(false)}>
         <ArrowLeft />
       </button>
       <h2>Appearance</h2>
-      <ToggleGroup type="single" defaultValue="system" variant="outline">
+      <ToggleGroup type="single" defaultValue={theme} variant="outline">
         <ToggleGroupItem value="light" onClick={() => setTheme("light")}>
           <Sun />
         </ToggleGroupItem>
