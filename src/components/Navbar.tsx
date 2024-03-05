@@ -12,11 +12,11 @@ const menuIconsProps = {
 
 export default function Navbar() {
   return (
-    <nav className="flex items-center justify-between md:mx-auto md:h-[74px] md:max-w-screen-xl">
-      <Link href="/">
-        <ThreadsCloneLogo className="ml-[22px] h-8 w-8 dark:fill-white" />
+    <nav className="fixed left-0 right-0 top-0 z-10 mx-auto grid h-[74px] w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 items-center md:max-w-screen-xl">
+      <Link href="/" className="group ml-4 flex h-12 w-12 items-center justify-center">
+        <ThreadsCloneLogo className="h-8 w-8 transition duration-200 group-hover:scale-110 dark:fill-white" />
       </Link>
-      <ul className="grid grid-flow-col grid-rows-1 text-neutral-400/85">
+      <ul className="grid grid-flow-col grid-rows-1 px-16 text-neutral-400">
         <NavbarItemWrapper>
           <Home {...menuIconsProps} />
         </NavbarItemWrapper>

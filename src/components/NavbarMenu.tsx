@@ -22,7 +22,7 @@ export default function NavbarMenu() {
           systemTheme === "dark" ? "#171717" : "#ffffff",
         );
       } else {
-        themeColor.setAttribute("content", theme === "dark" ? "#171717" : "#ffffff");
+        themeColor.setAttribute("content", theme === "dark" ? "#242526" : "#ffffff");
       }
     }
   }, [theme, systemTheme]);
@@ -35,8 +35,8 @@ export default function NavbarMenu() {
         }
       }}
     >
-      <PopoverTrigger>
-        <div className="group mr-3 flex h-12 w-12 items-center justify-center">
+      <PopoverTrigger className="mr-3 justify-self-end">
+        <div className="group flex h-12 w-12 items-center justify-center">
           <MenuIcon className="h-6 w-6 fill-neutral-400/85 transition-colors duration-200 group-hover:fill-foreground" />
         </div>
       </PopoverTrigger>
@@ -44,7 +44,7 @@ export default function NavbarMenu() {
         data-appearance={appearanceModal}
         align="end"
         side="top"
-        className="h-[187px] w-40 rounded-2xl border-[0.5px] p-0 shadow-xl transition-all duration-200 data-[appearance=true]:h-[118px] data-[appearance=true]:w-80"
+        className="h-[187px] w-40 rounded-2xl border-[0.5px] p-0 shadow-xl transition-all duration-200 data-[appearance=true]:h-[118px] data-[appearance=true]:w-80 dark:bg-neutral-900"
       >
         {!appearanceModal ? (
           <MenuOptions setAppearance={() => setAppearanceModal(true)} />
@@ -109,24 +109,24 @@ function AppearanceOption({ setAppearance, setTheme, theme }: AppearanceProps) {
         <div className="p-6" />
       </div>
       <ToggleGroup type="single" className="w-full px-4 pb-5 pt-2" defaultValue={theme}>
-        <div className="grid w-full grid-cols-3 grid-rows-1 rounded-2xl bg-muted/80">
+        <div className="grid w-full grid-cols-3 grid-rows-1 rounded-2xl bg-muted/80 dark:bg-neutral-950">
           <ToggleGroupItem
             value="light"
-            className="rounded-2xl py-5 aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50"
+            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50"
             onClick={() => setTheme("light")}
           >
             <Sun absoluteStrokeWidth strokeWidth={1.5} size={20} />
           </ToggleGroupItem>
           <ToggleGroupItem
             value="dark"
-            className="rounded-2xl py-5 aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
+            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
             onClick={() => setTheme("dark")}
           >
             <Moon absoluteStrokeWidth strokeWidth={1.5} size={20} />
           </ToggleGroupItem>
           <ToggleGroupItem
             value="system"
-            className="rounded-2xl py-5 aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50"
+            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50"
             onClick={() => setTheme("system")}
           >
             Auto
