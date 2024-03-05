@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { MenuIcon } from "./NavbarSVGs";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ArrowLeft, Moon, Sun } from "lucide-react";
@@ -58,6 +58,14 @@ function MenuOptions({ setAppearance }: OptionsProps) {
 
 function AppearanceOption({ setAppearance }: OptionsProps) {
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+
+    if (themeColor) {
+      themeColor.setAttribute("content", theme!);
+    }
+  }, [theme]);
 
   return (
     <div className="relative z-[60] w-96">
