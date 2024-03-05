@@ -2,14 +2,15 @@
 
 import { ArrowLeft, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { MenuIcon } from "./NavbarSVGs";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 export default function NavbarMenu() {
-  const [appearanceModal, setAppearance] = useState(false);
   const { theme, systemTheme, setTheme } = useTheme();
+  const [appearanceModal, setAppearanceModal] = useState(false);
 
   useEffect(() => {
     const themeColor = document.querySelector('meta[name="theme-color"]');
@@ -27,78 +28,110 @@ export default function NavbarMenu() {
   }, [theme, systemTheme]);
 
   return (
-    <Popover>
+    <Popover
+      onOpenChange={(state) => {
+        if (state) {
+          setAppearanceModal(false);
+        }
+      }}
+    >
       <PopoverTrigger>
         <div className="group mr-3 flex h-12 w-12 items-center justify-center">
           <MenuIcon className="h-6 w-6 fill-neutral-400/85 transition-colors duration-200 group-hover:fill-foreground" />
         </div>
       </PopoverTrigger>
       <PopoverContent
-        className="relative w-fit border-none bg-transparent shadow-none"
+        data-appearance={appearanceModal}
         align="end"
         side="top"
+        className="h-[187px] w-40 rounded-2xl border-[0.5px] p-0 shadow-xl transition-all duration-200 data-[appearance=true]:h-[118px] data-[appearance=true]:w-80"
       >
         {!appearanceModal ? (
-          <MenuOptions setAppearance={setAppearance} />
+          <MenuOptions setAppearance={() => setAppearanceModal(true)} />
         ) : (
           <AppearanceOption
-            setAppearance={setAppearance}
+            setAppearance={() => setAppearanceModal(false)}
             setTheme={setTheme}
             theme={theme}
           />
         )}
-        <div
-          data-appearance={appearanceModal}
-          className="absolute right-0 top-0 h-32 w-32 rounded-xl border-[0.5px] border-muted bg-card shadow-xl transition-all data-[appearance=true]:w-[418px]"
-        ></div>
       </PopoverContent>
     </Popover>
   );
 }
 
 type OptionsProps = {
-  setAppearance: Dispatch<SetStateAction<boolean>>;
+  setAppearance: () => void;
 };
 
 function MenuOptions({ setAppearance }: OptionsProps) {
   return (
-    <ul className="relative z-[60]">
+    <ul className="relative z-[60] divide-y-[0.5px] divide-muted-foreground/30 py-1 font-[550]">
       <li>
-        <button onClick={() => setAppearance(true)}>Appearance</button>
+        <button onClick={() => setAppearance()} className="px-5 py-2.5 outline-none">
+          Appearance
+        </button>
       </li>
       <li>
-        <button>Saved</button>
+        <Link href="/saved" className="inline-block px-5 py-2.5">
+          Saved
+        </Link>
       </li>
       <li>
-        <button>Logout</button>
+        <Link href="/liked" className="inline-block px-5 py-2.5">
+          Your likes
+        </Link>
+      </li>
+      <li>
+        <button className="px-5 py-2.5">Logout</button>
       </li>
     </ul>
   );
 }
 
 type AppearanceProps = {
-  setAppearance: Dispatch<SetStateAction<boolean>>;
+  setAppearance: () => void;
   setTheme: (theme: string) => void;
   theme?: string;
 };
 
 function AppearanceOption({ setAppearance, setTheme, theme }: AppearanceProps) {
   return (
-    <div className="relative z-[60] w-96">
-      <button onClick={() => setAppearance(false)}>
-        <ArrowLeft />
-      </button>
-      <h2>Appearance</h2>
-      <ToggleGroup type="single" defaultValue={theme} variant="outline">
-        <ToggleGroupItem value="light" onClick={() => setTheme("light")}>
-          <Sun />
-        </ToggleGroupItem>
-        <ToggleGroupItem value="dark" onClick={() => setTheme("dark")}>
-          <Moon />
-        </ToggleGroupItem>
-        <ToggleGroupItem value="system" onClick={() => setTheme("system")}>
-          Auto
-        </ToggleGroupItem>
+    <div className="relative z-[60] w-80">
+      <div className="flex w-full items-center justify-between">
+        <button
+          onClick={() => setAppearance()}
+          className="flex h-12 w-12 items-center justify-center"
+        >
+          <ArrowLeft absoluteStrokeWidth strokeWidth={1.5} size={20} />
+        </button>
+        <h2 className="text-center font-[550]">Appearance</h2>
+        <div className="p-6" />
+      </div>
+      <ToggleGroup type="single" className="w-full px-4 pb-5 pt-2" defaultValue={theme}>
+        <div className="grid w-full grid-cols-3 grid-rows-1 rounded-2xl bg-muted/80">
+          <ToggleGroupItem
+            value="light"
+            className="rounded-2xl py-5 aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50"
+            onClick={() => setTheme("light")}
+          >
+            <Sun absoluteStrokeWidth strokeWidth={1.5} size={20} />
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="dark"
+            className="rounded-2xl py-5 aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
+            onClick={() => setTheme("dark")}
+          >
+            <Moon absoluteStrokeWidth strokeWidth={1.5} size={20} />
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="system"
+            className="rounded-2xl py-5 aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50"
+            onClick={() => setTheme("system")}
+          >
+            Auto
+          </ToggleGroupItem>
+        </div>
       </ToggleGroup>
     </div>
   );
