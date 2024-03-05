@@ -1,8 +1,9 @@
+import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "Threads Clone",
@@ -18,6 +19,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const heads = headers();
+  const pathname = heads.get("next-url");
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={GeistSans.className}>
@@ -28,7 +32,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <main>
-            <Navbar />
+            {pathname !== "/login" && <Navbar />}
             {children}
           </main>
         </ThemeProvider>

@@ -1,10 +1,12 @@
 import { Heart, Home, Search, SquarePen, User } from "lucide-react";
 import Link from "next/link";
+import NavbarItemWrapper from "./NavbarItemWrapper";
 import NavbarMenu from "./NavbarMenu";
 import { ThreadsCloneLogo } from "./NavbarSVGs";
+import RedirectButton from "./RedirectButton";
 
 const menuIconsProps = {
-  className: "relative z-10",
+  className: "relative z-10 fill-inherit",
   size: 26,
   absoluteStrokeWidth: true,
   strokeWidth: 2.5,
@@ -16,33 +18,32 @@ export default function Navbar() {
       <Link href="/" className="group ml-4 flex h-12 w-12 items-center justify-center">
         <ThreadsCloneLogo className="h-8 w-8 transition duration-200 group-hover:scale-110 dark:fill-white" />
       </Link>
-      <ul className="grid grid-flow-col grid-rows-1 px-16 text-neutral-400">
-        <NavbarItemWrapper>
-          <Home {...menuIconsProps} />
-        </NavbarItemWrapper>
-        <NavbarItemWrapper>
-          <Search {...menuIconsProps} />
-        </NavbarItemWrapper>
+      <div className="grid grid-flow-col grid-rows-1 px-16 text-neutral-400">
+        <RedirectButton href="/">
+          <NavbarItemWrapper selectedPathname="/">
+            <Home {...menuIconsProps} />
+          </NavbarItemWrapper>
+        </RedirectButton>
+        <RedirectButton href="/search">
+          <NavbarItemWrapper selectedPathname="/search">
+            <Search {...menuIconsProps} className="relative z-10 !fill-none" />
+          </NavbarItemWrapper>
+        </RedirectButton>
         <NavbarItemWrapper>
           <SquarePen {...menuIconsProps} />
         </NavbarItemWrapper>
-        <NavbarItemWrapper>
-          <Heart {...menuIconsProps} />
-        </NavbarItemWrapper>
-        <NavbarItemWrapper>
-          <User {...menuIconsProps} />
-        </NavbarItemWrapper>
-      </ul>
+        <RedirectButton href="/liked">
+          <NavbarItemWrapper selectedPathname="/liked">
+            <Heart {...menuIconsProps} />
+          </NavbarItemWrapper>
+        </RedirectButton>
+        <RedirectButton href="/@user">
+          <NavbarItemWrapper selectedPathname="/@user">
+            <User {...menuIconsProps} />
+          </NavbarItemWrapper>
+        </RedirectButton>
+      </div>
       <NavbarMenu />
     </nav>
-  );
-}
-
-function NavbarItemWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <li className="group relative mx-0.5 my-1 flex justify-center rounded-md px-8 py-5">
-      {children}
-      <div className="absolute left-0 top-0 h-full w-full scale-90 rounded-lg transition-all duration-200 group-hover:scale-100 group-hover:bg-neutral-100/90"></div>
-    </li>
   );
 }

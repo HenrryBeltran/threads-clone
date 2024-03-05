@@ -1,3 +1,3 @@
 export default function SavedPage() {
-  return <section>Saved</section>;
+  return <section className="flex min-h-svh items-center justify-center">Saved</section>;
 }

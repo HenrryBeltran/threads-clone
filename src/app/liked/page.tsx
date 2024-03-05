@@ -1,3 +1,3 @@
 export default function LikedPage() {
-  return <section>Liked</section>;
+  return <section className="flex min-h-svh items-center justify-center">Liked</section>;
 }
