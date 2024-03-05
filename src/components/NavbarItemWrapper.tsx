@@ -10,7 +10,6 @@ export default function NavbarItemWrapper({
   selectedPathname?: string;
 }) {
   const pathname = usePathname();
-  console.log("~ nabvar item wrapper", selectedPathname);
 
   return (
     <div
