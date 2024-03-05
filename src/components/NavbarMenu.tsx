@@ -1,14 +1,30 @@
 "use client";
 
+import { ArrowLeft, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { MenuIcon } from "./NavbarSVGs";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { ArrowLeft, Moon, Sun } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
-import { useTheme } from "next-themes";
 
 export default function NavbarMenu() {
   const [appearanceModal, setAppearance] = useState(false);
+  const { theme, systemTheme, setTheme } = useTheme();
+
+  useEffect(() => {
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+
+    if (themeColor) {
+      if (theme === "system") {
+        themeColor.setAttribute(
+          "content",
+          systemTheme === "dark" ? "#171717" : "#ffffff",
+        );
+      } else {
+        themeColor.setAttribute("content", theme === "dark" ? "#171717" : "#ffffff");
+      }
+    }
+  }, [theme, systemTheme]);
 
   return (
     <Popover>
@@ -25,7 +41,11 @@ export default function NavbarMenu() {
         {!appearanceModal ? (
           <MenuOptions setAppearance={setAppearance} />
         ) : (
-          <AppearanceOption setAppearance={setAppearance} />
+          <AppearanceOption
+            setAppearance={setAppearance}
+            setTheme={setTheme}
+            theme={theme}
+          />
         )}
         <div
           data-appearance={appearanceModal}
@@ -56,17 +76,13 @@ function MenuOptions({ setAppearance }: OptionsProps) {
   );
 }
 
-function AppearanceOption({ setAppearance }: OptionsProps) {
-  const { theme, setTheme } = useTheme();
+type AppearanceProps = {
+  setAppearance: Dispatch<SetStateAction<boolean>>;
+  setTheme: (theme: string) => void;
+  theme?: string;
+};
 
-  useEffect(() => {
-    const themeColor = document.querySelector('meta[name="theme-color"]');
-
-    if (themeColor) {
-      themeColor.setAttribute("content", theme!);
-    }
-  }, [theme]);
-
+function AppearanceOption({ setAppearance, setTheme, theme }: AppearanceProps) {
   return (
     <div className="relative z-[60] w-96">
       <button onClick={() => setAppearance(false)}>
