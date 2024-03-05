@@ -1,11 +1,15 @@
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { GeistSans } from "geist/font/sans";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Threads Clone",
   description: "Threads clone by Henrry Beltran.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "light",
 };
 
 export default function RootLayout({
