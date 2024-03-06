@@ -112,7 +112,7 @@ function AppearanceOption({ setAppearance, setTheme, theme }: AppearanceProps) {
         <div className="grid w-full grid-cols-3 grid-rows-1 rounded-2xl bg-muted/80 dark:bg-neutral-950">
           <ToggleGroupItem
             value="light"
-            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50"
+            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
             onClick={() => setTheme("light")}
           >
             <Sun absoluteStrokeWidth strokeWidth={1.5} size={20} />
@@ -126,7 +126,7 @@ function AppearanceOption({ setAppearance, setTheme, theme }: AppearanceProps) {
           </ToggleGroupItem>
           <ToggleGroupItem
             value="system"
-            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50"
+            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
             onClick={() => setTheme("system")}
           >
             Auto
