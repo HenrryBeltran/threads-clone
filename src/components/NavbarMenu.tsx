@@ -3,41 +3,20 @@
 import { ArrowLeft, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MenuIcon } from "./NavbarSVGs";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 export default function NavbarMenu() {
-  const { theme, systemTheme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [appearanceModal, setAppearanceModal] = useState(false);
 
-  useEffect(() => {
-    const themeColor = document.querySelector('meta[name="theme-color"]');
-
-    if (themeColor) {
-      if (theme === "system") {
-        themeColor.setAttribute(
-          "content",
-          systemTheme === "dark" ? "#171717" : "#ffffff",
-        );
-      } else {
-        themeColor.setAttribute("content", theme === "dark" ? "#242526" : "#ffffff");
-      }
-    }
-  }, [theme, systemTheme]);
-
   return (
-    <Popover
-      onOpenChange={(state) => {
-        if (state) {
-          setAppearanceModal(false);
-        }
-      }}
-    >
+    <Popover>
       <PopoverTrigger className="mr-3 justify-self-end">
         <div className="group flex h-12 w-12 items-center justify-center">
-          <MenuIcon className="h-6 w-6 fill-neutral-400/85 transition-colors duration-200 group-hover:fill-foreground" />
+          <MenuIcon className="h-6 w-6 fill-neutral-400/85 transition duration-200 group-hover:fill-foreground group-active:scale-90" />
         </div>
       </PopoverTrigger>
       <PopoverContent

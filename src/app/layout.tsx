@@ -1,8 +1,8 @@
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import UpdateTheme from "@/components/UpdateTheme";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "none",
+  themeColor: "currentColor",
 };
 
 export default function RootLayout({
@@ -19,9 +19,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const heads = headers();
-  const pathname = heads.get("next-url");
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={GeistSans.className}>
@@ -29,10 +26,12 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="system"
           enableSystem
+          enableColorScheme
           disableTransitionOnChange
         >
+          <UpdateTheme />
           <main>
-            {pathname !== "/login" && <Navbar />}
+            <Navbar />
             {children}
           </main>
         </ThemeProvider>

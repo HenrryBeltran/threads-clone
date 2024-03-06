@@ -2,17 +2,6 @@ export default async function Home() {
   return (
     <section className="relative flex min-h-svh items-center justify-center">
       Home
-      {/* <section className="mx-auto flex min-h-svh max-w-sm items-start justify-between gap-4 pt-12"> */}
-      {/*   <div className="flex flex-row-reverse items-center gap-2"> */}
-      {/*     <Suspense */}
-      {/*       fallback={ */}
-      {/*         <div className="h-16 w-16 rounded-full border border-muted-foreground" /> */}
-      {/*       } */}
-      {/*     > */}
-      {/*       <UserProfile id={user.id} /> */}
-      {/*     </Suspense> */}
-      {/*   </div> */}
-      {/* </section> */}
     </section>
   );
 }
