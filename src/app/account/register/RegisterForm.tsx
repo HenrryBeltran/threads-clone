@@ -103,7 +103,7 @@ export default function RegisterForm() {
     }
 
     if (result) {
-      const key = Object.keys(result.errors)[0] as "username" | "root";
+      const key = Object.keys(result.errors)[0] as "username";
       form.setError(key, { message: result.errors[key] });
     }
   }
