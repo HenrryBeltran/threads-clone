@@ -42,6 +42,7 @@ export default function SignUpForm() {
             type="text"
             placeholder="Username"
             className="rounded-xl border-none bg-muted px-4 py-7 focus:!ring-muted-foreground/60 dark:bg-muted/75"
+            autoFocus
           />
           <Input
             {...form.register("email")}
