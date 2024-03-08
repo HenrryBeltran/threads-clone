@@ -1,10 +1,8 @@
 "use server";
 
 import { xata } from "@/db";
-import { RegisterFormData } from "./RegisterForm";
 import { Try } from "@/lib/safeTry";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { redirect } from "next/navigation";
+import { RegisterFormData } from "./RegisterForm";
 
 interface FormData extends RegisterFormData {
   profilePicture?: {
@@ -28,46 +26,48 @@ export async function registerUser(data: FormData) {
     return { errors: { username: "This username already exists." } };
   }
 
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
+  console.log("~ Completed user registration", JSON.stringify(data, null, 2));
 
-  if (user) {
-    console.log(JSON.stringify({ ...data, ...user }, null, 2));
-
-    let insertUser;
-    if (data.profilePicture) {
-      insertUser = xata.db.user.create({
-        username,
-        bio: data.bio,
-        auth_id: user.id,
-        email: user.email,
-        name: user.given_name,
-        lastname: user.family_name,
-        profile_picture: {
-          name: data.profilePicture.name,
-          mediaType: "image/jpg",
-          base64Content: data.profilePicture.base64.split(";base64,")[1],
-          enablePublicUrl: true,
-        },
-      });
-    } else {
-      insertUser = xata.db.user.create({
-        username,
-        bio: data.bio,
-        auth_id: user.id,
-        email: user.email,
-        name: user.given_name,
-        lastname: user.family_name,
-      });
-    }
-
-    const { error } = await Try(insertUser);
-
-    if (error) {
-      console.error(JSON.stringify(error));
-      return { errors: { root: "Something went wrong." } };
-    }
-
-    redirect("/");
-  }
+  // const { getUser } = getKindeServerSession();
+  // const user = await getUser();
+  //
+  // if (user) {
+  //   console.log(JSON.stringify({ ...data, ...user }, null, 2));
+  //
+  //   let insertUser;
+  //   if (data.profilePicture) {
+  //     insertUser = xata.db.user.create({
+  //       username,
+  //       bio: data.bio,
+  //       auth_id: user.id,
+  //       email: user.email,
+  //       name: user.given_name,
+  //       lastname: user.family_name,
+  //       profile_picture: {
+  //         name: data.profilePicture.name,
+  //         mediaType: "image/jpg",
+  //         base64Content: data.profilePicture.base64.split(";base64,")[1],
+  //         enablePublicUrl: true,
+  //       },
+  //     });
+  //   } else {
+  //     insertUser = xata.db.user.create({
+  //       username,
+  //       bio: data.bio,
+  //       auth_id: user.id,
+  //       email: user.email,
+  //       name: user.given_name,
+  //       lastname: user.family_name,
+  //     });
+  //   }
+  //
+  //   const { error } = await Try(insertUser);
+  //
+  //   if (error) {
+  //     console.error(JSON.stringify(error));
+  //     return { errors: { root: "Something went wrong." } };
+  //   }
+  //
+  //   redirect("/");
+  // }
 }

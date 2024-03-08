@@ -62,7 +62,7 @@ function MenuOptions({ setAppearance }: OptionsProps) {
         </Link>
       </li>
       <li>
-        <button className="px-5 py-2.5">Logout</button>
+        <button className="px-5 py-2.5">Log out</button>
       </li>
     </ul>
   );
