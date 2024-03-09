@@ -14,10 +14,6 @@ const menuIconsProps = {
 export default function Navbar() {
   const pathname = usePathname();
 
-  if (pathname === "/login" || pathname === "/sign-up") {
-    return <></>;
-  }
-
   return (
     <nav className="fixed bottom-0 left-0 grid h-[68px] w-full grid-cols-5 grid-rows-1 items-center sm:static sm:h-full">
       <NavbarLinkItem href="/" pathname={pathname}>
