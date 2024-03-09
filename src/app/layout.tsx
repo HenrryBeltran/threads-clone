@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={GeistSans.className}>
+      <body className={`${GeistSans.className} bg-white dark:bg-[#242526]`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -31,7 +31,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <UpdateTheme />
-          <main>
+          <main className="bg-white dark:bg-neutral-900">
             <Header />
             {children}
             <BottomNavbar />

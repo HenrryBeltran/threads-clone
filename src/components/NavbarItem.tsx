@@ -30,7 +30,7 @@ export function NavbarLinkItem({
         </div>
         <div
           hidden
-          className="absolute left-1/2 top-2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-500"
+          className="absolute bottom-2 left-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-500 sm:top-2"
         />
       </div>
     </>
@@ -51,7 +51,7 @@ export function NavbarItem({ children }: { children: React.ReactNode }) {
         </div>
         <div
           hidden
-          className="absolute left-1/2 top-2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-500"
+          className="absolute bottom-2 left-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-500 sm:top-2"
         />
       </div>
     </>
