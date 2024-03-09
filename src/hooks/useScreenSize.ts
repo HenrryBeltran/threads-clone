@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 
 export default function useScreenSize() {
-  const [screenSize, setScreenSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
+  const [screenSize, setScreenSize] = useState<{ width?: number; height?: number }>({
+    width: undefined,
+    height: undefined,
   });
 
   useEffect(() => {

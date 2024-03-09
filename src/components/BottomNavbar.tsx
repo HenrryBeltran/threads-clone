@@ -1,10 +1,10 @@
 "use client";
 
-import Navbar from "./Navbar";
 import useScreenSize from "@/hooks/useScreenSize";
+import Navbar from "./Navbar";
 
 export default function BottomNavbar() {
   const { width } = useScreenSize();
 
-  return <>{width < 640 && <Navbar />}</>;
+  return <>{width && width < 640 && <Navbar />}</>;
 }
