@@ -8,7 +8,7 @@ import { MenuIcon } from "./NavbarSVGs";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
-export default function NavbarMenu() {
+export default function Menu() {
   const { theme, setTheme } = useTheme();
   const [appearanceModal, setAppearanceModal] = useState(false);
 

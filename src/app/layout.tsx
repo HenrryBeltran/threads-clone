@@ -1,9 +1,10 @@
-import Navbar from "@/components/Navbar";
+import Header from "@/components/Hearder";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import UpdateTheme from "@/components/UpdateTheme";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import BottomNavbar from "@/components/BottomNavbar";
 
 export const metadata: Metadata = {
   title: "Threads Clone",
@@ -31,8 +32,9 @@ export default function RootLayout({
         >
           <UpdateTheme />
           <main>
-            <Navbar />
+            <Header />
             {children}
+            <BottomNavbar />
           </main>
         </ThemeProvider>
       </body>
