@@ -31,7 +31,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <UpdateTheme />
-          <main className="bg-white dark:bg-neutral-900">
+          <main className="bg-background">
             <Header />
             {children}
             <BottomNavbar />

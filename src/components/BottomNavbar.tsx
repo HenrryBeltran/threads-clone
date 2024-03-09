@@ -1,8 +1,8 @@
 "use client";
 
 import useScreenSize from "@/hooks/useScreenSize";
-import Navbar from "./Navbar";
 import { usePathname } from "next/navigation";
+import Navbar from "./Navbar";
 
 export default function BottomNavbar() {
   const { width } = useScreenSize();
@@ -12,5 +12,5 @@ export default function BottomNavbar() {
     return <></>;
   }
 
-  return <>{width && width < 640 && <Navbar />}</>;
+  return <>{(width === undefined || width < 640) && <Navbar />}</>;
 }
