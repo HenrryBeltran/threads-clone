@@ -62,7 +62,6 @@ export default function LoginForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               className="border-none px-4 py-7 shadow-none !ring-0"
-              autoFocus
             />
             <button
               type="button"

@@ -85,7 +85,6 @@ export default function SignUpForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               className="border-none px-4 py-7 shadow-none !ring-0"
-              autoFocus
             />
             <button
               type="button"
@@ -110,7 +109,6 @@ export default function SignUpForm() {
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm password"
               className="border-none px-4 py-7 shadow-none !ring-0"
-              autoFocus
             />
             <button
               type="button"
