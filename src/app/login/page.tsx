@@ -3,7 +3,7 @@ import LoginForm from "./LoginForm";
 export default function LoginPage() {
   return (
     <>
-      <section className="flex min-h-[calc(100svh-48px)] w-full flex-col items-center justify-center px-5 sm:px-5">
+      <section className="flex min-h-[calc(100svh-48px)] w-full flex-col items-center justify-center px-5 pt-6 sm:px-5">
         <header className="w-full space-y-12 py-8">
           <h1 className="mx-auto w-fit bg-gradient-to-r from-purple-500 via-red-500 via-65% to-orange-400 bg-clip-text text-[12vw] font-extrabold leading-none tracking-tight text-transparent sm:text-[10vw] lg:text-[8vw] xl:text-[7vw]">
             Threads Clone

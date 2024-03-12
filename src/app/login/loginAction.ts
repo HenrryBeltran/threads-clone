@@ -1,37 +1,96 @@
 "use server";
 
 import { loginFormSchema } from "@/common/schemas";
+import { xata } from "@/db";
+import { UsersRecord } from "@/db/xata";
+import { Try } from "@/lib/safeTry";
+import { SelectedPick } from "@xata.io/client";
+import bcrypt from "bcrypt";
+import { z } from "zod";
 
 export type FormState = {
   message: string;
-  fields?: Record<string, string>;
-  issues?: string[];
+  ok?: boolean;
+  path?: string;
+  issues?: z.ZodError<typeof loginFormSchema>;
 };
 
-export async function loginAction(_: FormState, formData: FormData) {
-  const data = Object.fromEntries(formData);
-  const parsed = loginFormSchema.safeParse(data);
+export async function loginAction(formData: z.infer<typeof loginFormSchema>) {
+  console.log("~ hit login action");
 
-  if (!parsed.success) {
-    const fields: Record<string, string> = {};
-    for (const key of Object.keys(data)) {
-      fields[key] = data[key].toString();
-    }
+  const validatedForm = loginFormSchema.safeParse(formData);
+
+  if (!validatedForm.success) {
     return {
-      message: "Invalid form data",
-      fields,
-      issues: parsed.error.issues.map((issue) => issue.message),
+      message: "Invalid form data.",
+      issues: validatedForm.error.flatten().fieldErrors,
     };
   }
 
-  // if (parsed.data.email.includes("a")) {
-  //   return {
-  //     message: "Invalid email",
-  //     fields: parsed.data,
-  //   };
-  // }
+  const { password } = validatedForm.data;
+  const username = validatedForm.data.username.toLowerCase();
 
-  console.log("~ User", JSON.stringify(parsed.data, null, 2));
+  let foundUser: SelectedPick<UsersRecord, ("id" | "password")[]> | null | undefined;
 
-  return { message: "User logged in" };
+  if (username.includes("@")) {
+    const { error: foundEmailError, result: foundUserByEmail } = await Try(
+      xata.db.users.select(["id", "password"]).filter({ email: username }).getFirst(),
+    );
+
+    if (foundEmailError) {
+      console.error(foundEmailError);
+
+      return {
+        message: foundEmailError.message,
+      };
+    }
+
+    if (!foundUserByEmail) {
+      return {
+        message: "Email not register.",
+        path: "username",
+      };
+    }
+    foundUser = foundUserByEmail;
+  } else {
+    const { error: foundUsernameError, result: foundUserByUsername } = await Try(
+      xata.db.users.select(["id", "password"]).filter({ username: username }).getFirst(),
+    );
+
+    if (foundUsernameError) {
+      console.error(foundUserByUsername);
+
+      return {
+        message: foundUsernameError.message,
+      };
+    }
+
+    if (!foundUserByUsername) {
+      return {
+        message: "Username not found.",
+        path: "username",
+      };
+    }
+    foundUser = foundUserByUsername;
+  }
+
+  const passwordMatch = await Try(bcrypt.compare(password, foundUser.password!));
+
+  if (passwordMatch.error) {
+    return {
+      message: passwordMatch.error.message,
+    };
+  }
+
+  if (!passwordMatch.result) {
+    return {
+      message: "Wrong password",
+      path: "password",
+      ok: false,
+    };
+  }
+
+  console.log("~ User", JSON.stringify(validatedForm.data, null, 2));
+
+  return { message: "User logged in", ok: true };
 }

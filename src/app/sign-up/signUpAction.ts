@@ -1,38 +1,103 @@
 "use server";
 
 import { signUpFormSchema } from "@/common/schemas";
+import { xata } from "@/db";
+import { Try } from "@/lib/safeTry";
+import bcrypt from "bcrypt";
+import { z } from "zod";
 
 export type FormState = {
   message: string;
-  fields?: Record<string, string>;
-  issues?: string[];
+  ok?: boolean;
+  path?: string;
+  issues?: z.ZodError<typeof signUpFormSchema>;
 };
 
-export async function signUpAction(_: FormState, formData: FormData) {
-  console.log("~ hit");
-  const data = Object.fromEntries(formData);
-  const parsed = signUpFormSchema.safeParse(data);
+export async function signUpAction(formData: z.infer<typeof signUpFormSchema>) {
+  console.log("~ hit sign up action");
 
-  if (!parsed.success) {
-    const fields: Record<string, string> = {};
-    for (const key of Object.keys(data)) {
-      fields[key] = data[key].toString();
-    }
+  const validatedForm = signUpFormSchema.safeParse(formData);
+
+  if (!validatedForm.success) {
     return {
-      message: "Invalid form data",
-      fields,
-      issues: parsed.error.issues.map((issue) => issue.message),
+      message: "Invalid form data.",
+      issues: validatedForm.error.flatten().fieldErrors,
     };
   }
 
-  // if (parsed.data.email.includes("a")) {
-  //   return {
-  //     message: "Invalid email",
-  //     fields: parsed.data,
-  //   };
-  // }
+  const { email, password } = validatedForm.data;
+  const username = validatedForm.data.username.toLowerCase();
 
-  console.log("~ New user", JSON.stringify(parsed.data, null, 2));
+  const { error: foundUsernameError, result: foundUsername } = await Try(
+    xata.db.users.select(["id"]).filter({ username: username }).getFirst(),
+  );
 
-  return { message: "User signed up" };
+  if (foundUsernameError) {
+    console.error(foundUsername);
+
+    return {
+      message: foundUsernameError.message,
+    };
+  }
+
+  if (foundUsername) {
+    return {
+      message: `Username ${username} is already taken.`,
+      path: "username",
+    };
+  }
+
+  const { error: foundEmailError, result: foundEmail } = await Try(
+    xata.db.users.select(["id"]).filter({ email: email }).getFirst(),
+  );
+
+  if (foundEmailError) {
+    console.error(foundEmailError);
+
+    return {
+      message: foundEmailError.message,
+    };
+  }
+
+  if (foundEmail) {
+    return {
+      message: "This email is already register.",
+      path: "email",
+    };
+  }
+
+  const { error: hashedPasswordError, result: hashedPassword } = await Try(
+    bcrypt.hash(password, 10),
+  );
+
+  if (hashedPasswordError) {
+    console.error(hashedPasswordError);
+
+    return {
+      message: hashedPasswordError.message,
+    };
+  }
+
+  const { error } = await Try(
+    xata.db.users.create({
+      username,
+      email,
+      password: hashedPassword,
+    }),
+  );
+
+  if (error) {
+    console.error(error);
+
+    return {
+      message: error.message,
+    };
+  }
+
+  console.log(
+    "~ New user",
+    JSON.stringify({ username, email, password: hashedPassword }, null, 2),
+  );
+
+  return { message: "User signed up.", ok: true };
 }

@@ -1,10 +1,11 @@
+import BottomNavbar from "@/components/BottomNavbar";
 import Header from "@/components/Hearder";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import UpdateTheme from "@/components/UpdateTheme";
+import { Toaster } from "@/components/ui/sonner";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import BottomNavbar from "@/components/BottomNavbar";
 
 export const metadata: Metadata = {
   title: "Threads Clone",
@@ -36,6 +37,7 @@ export default function RootLayout({
             {children}
             <BottomNavbar />
           </main>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
