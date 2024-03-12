@@ -15,7 +15,7 @@ export async function registerUser(data: FormData) {
   const username = data.username.toLowerCase();
 
   const { error: repeatUserError, result: foundRepeatUser } = await Try(
-    xata.db.user.select(["id", "username"]).filter({ username }).getFirst(),
+    xata.db.users.select(["id", "username"]).filter({ username }).getFirst(),
   );
 
   if (repeatUserError) {
