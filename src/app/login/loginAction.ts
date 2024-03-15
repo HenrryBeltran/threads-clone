@@ -1,12 +1,15 @@
 "use server";
 
+import { cookieOptions } from "@/common/cookieOptions";
 import { loginFormSchema } from "@/common/schemas";
 import { xata } from "@/db";
 import { UserRecord } from "@/db/xata";
 import { Try } from "@/lib/safeTry";
 import { SelectedPick } from "@xata.io/client";
 import bcrypt from "bcrypt";
+import { cookies } from "next/headers";
 import { z } from "zod";
+import { nanoid } from "nanoid";
 
 export type FormState = {
   message: string;
@@ -87,6 +90,8 @@ export async function loginAction(formData: z.infer<typeof loginFormSchema>) {
       ok: false,
     };
   }
+
+  cookies().set("st", nanoid(), cookieOptions);
 
   return { message: "User logged in", ok: true };
 }

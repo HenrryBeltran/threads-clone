@@ -15,10 +15,13 @@ const username = z
     (s) => /^[a-zA-Z_\d]([a-zA-Z\d_]*\.?[a-zA-Z\d_]+)*$/.test(s),
     `Invalid special characters.\n\nUnderscores and dots are valid.`,
   );
+
 const password = z
   .string({ required_error: "Password is required." })
   .min(8, { message: "Password must be at least 8 characters." })
   .max(30, { message: "Password cannot execeed 30 characters long." });
+
+const nanoToken = z.string().refine((s) => !s.includes(" "), "Invalid token.");
 
 export const loginFormSchema = z.object({
   username: z.string().email().or(username),
@@ -36,3 +39,5 @@ export const signUpFormSchema = z
     message: "Passwords do not match.",
     path: ["confirmPassword"],
   });
+
+export const nanoTokenSchema = nanoToken;
