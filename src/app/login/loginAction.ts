@@ -2,7 +2,7 @@
 
 import { loginFormSchema } from "@/common/schemas";
 import { xata } from "@/db";
-import { UsersRecord } from "@/db/xata";
+import { UserRecord } from "@/db/xata";
 import { Try } from "@/lib/safeTry";
 import { SelectedPick } from "@xata.io/client";
 import bcrypt from "bcrypt";
@@ -16,8 +16,6 @@ export type FormState = {
 };
 
 export async function loginAction(formData: z.infer<typeof loginFormSchema>) {
-  console.log("~ hit login action");
-
   const validatedForm = loginFormSchema.safeParse(formData);
 
   if (!validatedForm.success) {
@@ -30,11 +28,11 @@ export async function loginAction(formData: z.infer<typeof loginFormSchema>) {
   const { password } = validatedForm.data;
   const username = validatedForm.data.username.toLowerCase();
 
-  let foundUser: SelectedPick<UsersRecord, ("id" | "password")[]> | null | undefined;
+  let foundUser: SelectedPick<UserRecord, ("id" | "password")[]> | null | undefined;
 
   if (username.includes("@")) {
     const { error: foundEmailError, result: foundUserByEmail } = await Try(
-      xata.db.users.select(["id", "password"]).filter({ email: username }).getFirst(),
+      xata.db.user.select(["id", "password"]).filter({ email: username }).getFirst(),
     );
 
     if (foundEmailError) {
@@ -54,7 +52,7 @@ export async function loginAction(formData: z.infer<typeof loginFormSchema>) {
     foundUser = foundUserByEmail;
   } else {
     const { error: foundUsernameError, result: foundUserByUsername } = await Try(
-      xata.db.users.select(["id", "password"]).filter({ username: username }).getFirst(),
+      xata.db.user.select(["id", "password"]).filter({ username: username }).getFirst(),
     );
 
     if (foundUsernameError) {
@@ -89,8 +87,6 @@ export async function loginAction(formData: z.infer<typeof loginFormSchema>) {
       ok: false,
     };
   }
-
-  console.log("~ User", JSON.stringify(validatedForm.data, null, 2));
 
   return { message: "User logged in", ok: true };
 }

@@ -8,43 +8,51 @@ import type {
 
 const tables = [
   {
-    name: "users",
+    name: "user",
     columns: [
-      { name: "email", type: "email" },
-      { name: "emailVerified", type: "datetime" },
-      { name: "name", type: "string" },
-      { name: "image", type: "string" },
-      { name: "password", type: "string" },
       { name: "bio", type: "string" },
+      {
+        name: "sessions",
+        type: "link",
+        link: { table: "session" },
+        unique: true,
+      },
+      { name: "profile_picture", type: "file" },
+      { name: "name", type: "string" },
+      { name: "password", type: "string", notNull: true, defaultValue: "" },
+      { name: "email", type: "email", unique: true },
       { name: "username", type: "string", unique: true },
-    ],
-    revLinks: [
-      { column: "user", table: "accounts" },
-      { column: "user", table: "users_accounts" },
+      { name: "email_verified", type: "datetime" },
     ],
   },
   {
-    name: "accounts",
+    name: "session",
     columns: [
-      { name: "user", type: "link", link: { table: "users" } },
-      { name: "type", type: "string" },
-      { name: "provider", type: "string" },
-      { name: "providerAccountId", type: "string" },
-      { name: "refresh_token", type: "string" },
-      { name: "access_token", type: "string" },
-      { name: "expires_at", type: "int" },
-      { name: "token_type", type: "string" },
-      { name: "scope", type: "string" },
-      { name: "id_token", type: "text" },
-      { name: "session_state", type: "string" },
+      { name: "expires", type: "datetime", notNull: true, defaultValue: "now" },
+      { name: "session_token", type: "string", unique: true },
     ],
-    revLinks: [{ column: "account", table: "users_accounts" }],
+    revLinks: [{ column: "sessions", table: "user" }],
   },
   {
-    name: "users_accounts",
+    name: "reset_password",
     columns: [
-      { name: "user", type: "link", link: { table: "users" } },
-      { name: "account", type: "link", link: { table: "accounts" } },
+      { name: "expires", type: "datetime", notNull: true, defaultValue: "now" },
+      { name: "email", type: "email" },
+      { name: "password_token", type: "string", unique: true },
+    ],
+  },
+  {
+    name: "verify_user",
+    columns: [
+      { name: "user_token", type: "string", unique: true },
+      { name: "expires", type: "datetime", notNull: true, defaultValue: "now" },
+      { name: "email", type: "email", unique: true },
+      {
+        name: "code_verified",
+        type: "string",
+        notNull: true,
+        defaultValue: "",
+      },
     ],
   },
 ] as const;
@@ -52,19 +60,23 @@ const tables = [
 export type SchemaTables = typeof tables;
 export type InferredTypes = SchemaInference<SchemaTables>;
 
-export type Users = InferredTypes["users"];
-export type UsersRecord = Users & XataRecord;
+export type User = InferredTypes["user"];
+export type UserRecord = User & XataRecord;
 
-export type Accounts = InferredTypes["accounts"];
-export type AccountsRecord = Accounts & XataRecord;
+export type Session = InferredTypes["session"];
+export type SessionRecord = Session & XataRecord;
 
-export type UsersAccounts = InferredTypes["users_accounts"];
-export type UsersAccountsRecord = UsersAccounts & XataRecord;
+export type ResetPassword = InferredTypes["reset_password"];
+export type ResetPasswordRecord = ResetPassword & XataRecord;
+
+export type VerifyUser = InferredTypes["verify_user"];
+export type VerifyUserRecord = VerifyUser & XataRecord;
 
 export type DatabaseSchema = {
-  users: UsersRecord;
-  accounts: AccountsRecord;
-  users_accounts: UsersAccountsRecord;
+  user: UserRecord;
+  session: SessionRecord;
+  reset_password: ResetPasswordRecord;
+  verify_user: VerifyUserRecord;
 };
 
 const DatabaseClient = buildClient();

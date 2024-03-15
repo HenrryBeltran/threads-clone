@@ -45,7 +45,7 @@ export default function LoginForm() {
             <Input
               {...form.register("username")}
               type="text"
-              placeholder="Username"
+              placeholder="Username or email address"
               className="border-none px-4 py-7 shadow-none !ring-0"
               autoFocus
             />

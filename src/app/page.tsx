@@ -1,7 +1,7 @@
-export default async function Home() {
+export default function Home() {
   return (
-    <section className="relative flex min-h-svh items-center justify-center">
-      Home
+    <section className="relative flex min-h-svh flex-col items-center justify-center gap-2">
+      <h1>Home</h1>
     </section>
   );
 }

@@ -14,8 +14,6 @@ export type FormState = {
 };
 
 export async function signUpAction(formData: z.infer<typeof signUpFormSchema>) {
-  console.log("~ hit sign up action");
-
   const validatedForm = signUpFormSchema.safeParse(formData);
 
   if (!validatedForm.success) {
@@ -29,7 +27,7 @@ export async function signUpAction(formData: z.infer<typeof signUpFormSchema>) {
   const username = validatedForm.data.username.toLowerCase();
 
   const { error: foundUsernameError, result: foundUsername } = await Try(
-    xata.db.users.select(["id"]).filter({ username: username }).getFirst(),
+    xata.db.user.select(["id"]).filter({ username: username }).getFirst(),
   );
 
   if (foundUsernameError) {
@@ -48,7 +46,7 @@ export async function signUpAction(formData: z.infer<typeof signUpFormSchema>) {
   }
 
   const { error: foundEmailError, result: foundEmail } = await Try(
-    xata.db.users.select(["id"]).filter({ email: email }).getFirst(),
+    xata.db.user.select(["id"]).filter({ email: email }).getFirst(),
   );
 
   if (foundEmailError) {
@@ -79,7 +77,7 @@ export async function signUpAction(formData: z.infer<typeof signUpFormSchema>) {
   }
 
   const { error } = await Try(
-    xata.db.users.create({
+    xata.db.user.create({
       username,
       email,
       password: hashedPassword,
@@ -93,11 +91,6 @@ export async function signUpAction(formData: z.infer<typeof signUpFormSchema>) {
       message: error.message,
     };
   }
-
-  console.log(
-    "~ New user",
-    JSON.stringify({ username, email, password: hashedPassword }, null, 2),
-  );
 
   return { message: "User signed up.", ok: true };
 }
