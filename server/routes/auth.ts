@@ -169,6 +169,21 @@ export const authSession = new Hono()
     // }
 
     return ctx.redirect("/", 301);
+  })
+  .delete("/session/:id", async (ctx) => {
+    const sessionId = ctx.req.param("id");
+
+    const deleteSession = await safeTry(
+      db.delete(sessions).where(eq(sessions.id, sessionId)),
+    );
+
+    if (deleteSession.error) {
+      return ctx.json(deleteSession.error, 500);
+    }
+
+    deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
+
+    return ctx.json({ message: "Logout successfully." });
   });
 
 export const authUser = new Hono().get("/user", async (ctx) => {
