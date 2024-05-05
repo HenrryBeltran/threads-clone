@@ -1,6 +1,11 @@
 import { zValidator } from "@hono/zod-validator";
+import { eq, or } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
+import { db } from "../db";
+import { users as usersTable } from "../db/schemas/users";
+
+/// TODO: pass this to real db
 
 const usersData = [
   { id: 1, username: "foo", name: "Foo" },
@@ -22,18 +27,18 @@ export const users = new Hono()
   .get("/", (ctx) => {
     return ctx.json(usersData);
   })
-  .get("/:idusername", (ctx) => {
+  .get("/:idusername", async (ctx) => {
     const idUsername = ctx.req.param("idusername");
 
-    const user = usersData.find(
-      (user) => user.username === idUsername || user.id === Number(idUsername),
-    );
+    const foundUser = await db.query.users.findFirst({
+      where: or(eq(usersTable.username, idUsername), eq(usersTable, idUsername)),
+    });
 
-    if (user === undefined) {
+    if (foundUser === undefined) {
       return ctx.notFound();
     }
 
-    return ctx.json(user);
+    return ctx.json(foundUser);
   })
   .post("/", zValidator("json", insertUserSchema), (ctx) => {
     const body = ctx.req.valid("json");
