@@ -21,7 +21,8 @@ export const authSession = new Hono()
     const sessionToken = getCookie(ctx, COOKIE_SESSION);
 
     if (!sessionToken) {
-      return ctx.json({ message: "Session token not found." }, 404);
+      console.error("~ Session token not found.");
+      return ctx.json(null, 404);
     }
 
     const session = await safeTry(
@@ -32,11 +33,13 @@ export const authSession = new Hono()
     );
 
     if (session.error) {
-      return ctx.json(session.error, 500);
+      console.error(session.error);
+      return ctx.json(null, 500);
     }
 
     if (!session.result) {
-      return ctx.json({ message: "Session not found." }, 404);
+      console.error("Session not found.");
+      return ctx.json(null, 404);
     }
 
     const now = dayjs.utc();
@@ -48,6 +51,8 @@ export const authSession = new Hono()
       );
 
       if (logoutError) {
+        /// TODO: Insert console errors in all the ctx returns
+        /// TODO: replace the json to null for all non-happy paths
         return ctx.json(logoutError, 500);
       }
 
@@ -111,6 +116,7 @@ export const authSession = new Hono()
     }
 
     if (!passwordMatch.result) {
+      console.log("wrong password");
       return ctx.json(
         {
           message: "Wrong password.",
@@ -133,6 +139,7 @@ export const authSession = new Hono()
     );
 
     if (createSession.error) {
+      /// TODO: put console.error
       return ctx.json(createSession.error, 500);
     }
 
@@ -190,7 +197,8 @@ export const authUser = new Hono().get("/user", async (ctx) => {
   const sessionToken = getCookie(ctx, COOKIE_SESSION);
 
   if (!sessionToken) {
-    return ctx.json({ message: "Session token not found." }, 404);
+    /// TODO: put console.error
+    return ctx.json(null, 204);
   }
 
   const session = await safeTry(
@@ -220,7 +228,7 @@ export const authUser = new Hono().get("/user", async (ctx) => {
   }
 
   if (!session.result) {
-    return ctx.json({ message: "Session not found." }, 404);
+    return ctx.json(null, 204);
   }
 
   const now = dayjs.utc();
@@ -237,7 +245,8 @@ export const authUser = new Hono().get("/user", async (ctx) => {
 
     deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
 
-    return ctx.redirect("/login");
+    return ctx.json(null, 301);
+    // return ctx.redirect("/login", 301);
   }
 
   return ctx.json({ user: session.result.userId });

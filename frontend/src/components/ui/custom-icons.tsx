@@ -1,4 +1,6 @@
-export function ThreadsCloneLogo(props: { class?: string }) {
+import { JSX } from "solid-js";
+
+export function ThreadsCloneLogo(props: JSX.SvgSVGAttributes<SVGSVGElement>) {
   return (
     <svg
       version="1.1"
@@ -18,7 +20,7 @@ export function ThreadsCloneLogo(props: { class?: string }) {
   );
 }
 
-export function MenuIcon(props: { class?: string }) {
+export function MenuIcon(props: JSX.SvgSVGAttributes<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

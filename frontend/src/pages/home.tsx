@@ -13,10 +13,16 @@ export default function Home() {
   ];
 
   return (
-    <div class="flex min-h-svh flex-col items-center justify-center gap-16 pb-16 pt-24">
+    <div class="flex min-h-svh flex-col items-center justify-center gap-16 px-6 pb-16 pt-24">
       <For each={links}>
         {(link) => (
-          <img src={link} width={320} height={320} class="mx-6" loading="lazy" />
+          <img
+            src={link}
+            width={448}
+            height={448}
+            class="mx-6 rounded-lg border-[0.5px] border-muted-foreground/30"
+            loading="lazy"
+          />
         )}
       </For>
     </div>

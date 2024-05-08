@@ -9,10 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@modular-forms/solid": "^0.20.0",
     "@solidjs/router": "^0.13.3",
     "@tanstack/solid-query": "^5.34.1",
     "@tanstack/solid-query-devtools": "^5.34.1",
-    "solid-js": "^1.8.15"
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "motion": "^10.17.0",
+    "solid-js": "^1.8.15",
+    "tailwind-merge": "^2.3.0",
+    "zod": "^3.23.6"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",

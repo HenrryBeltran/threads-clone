@@ -6,5 +6,5 @@ export const cookieOptions: CookieOptions = {
   sameSite: "Strict",
   httpOnly: true,
   secure: Bun.env.NODE_ENV === "production",
-  maxAge: 1000 * 60 * 60 * 24 * 30 * 12, // Max age of 1 year
+  maxAge: 60 * 60 * 24 * 365, // Max age of 1 year
 };

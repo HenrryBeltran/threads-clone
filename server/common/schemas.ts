@@ -24,7 +24,13 @@ const password = z
 const nanoToken = z.string().refine((s) => !s.includes(" "), "Invalid token.");
 
 export const loginSchema = z.object({
-  username: z.string().email().or(username),
+  username: z
+    .string()
+    .min(3, {
+      message: "Username must be at least 3 characters.",
+    })
+    .email()
+    .or(username),
   password,
 });
 

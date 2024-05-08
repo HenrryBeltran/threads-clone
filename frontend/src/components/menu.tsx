@@ -80,7 +80,7 @@ function MenuOptions({ setAppearance, setModal }: OptionsProps) {
             /// TODO: aria-hidden={!loading} should be in a loading state
             aria-hidden={true}
             class="text-foreground aria-hidden:hidden"
-            stroke-width={2}
+            stroke-width={3}
             width={20}
             height={20}
           />
