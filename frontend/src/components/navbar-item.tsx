@@ -1,32 +1,29 @@
-import { openLoginModal } from "@/lib/login-store";
-import { A } from "@solidjs/router";
-import { JSXElement, createSignal } from "solid-js";
+// TODO: urgent a state manager
+// import { openLoginModal } from "@/lib/login-store";
+import { Link } from "@tanstack/react-router";
 
 type Props = {
-  children: JSXElement;
+  children: React.ReactNode;
   href?: string;
+  pathname?: string;
   username?: string;
 };
 
-const [current, setCurrent] = createSignal(window.location.pathname);
-
-export function NavbarItem({ children, href, username }: Props) {
-  const selected = () => current() === href;
-  let iconDiv: HTMLDivElement | undefined;
-
+export function NavbarItem({ children, href, pathname, username }: Props) {
   return (
     <>
-      <div class="relative h-full sm:h-auto">
-        <div class="relative h-full sm:h-auto">
-          <A
-            href={href ?? ""}
-            class="group relative z-0 flex h-full min-h-0 w-full min-w-0 flex-shrink basis-auto touch-manipulation items-center justify-center rounded-lg transition-transform active:scale-95 sm:mx-0.5 sm:my-1 sm:items-stretch sm:px-8 sm:py-5"
+      <div className="relative h-full transition-transform active:scale-95 sm:h-auto">
+        <div className="relative h-full sm:h-auto">
+          <Link
+            to={href}
+            className="group relative z-0 flex h-full min-h-0 min-w-0 flex-shrink basis-auto touch-manipulation items-center justify-center rounded-lg sm:mx-0.5 sm:my-1 sm:items-stretch sm:px-8 sm:py-5"
             onClick={(e) => {
-              if (!username) {
+              if (!username && pathname !== "/") {
                 e.preventDefault();
                 e.stopPropagation();
 
-                openLoginModal();
+                alert("Open login modal");
+                // openLoginModal();
                 return;
               }
 
@@ -37,23 +34,20 @@ export function NavbarItem({ children, href, username }: Props) {
                 alert("Works as a button");
                 return;
               }
-
-              setCurrent(href);
             }}
           >
             <div
-              ref={iconDiv}
-              aria-selected={selected()}
-              class="group z-10 fill-none text-neutral-400 transition-transform duration-200 aria-selected:fill-foreground aria-selected:text-foreground dark:text-neutral-500 dark:aria-selected:text-foreground"
+              aria-selected={!!href && !!pathname && pathname === href}
+              className="group z-10 fill-none text-neutral-400 transition-transform duration-200 aria-selected:fill-foreground aria-selected:text-foreground dark:text-neutral-500 aria-selected:dark:text-foreground"
             >
               {children}
             </div>
-            <div class="absolute left-0 top-0 z-0 m-1 h-[calc(100%-8px)] w-[calc(100%-8px)] scale-90 rounded-lg bg-transparent transition-all group-hover:scale-100 group-hover:bg-neutral-400/15 dark:group-hover:bg-neutral-600/20 sm:m-0 sm:h-full sm:w-full" />
-          </A>
+            <div className="bg-transparen absolute left-0 top-0 z-0 m-1 h-[calc(100%-8px)] w-[calc(100%-8px)] scale-90 rounded-lg transition-all duration-200 group-hover:scale-100 group-hover:bg-neutral-400/20 dark:group-hover:bg-neutral-600/20 sm:m-0 sm:h-full sm:w-full" />
+          </Link>
         </div>
         <div
           hidden
-          class="absolute bottom-2 left-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-500 sm:top-2"
+          className="absolute bottom-2 left-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-500 sm:top-2"
         />
       </div>
     </>

@@ -1,22 +1,27 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
+import { useEffect, useState } from "react";
 
-export function useScreenSize() {
-  const [screenSize, setScreenSize] = createSignal<{ width: number; height: number }>({
+export default function useScreenSize() {
+  const [screenSize, setScreenSize] = useState<{ width: number; height: number }>({
     width: window.innerWidth,
     height: window.innerHeight,
   });
 
-  function handler() {
-    setScreenSize({ height: window.innerHeight, width: window.innerWidth });
-  }
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setScreenSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
 
-  onMount(() => {
-    window.addEventListener("resize", handler);
-  });
+    resizeObserver.observe(document.body);
 
-  onCleanup(() => {
-    window.removeEventListener("resize", handler);
-  });
+    return () => {
+      resizeObserver.unobserve(document.body);
+    };
+  }, []);
 
   return screenSize;
 }

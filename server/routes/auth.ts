@@ -33,12 +33,12 @@ export const authSession = new Hono()
     );
 
     if (session.error) {
-      console.error(session.error);
+      console.error(" ~ Server error", session.error);
       return ctx.json(null, 500);
     }
 
     if (!session.result) {
-      console.error("Session not found.");
+      console.error(" ~ Session not found.");
       return ctx.json(null, 404);
     }
 
@@ -51,19 +51,19 @@ export const authSession = new Hono()
       );
 
       if (logoutError) {
-        /// TODO: Insert console errors in all the ctx returns
-        /// TODO: replace the json to null for all non-happy paths
-        return ctx.json(logoutError, 500);
+        console.error(" ~ Server error", logoutError);
+        return ctx.json(null, 500);
       }
 
       deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
 
-      return ctx.redirect("/login", 301);
+      console.error(" ~ Session expired.");
+      return ctx.json(null, 301);
     }
 
     return ctx.json({ user: session.result.userId });
   })
-  .post("/session", zValidator("json", loginSchema), async (ctx) => {
+  .post("/login", zValidator("json", loginSchema), async (ctx) => {
     const body = ctx.req.valid("json");
 
     const { password } = body;
@@ -91,7 +91,7 @@ export const authSession = new Hono()
       if (username.includes("@")) {
         return ctx.json(
           {
-            message: "Email not register.",
+            message: "Email not found.",
             path: "username",
           },
           404,
@@ -108,6 +108,7 @@ export const authSession = new Hono()
     }
 
     const passwordMatch = await safeTry(
+      /// TODO: Test the other password hash algorithm
       Bun.password.verify(password, foundUser.password!, "bcrypt"),
     );
 
@@ -116,7 +117,6 @@ export const authSession = new Hono()
     }
 
     if (!passwordMatch.result) {
-      console.log("wrong password");
       return ctx.json(
         {
           message: "Wrong password.",
@@ -139,7 +139,6 @@ export const authSession = new Hono()
     );
 
     if (createSession.error) {
-      /// TODO: put console.error
       return ctx.json(createSession.error, 500);
     }
 
@@ -175,9 +174,9 @@ export const authSession = new Hono()
     //   redirect(`/account/verification?utk=${verifiedUser.token}`);
     // }
 
-    return ctx.redirect("/", 301);
+    return ctx.json(200);
   })
-  .delete("/session/:id", async (ctx) => {
+  .delete("/logout/:id", async (ctx) => {
     const sessionId = ctx.req.param("id");
 
     const deleteSession = await safeTry(
@@ -190,14 +189,14 @@ export const authSession = new Hono()
 
     deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
 
-    return ctx.json({ message: "Logout successfully." });
+    return ctx.json(200);
   });
 
 export const authUser = new Hono().get("/user", async (ctx) => {
   const sessionToken = getCookie(ctx, COOKIE_SESSION);
 
   if (!sessionToken) {
-    /// TODO: put console.error
+    console.error(" ~ Session token not found.");
     return ctx.json(null, 204);
   }
 
@@ -224,10 +223,12 @@ export const authUser = new Hono().get("/user", async (ctx) => {
   );
 
   if (session.error) {
-    return ctx.json(session.error, 500);
+    console.error(" ~ Sever error", session.error);
+    return ctx.json(null, 500);
   }
 
   if (!session.result) {
+    console.warn(" ~ Session not found.");
     return ctx.json(null, 204);
   }
 
@@ -240,14 +241,15 @@ export const authUser = new Hono().get("/user", async (ctx) => {
     );
 
     if (logoutError) {
-      return ctx.json(logoutError, 500);
+      console.error(logoutError);
+      return ctx.json(null, 500);
     }
 
     deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
 
+    console.error(" ~ Session expired");
     return ctx.json(null, 301);
-    // return ctx.redirect("/login", 301);
   }
 
-  return ctx.json({ user: session.result.userId });
+  return ctx.json({ id: session.result.id, user: session.result.userId });
 });

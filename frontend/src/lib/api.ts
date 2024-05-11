@@ -1,7 +1,7 @@
 import { type ApiRoutes } from "@server/app";
 import { safeTry } from "@server/lib/safe-try";
-import { queryOptions } from "@tanstack/solid-query";
-import { hc } from "hono/client";
+import { queryOptions } from "@tanstack/react-query";
+import { hc, type InferResponseType } from "hono/client";
 
 const client = hc<ApiRoutes>("/");
 
@@ -20,6 +20,8 @@ export async function getAuthUser() {
 
   return res.result.json();
 }
+
+export type AuthUser = InferResponseType<typeof api.auth.user.$get>;
 
 export const userAuthQueryOptions = queryOptions({
   queryKey: ["auth", "user"],

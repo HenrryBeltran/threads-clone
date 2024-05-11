@@ -1,86 +1,124 @@
-import { MenuIcon } from "@/components/ui/custom-icons";
+import { MenuIcon } from "@/components/icons/custom-icons";
 import {
   ArrowLeft02Icon,
   Loading03AnimatedIcon,
   Moon02Icon,
   Sun03Icon,
-} from "@/components/ui/hugeicons";
-import { A } from "@solidjs/router";
+} from "@/components/icons/hugeicons";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useTheme } from "@/hooks/theme";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Theme } from "./theme-provider";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AuthUser, api } from "@/lib/api";
+import { safeTry } from "@server/lib/safe-try";
 
 export default function Menu() {
-  /// TODO: make this to work as modal and change the theme
-  // const { theme, setTheme } = useTheme();
-  // const [modal, setModal] = useState(false);
-  // const [appearanceModal, setAppearanceModal] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [open, setOpen] = useState(false);
+  const [state, setState] = useState<"options" | "appearance">("options");
 
   return (
-    <div class="flex justify-end">
-      <div class="mr-3">
-        <div class="group flex h-12 w-12 items-center justify-center">
-          <MenuIcon class="h-6 w-6 fill-neutral-400/85 transition duration-200 group-hover:fill-foreground group-active:scale-90" />
+    <Popover open={open} onOpenChange={(value) => setOpen(value)}>
+      <PopoverTrigger className="mr-3 justify-self-end">
+        <div className="group flex h-12 w-12 items-center justify-center">
+          <MenuIcon className="h-6 w-6 fill-neutral-400/85 transition duration-200 group-hover:fill-foreground group-active:scale-90" />
         </div>
-      </div>
-      {/* <div */}
-      {/*   // data-appearance={appearanceModal} */}
-      {/*   class="h-[187px] w-40 rounded-2xl border-[0.5px] p-0 shadow-xl transition-all duration-200 data-[appearance=true]:h-[118px] data-[appearance=true]:w-80 dark:bg-neutral-900" */}
-      {/* > */}
-      {/*   {!appearanceModal ? ( */}
-      {/*     <MenuOptions */}
-      {/*       setAppearance={() => setAppearanceModal(true)} */}
-      {/*       setModal={() => setModal(false)} */}
-      {/*     /> */}
-      {/*   ) : ( */}
-      {/*     <AppearanceOption */}
-      {/*       setAppearance={() => setAppearanceModal(false)} */}
-      {/*       setTheme={setTheme} */}
-      {/*       theme={theme} */}
-      {/*     /> */}
-      {/*   )} */}
-      {/* </div> */}
-    </div>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        side="top"
+        data-appearance={state === "appearance"}
+        className="h-[187px] w-40 origin-top-right !animate-none rounded-2xl border border-muted-foreground/20 p-0 shadow-xl transition-all data-[appearance=true]:h-[118px] data-[appearance=true]:w-80 data-[state=open]:!animate-appear dark:bg-neutral-900"
+        onCloseAutoFocus={() => setState("options")}
+      >
+        {state === "options" ? (
+          <MenuOptions
+            setState={() => setState("appearance")}
+            close={() => setOpen(false)}
+          />
+        ) : (
+          <AppearanceMenu
+            setState={() => setState("options")}
+            setTheme={setTheme}
+            theme={theme}
+          />
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }
 
 type OptionsProps = {
-  setAppearance: () => void;
-  setModal: () => void;
+  setState: () => void;
+  close: () => void;
 };
 
-function MenuOptions({ setAppearance, setModal }: OptionsProps) {
-  // const [loading, setLoading] = useState(false);
+function MenuOptions({ setState, close: close }: OptionsProps) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const auth = queryClient.getQueryData<AuthUser>(["auth", "user"]);
+  const mutation = useMutation({
+    mutationFn: async () => {
+      if (!auth?.id) {
+        console.warn("Session not found.");
+        return null;
+      }
+
+      const { error } = await safeTry(
+        api.auth.logout[":id"].$delete({ param: { id: auth.id } }),
+      );
+
+      if (error) {
+        return null;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
+      navigate({ to: "/login" });
+    },
+  });
 
   return (
-    <ul class="relative z-[60] divide-y-[0.5px] divide-muted-foreground/30 py-1 font-[550]">
+    <ul className="relative z-[60] divide-y divide-muted-foreground/20 py-1 font-[550]">
       <li>
-        <button onClick={() => setAppearance()} class="px-5 py-2.5 outline-none">
+        <button
+          onClick={() => setState()}
+          className="w-full px-5 py-2.5 text-start outline-none"
+        >
           Appearance
         </button>
       </li>
       <li>
-        <A href="/saved" onClick={() => setModal()} class="inline-block px-5 py-2.5">
+        <Link
+          to="/saved"
+          onClick={() => close()}
+          className="inline-block w-full px-5 py-2.5"
+        >
           Saved
-        </A>
+        </Link>
       </li>
       <li>
-        <A href="/liked" onClick={() => setModal()} class="inline-block px-5 py-2.5">
+        <Link
+          to="/liked"
+          onClick={() => close()}
+          className="inline-block w-full px-5 py-2.5"
+        >
           Your likes
-        </A>
+        </Link>
       </li>
       <li>
         <button
-          class="flex w-full items-center justify-between px-5 py-2.5"
-          // onClick={async () => {
-          //   setLoading(true);
-          //   await logoutAction();
-          //   setLoading(false);
-          // }}
+          className="flex w-full items-center justify-between px-5 py-2.5"
+          onClick={() => mutation.mutate()}
         >
           Log out
           <Loading03AnimatedIcon
-            /// TODO: aria-hidden={!loading} should be in a loading state
-            aria-hidden={true}
-            class="text-foreground aria-hidden:hidden"
-            stroke-width={3}
+            aria-hidden={!mutation.isPending}
+            className="text-foreground aria-hidden:hidden"
+            strokeWidth={3}
             width={20}
             height={20}
           />
@@ -91,54 +129,49 @@ function MenuOptions({ setAppearance, setModal }: OptionsProps) {
 }
 
 type AppearanceProps = {
-  setAppearance: () => void;
-  setTheme: (theme: string) => void;
-  /// TODO: check this unused
+  setState: () => void;
+  setTheme: (theme: Theme) => void;
   theme?: string;
 };
 
-function AppearanceOption({ setAppearance, setTheme }: AppearanceProps) {
+function AppearanceMenu({ setState, setTheme, theme }: AppearanceProps) {
   return (
-    <div class="relative z-[60] w-80">
-      <div class="flex w-full items-center justify-between">
-        {/* TODO: open modal i think */}
+    <div className="relative z-[60] w-80">
+      <div className="flex w-full items-center justify-between">
         <button
-          onClick={() => setAppearance()}
-          class="flex h-12 w-12 items-center justify-center"
+          onClick={() => setState()}
+          className="flex h-12 w-12 items-center justify-center"
         >
-          <ArrowLeft02Icon stroke-width={1.5} width={20} height={20} />
+          <ArrowLeft02Icon strokeWidth={1.5} width={20} height={20} />
         </button>
-        <h2 class="text-center font-[550]">Appearance</h2>
-        <div class="p-6" />
+        <h2 className="text-center font-[550]">Appearance</h2>
+        <div className="p-6" />
       </div>
-      <div class="w-full px-4 pb-5 pt-2">
-        <div class="grid w-full grid-cols-3 grid-rows-1 rounded-2xl bg-muted/80 dark:bg-neutral-950">
-          {/* TODO: set to ligth */}
-          <button
-            type="button"
-            class="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
+      <ToggleGroup type="single" className="w-full px-4 pb-5 pt-2" defaultValue={theme}>
+        <div className="grid w-full grid-cols-3 grid-rows-1 rounded-2xl bg-muted/80 dark:bg-neutral-950">
+          <ToggleGroupItem
+            value="light"
+            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
             onClick={() => setTheme("light")}
           >
-            <Sun03Icon stroke-width={1.5} width={20} height={20} />
-          </button>
-          {/* TODO: set to dark */}
-          <button
-            type="button"
-            class="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
+            <Sun03Icon strokeWidth={1.5} width={20} height={20} />
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="dark"
+            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
             onClick={() => setTheme("dark")}
           >
-            <Moon02Icon stroke-width={1.5} width={20} height={20} />
-          </button>
-          {/* TODO: set to system */}
-          <button
-            type="button"
-            class="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
+            <Moon02Icon strokeWidth={1.5} width={20} height={20} />
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="system"
+            className="rounded-2xl py-5 text-muted-foreground/80 hover:!bg-transparent aria-checked:border aria-checked:border-neutral-300 aria-checked:!bg-neutral-200/50 dark:aria-checked:border-neutral-600 dark:aria-checked:!bg-neutral-700/70"
             onClick={() => setTheme("system")}
           >
             Auto
-          </button>
+          </ToggleGroupItem>
         </div>
-      </div>
+      </ToggleGroup>
     </div>
   );
 }

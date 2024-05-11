@@ -1,13 +1,19 @@
-import { useScreenSize } from "@/hooks/screen-size";
+import useScreenSize from "@/hooks/screen-size";
+import { AuthUser } from "@/lib/api";
 import Navbar from "./navbar";
-import { Show } from "solid-js";
 
-export default function BottomNavbar() {
+type Props = {
+  auth?: AuthUser;
+};
+
+export default function BottomNavbar({ auth }: Props) {
   const screen = useScreenSize();
 
   return (
-    <Show when={screen().width !== 0 && screen().width < 640}>
-      <Navbar />
-    </Show>
+    <>
+      {screen.width !== 0 && screen.width < 640 && (
+        <Navbar username={auth?.user.username} />
+      )}
+    </>
   );
 }

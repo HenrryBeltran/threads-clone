@@ -1,24 +1,25 @@
 import { Button, ButtonProps } from "@/components/ui/button";
-import { NavigateOptions, useNavigate } from "@solidjs/router";
+import { NavigateOptions, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
-import { JSXElement } from "solid-js";
 
 export interface Props extends ButtonProps {
-  href: string;
-  children: JSXElement;
-  class?: string;
-  options?: Partial<NavigateOptions>;
+  children: React.ReactNode;
+  navigateOptions: NavigateOptions;
 }
 
-export function LinkButton({ href, children, options, ...props }: Props) {
+export function LinkButton({ children, navigateOptions, ...props }: Props) {
   const navigate = useNavigate();
 
   function handleClick() {
-    navigate(href, options);
+    navigate(navigateOptions);
   }
 
   return (
-    <Button {...props} onClick={handleClick} class={clsx("rounded-xl", props.class)}>
+    <Button
+      {...props}
+      onClick={handleClick}
+      className={clsx("rounded-xl", props.className)}
+    >
       {children}
     </Button>
   );

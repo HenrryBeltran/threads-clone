@@ -6,6 +6,7 @@ import { db } from "../db";
 import { users as usersTable } from "../db/schemas/users";
 
 /// TODO: pass this to real db
+/// TODO: verify if I gonna use this route
 
 const usersData = [
   { id: 1, username: "foo", name: "Foo" },
