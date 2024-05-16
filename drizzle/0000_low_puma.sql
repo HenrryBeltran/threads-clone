@@ -1,11 +1,11 @@
 CREATE TABLE `follows` (
 	`id` text PRIMARY KEY NOT NULL,
-	`follower` text NOT NULL,
-	`following` text NOT NULL,
+	`user_id` text NOT NULL,
+	`target_id` text NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`follower`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`following`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`target_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `likes` (
@@ -55,8 +55,8 @@ CREATE TABLE `threads` (
 	`gif_url` text,
 	`hashtags` text,
 	`mentions` text,
-	`likes_amount` integer DEFAULT 0 NOT NULL,
-	`replies_amount` integer DEFAULT 0 NOT NULL,
+	`likes_count` integer DEFAULT 0 NOT NULL,
+	`replies_count` integer DEFAULT 0 NOT NULL,
 	`reply_id` text,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
@@ -74,6 +74,8 @@ CREATE TABLE `users` (
 	`link` text,
 	`profile_picture_url` text,
 	`roles` text DEFAULT 'user' NOT NULL,
+	`followers_count` integer DEFAULT 0 NOT NULL,
+	`followings_count` integer DEFAULT 0 NOT NULL,
 	`email_verified` text,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL

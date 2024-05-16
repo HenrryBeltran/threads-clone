@@ -4,10 +4,10 @@ import { users } from "./users";
 
 export const follows = sqliteTable("follows", {
   id: text("id").primaryKey().notNull(),
-  follower: text("follower")
+  userId: text("user_id")
     .notNull()
     .references(() => users.id),
-  following: text("following")
+  targetId: text("target_id")
     .notNull()
     .references(() => users.id),
   createdAt: text("created_at")
@@ -20,14 +20,14 @@ export const follows = sqliteTable("follows", {
 
 export const followsRelations = relations(follows, ({ one }) => ({
   follower: one(users, {
-    fields: [follows.follower],
+    fields: [follows.userId],
     references: [users.id],
-    relationName: "followers",
+    relationName: "follower",
   }),
   following: one(users, {
-    fields: [follows.following],
+    fields: [follows.targetId],
     references: [users.id],
-    relationName: "followings",
+    relationName: "following",
   }),
 }));
 

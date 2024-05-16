@@ -11,6 +11,7 @@
     "@libsql/client": "^0.6.0",
     "dayjs": "^1.11.11",
     "drizzle-orm": "^0.30.10",
+    "drizzle-zod": "^0.5.1",
     "hono": "^4.3.1",
     "nanoid": "^5.0.7",
     "zod": "^3.23.6"

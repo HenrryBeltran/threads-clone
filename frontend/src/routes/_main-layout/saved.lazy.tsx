@@ -1,9 +1,9 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 
-export const Route = createLazyFileRoute("/_authenticated/saved")({
-  component: Search,
+export const Route = createLazyFileRoute("/_main-layout/saved")({
+  component: Saved,
 });
 
-function Search() {
+function Saved() {
   return <div className="flex min-h-svh items-center justify-center">Saved</div>;
 }

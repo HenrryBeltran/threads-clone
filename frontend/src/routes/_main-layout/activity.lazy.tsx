@@ -1,9 +1,9 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 
-export const Route = createLazyFileRoute("/_authenticated/activity")({
-  component: Search,
+export const Route = createLazyFileRoute("/_main-layout/activity")({
+  component: Activity,
 });
 
-function Search() {
+function Activity() {
   return <div className="flex min-h-svh items-center justify-center">Activity</div>;
 }

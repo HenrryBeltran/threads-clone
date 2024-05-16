@@ -3,66 +3,21 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { eq, or } from "drizzle-orm";
 import { Hono } from "hono";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { deleteCookie, setCookie } from "hono/cookie";
 import { nanoid } from "nanoid";
-import { cookieOptions } from "../common/cookie-options";
-import { loginSchema } from "../common/schemas";
+import { COOKIE_SESSION, cookieOptions } from "../common/cookie-options";
+import { loginSchema, signUpSchema } from "../common/schemas/auth";
 import { db } from "../db";
 import { sessions } from "../db/schemas/sessions";
 import { users } from "../db/schemas/users";
 import { safeTry } from "../lib/safe-try";
+import { getSession } from "../middleware/getSession";
 
 dayjs.extend(utc);
 
-const COOKIE_SESSION = "st";
+/// TODO: Add the resend email feature.
 
-export const authSession = new Hono()
-  .get("/session", async (ctx) => {
-    const sessionToken = getCookie(ctx, COOKIE_SESSION);
-
-    if (!sessionToken) {
-      console.error("~ Session token not found.");
-      return ctx.json(null, 404);
-    }
-
-    const session = await safeTry(
-      db.query.sessions.findFirst({
-        columns: { id: true, userId: true, token: true, expires: true },
-        where: eq(sessions.token, sessionToken),
-      }),
-    );
-
-    if (session.error) {
-      console.error(" ~ Server error", session.error);
-      return ctx.json(null, 500);
-    }
-
-    if (!session.result) {
-      console.error(" ~ Session not found.");
-      return ctx.json(null, 404);
-    }
-
-    const now = dayjs.utc();
-    const expires = dayjs.utc(session.result.expires);
-
-    if (now.isAfter(expires)) {
-      const { error: logoutError } = await safeTry(
-        db.delete(sessions).where(eq(sessions.id, session.result.id)),
-      );
-
-      if (logoutError) {
-        console.error(" ~ Server error", logoutError);
-        return ctx.json(null, 500);
-      }
-
-      deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
-
-      console.error(" ~ Session expired.");
-      return ctx.json(null, 301);
-    }
-
-    return ctx.json({ user: session.result.userId });
-  })
+export const auth = new Hono()
   .post("/login", zValidator("json", loginSchema), async (ctx) => {
     const body = ctx.req.valid("json");
 
@@ -108,8 +63,7 @@ export const authSession = new Hono()
     }
 
     const passwordMatch = await safeTry(
-      /// TODO: Test the other password hash algorithm
-      Bun.password.verify(password, foundUser.password!, "bcrypt"),
+      Bun.password.verify(password, foundUser.password!),
     );
 
     if (passwordMatch.error) {
@@ -176,11 +130,128 @@ export const authSession = new Hono()
 
     return ctx.json(200);
   })
-  .delete("/logout/:id", async (ctx) => {
-    const sessionId = ctx.req.param("id");
+  .post("/sign-up", zValidator("json", signUpSchema), async (ctx) => {
+    const body = ctx.req.valid("json");
+
+    const { email, password } = body;
+    const username = body.username.toLowerCase();
+
+    const { error: foundUsernameError, result: foundUsername } = await safeTry(
+      db.query.users.findFirst({
+        columns: { id: true },
+        where: eq(users.username, username),
+      }),
+    );
+
+    if (foundUsernameError) {
+      return ctx.json(foundUsernameError, 500);
+    }
+
+    if (foundUsername) {
+      return ctx.json(
+        {
+          message: `Username ${username} is already taken.`,
+          path: "username",
+        },
+        409,
+      );
+    }
+
+    const { error: foundEmailError, result: foundEmail } = await safeTry(
+      db.query.users.findFirst({ columns: { id: true }, where: eq(users.email, email) }),
+    );
+
+    if (foundEmailError) {
+      return ctx.json(foundEmailError, 500);
+    }
+
+    if (foundEmail) {
+      return ctx.json(
+        {
+          message: "This email is already register.",
+          path: "email",
+        },
+        409,
+      );
+    }
+
+    const { error: hashedPasswordError, result: hashedPassword } = await safeTry(
+      Bun.password.hash(password, "bcrypt"),
+    );
+
+    if (hashedPasswordError) {
+      return ctx.json(hashedPasswordError, 500);
+    }
+
+    const { error, result: newUser } = await safeTry(
+      db
+        .insert(users)
+        .values({
+          id: nanoid(),
+          username,
+          email,
+          password: hashedPassword,
+          name: "",
+          bio: "",
+        })
+        .returning({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          emailVerified: users.emailVerified,
+        }),
+    );
+
+    if (error) {
+      return ctx.json(error, 500);
+    }
+
+    const sessionToken = nanoid();
+    const expires = dayjs.utc().add(1, "year").format("YYYY-MM-DD HH:mm:ss");
+
+    const createSession = await safeTry(
+      db.insert(sessions).values({
+        id: nanoid(),
+        token: sessionToken,
+        expires,
+        userId: newUser[0].id,
+      }),
+    );
+
+    if (createSession.error) {
+      return ctx.json(
+        {
+          message:
+            "User created now you can login, but something went wrong trying to login after sign up.",
+        },
+        417,
+      );
+    }
+
+    setCookie(ctx, COOKIE_SESSION, sessionToken, cookieOptions);
+
+    // const { error: emailError, result: emailResult } = await Try(
+    //   emailVerification({
+    //     id: newUser[0].id,
+    //     username: newUser[0].username,
+    //     email: newUser[0].email,
+    //   }),
+    // );
+    //
+    // if (emailError) {
+    //   console.error(emailError.message);
+    //   redirect("/account/verification");
+    // }
+    //
+    // redirect(`/account/verification?utk=${emailResult.verificationToken}`);
+
+    return ctx.json("User sign up successfully", 201);
+  })
+  .post("/logout", getSession, async (ctx) => {
+    const session = ctx.get("session");
 
     const deleteSession = await safeTry(
-      db.delete(sessions).where(eq(sessions.id, sessionId)),
+      db.delete(sessions).where(eq(sessions.id, session.id)),
     );
 
     if (deleteSession.error) {
@@ -192,64 +263,4 @@ export const authSession = new Hono()
     return ctx.json(200);
   });
 
-export const authUser = new Hono().get("/user", async (ctx) => {
-  const sessionToken = getCookie(ctx, COOKIE_SESSION);
-
-  if (!sessionToken) {
-    console.error(" ~ Session token not found.");
-    return ctx.json(null, 204);
-  }
-
-  const session = await safeTry(
-    db.query.sessions.findFirst({
-      columns: { id: true, token: true, expires: true },
-      with: {
-        userId: {
-          columns: {
-            username: true,
-            email: true,
-            roles: true,
-            name: true,
-            bio: true,
-            profilePictureUrl: true,
-            link: true,
-            emailVerified: true,
-            updatedAt: true,
-          },
-        },
-      },
-      where: eq(sessions.token, sessionToken),
-    }),
-  );
-
-  if (session.error) {
-    console.error(" ~ Sever error", session.error);
-    return ctx.json(null, 500);
-  }
-
-  if (!session.result) {
-    console.warn(" ~ Session not found.");
-    return ctx.json(null, 204);
-  }
-
-  const now = dayjs.utc();
-  const expires = dayjs.utc(session.result.expires);
-
-  if (now.isAfter(expires)) {
-    const { error: logoutError } = await safeTry(
-      db.delete(sessions).where(eq(sessions.id, session.result.id)),
-    );
-
-    if (logoutError) {
-      console.error(logoutError);
-      return ctx.json(null, 500);
-    }
-
-    deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
-
-    console.error(" ~ Session expired");
-    return ctx.json(null, 301);
-  }
-
-  return ctx.json({ id: session.result.id, user: session.result.userId });
-});
+/// TODO: Add the forgotten-password, reset password and update password via unique link.

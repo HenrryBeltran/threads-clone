@@ -1,5 +1,7 @@
 import type { CookieOptions } from "hono/utils/cookie";
 
+export const COOKIE_SESSION = "st";
+
 export const cookieOptions: CookieOptions = {
   path: "/",
   domain: Bun.env.COOKIE_DOMAIN,

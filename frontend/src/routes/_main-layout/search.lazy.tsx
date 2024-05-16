@@ -1,6 +1,6 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 
-export const Route = createLazyFileRoute("/_authenticated/search")({
+export const Route = createLazyFileRoute("/_main-layout/search")({
   component: Search,
 });
 

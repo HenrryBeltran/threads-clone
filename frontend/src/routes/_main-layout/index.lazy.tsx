@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { AuthUser } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
 
@@ -14,25 +14,33 @@ const links = [
   "https://media1.giphy.com/media/bCcxY1ADkAqfS/200.webp",
 ];
 
-export const Route = createLazyFileRoute("/_authenticated/")({
+export const Route = createLazyFileRoute("/_main-layout/")({
   component: Index,
 });
 
 function Index() {
   const queryClient = useQueryClient();
-  const data = queryClient.getQueryData<AuthUser>(["auth", "user"]);
+  const user = queryClient.getQueryData<UserAccount | null>(["user", "account"]);
 
   return (
     <>
-      {data && (
+      {user && (
         <div className="mx-auto mt-[74px] max-w-[620px] px-6">
           <div className="flex items-center justify-between border-b border-muted-foreground/20 py-4">
-            <Link to={`/@${data.user.username}`}>
-              <img
-                src={data.user.profilePictureUrl!}
-                alt={`${data.user.username} profile picture`}
-                className="h-10 w-10 rounded-full border-[0.5px] border-muted-foreground/30"
-              />
+            <Link to={`/@${user.data.username}`}>
+              {user.data.profilePictureUrl ?
+                <img
+                  src={user.data.profilePictureUrl}
+                  alt={`${user.data.username} profile picture`}
+                  className="h-10 w-10 rounded-full border-[0.5px] border-muted-foreground/30"
+                />
+              :
+                <img
+                  src="/images/empty-profile-picture/64x64.jpg"
+                  alt={`${user.data.username} profile picture`}
+                  className="h-10 w-10 rounded-full border-[0.5px] border-muted-foreground/30"
+                />
+              }
             </Link>
             <button
               className="flex-grow self-stretch px-3 text-start text-muted-foreground/90"

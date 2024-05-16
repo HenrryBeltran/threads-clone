@@ -13,24 +13,20 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as MainLayoutImport } from './routes/_main-layout'
 
 // Create Virtual Routes
 
 const SignUpLazyImport = createFileRoute('/sign-up')()
 const LoginLazyImport = createFileRoute('/login')()
 const ForgottenPasswordLazyImport = createFileRoute('/forgotten-password')()
-const AuthenticatedIndexLazyImport = createFileRoute('/_authenticated/')()
-const AuthenticatedSearchLazyImport = createFileRoute(
-  '/_authenticated/search',
-)()
-const AuthenticatedSavedLazyImport = createFileRoute('/_authenticated/saved')()
-const AuthenticatedLikedLazyImport = createFileRoute('/_authenticated/liked')()
-const AuthenticatedActivityLazyImport = createFileRoute(
-  '/_authenticated/activity',
-)()
-const AuthenticatedUsernameLazyImport = createFileRoute(
-  '/_authenticated/$username',
+const MainLayoutIndexLazyImport = createFileRoute('/_main-layout/')()
+const MainLayoutSearchLazyImport = createFileRoute('/_main-layout/search')()
+const MainLayoutSavedLazyImport = createFileRoute('/_main-layout/saved')()
+const MainLayoutLikedLazyImport = createFileRoute('/_main-layout/liked')()
+const MainLayoutActivityLazyImport = createFileRoute('/_main-layout/activity')()
+const MainLayoutUsernameLazyImport = createFileRoute(
+  '/_main-layout/$username',
 )()
 
 // Create/Update Routes
@@ -52,114 +48,144 @@ const ForgottenPasswordLazyRoute = ForgottenPasswordLazyImport.update({
   import('./routes/forgotten-password.lazy').then((d) => d.Route),
 )
 
-const AuthenticatedRoute = AuthenticatedImport.update({
-  id: '/_authenticated',
+const MainLayoutRoute = MainLayoutImport.update({
+  id: '/_main-layout',
   getParentRoute: () => rootRoute,
 } as any)
 
-const AuthenticatedIndexLazyRoute = AuthenticatedIndexLazyImport.update({
+const MainLayoutIndexLazyRoute = MainLayoutIndexLazyImport.update({
   path: '/',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => MainLayoutRoute,
 } as any).lazy(() =>
-  import('./routes/_authenticated/index.lazy').then((d) => d.Route),
+  import('./routes/_main-layout/index.lazy').then((d) => d.Route),
 )
 
-const AuthenticatedSearchLazyRoute = AuthenticatedSearchLazyImport.update({
+const MainLayoutSearchLazyRoute = MainLayoutSearchLazyImport.update({
   path: '/search',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => MainLayoutRoute,
 } as any).lazy(() =>
-  import('./routes/_authenticated/search.lazy').then((d) => d.Route),
+  import('./routes/_main-layout/search.lazy').then((d) => d.Route),
 )
 
-const AuthenticatedSavedLazyRoute = AuthenticatedSavedLazyImport.update({
+const MainLayoutSavedLazyRoute = MainLayoutSavedLazyImport.update({
   path: '/saved',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => MainLayoutRoute,
 } as any).lazy(() =>
-  import('./routes/_authenticated/saved.lazy').then((d) => d.Route),
+  import('./routes/_main-layout/saved.lazy').then((d) => d.Route),
 )
 
-const AuthenticatedLikedLazyRoute = AuthenticatedLikedLazyImport.update({
+const MainLayoutLikedLazyRoute = MainLayoutLikedLazyImport.update({
   path: '/liked',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => MainLayoutRoute,
 } as any).lazy(() =>
-  import('./routes/_authenticated/liked.lazy').then((d) => d.Route),
+  import('./routes/_main-layout/liked.lazy').then((d) => d.Route),
 )
 
-const AuthenticatedActivityLazyRoute = AuthenticatedActivityLazyImport.update({
+const MainLayoutActivityLazyRoute = MainLayoutActivityLazyImport.update({
   path: '/activity',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => MainLayoutRoute,
 } as any).lazy(() =>
-  import('./routes/_authenticated/activity.lazy').then((d) => d.Route),
+  import('./routes/_main-layout/activity.lazy').then((d) => d.Route),
 )
 
-const AuthenticatedUsernameLazyRoute = AuthenticatedUsernameLazyImport.update({
+const MainLayoutUsernameLazyRoute = MainLayoutUsernameLazyImport.update({
   path: '/$username',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => MainLayoutRoute,
 } as any).lazy(() =>
-  import('./routes/_authenticated/$username.lazy').then((d) => d.Route),
+  import('./routes/_main-layout/$username.lazy').then((d) => d.Route),
 )
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_authenticated': {
-      preLoaderRoute: typeof AuthenticatedImport
+    '/_main-layout': {
+      id: '/_main-layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof MainLayoutImport
       parentRoute: typeof rootRoute
     }
     '/forgotten-password': {
+      id: '/forgotten-password'
+      path: '/forgotten-password'
+      fullPath: '/forgotten-password'
       preLoaderRoute: typeof ForgottenPasswordLazyImport
       parentRoute: typeof rootRoute
     }
     '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
       preLoaderRoute: typeof LoginLazyImport
       parentRoute: typeof rootRoute
     }
     '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpLazyImport
       parentRoute: typeof rootRoute
     }
-    '/_authenticated/$username': {
-      preLoaderRoute: typeof AuthenticatedUsernameLazyImport
-      parentRoute: typeof AuthenticatedImport
+    '/_main-layout/$username': {
+      id: '/_main-layout/$username'
+      path: '/$username'
+      fullPath: '/$username'
+      preLoaderRoute: typeof MainLayoutUsernameLazyImport
+      parentRoute: typeof MainLayoutImport
     }
-    '/_authenticated/activity': {
-      preLoaderRoute: typeof AuthenticatedActivityLazyImport
-      parentRoute: typeof AuthenticatedImport
+    '/_main-layout/activity': {
+      id: '/_main-layout/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof MainLayoutActivityLazyImport
+      parentRoute: typeof MainLayoutImport
     }
-    '/_authenticated/liked': {
-      preLoaderRoute: typeof AuthenticatedLikedLazyImport
-      parentRoute: typeof AuthenticatedImport
+    '/_main-layout/liked': {
+      id: '/_main-layout/liked'
+      path: '/liked'
+      fullPath: '/liked'
+      preLoaderRoute: typeof MainLayoutLikedLazyImport
+      parentRoute: typeof MainLayoutImport
     }
-    '/_authenticated/saved': {
-      preLoaderRoute: typeof AuthenticatedSavedLazyImport
-      parentRoute: typeof AuthenticatedImport
+    '/_main-layout/saved': {
+      id: '/_main-layout/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof MainLayoutSavedLazyImport
+      parentRoute: typeof MainLayoutImport
     }
-    '/_authenticated/search': {
-      preLoaderRoute: typeof AuthenticatedSearchLazyImport
-      parentRoute: typeof AuthenticatedImport
+    '/_main-layout/search': {
+      id: '/_main-layout/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof MainLayoutSearchLazyImport
+      parentRoute: typeof MainLayoutImport
     }
-    '/_authenticated/': {
-      preLoaderRoute: typeof AuthenticatedIndexLazyImport
-      parentRoute: typeof AuthenticatedImport
+    '/_main-layout/': {
+      id: '/_main-layout/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof MainLayoutIndexLazyImport
+      parentRoute: typeof MainLayoutImport
     }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([
-  AuthenticatedRoute.addChildren([
-    AuthenticatedUsernameLazyRoute,
-    AuthenticatedActivityLazyRoute,
-    AuthenticatedLikedLazyRoute,
-    AuthenticatedSavedLazyRoute,
-    AuthenticatedSearchLazyRoute,
-    AuthenticatedIndexLazyRoute,
-  ]),
+export const routeTree = rootRoute.addChildren({
+  MainLayoutRoute: MainLayoutRoute.addChildren({
+    MainLayoutUsernameLazyRoute,
+    MainLayoutActivityLazyRoute,
+    MainLayoutLikedLazyRoute,
+    MainLayoutSavedLazyRoute,
+    MainLayoutSearchLazyRoute,
+    MainLayoutIndexLazyRoute,
+  }),
   ForgottenPasswordLazyRoute,
   LoginLazyRoute,
   SignUpLazyRoute,
-])
+})
 
 /* prettier-ignore-end */

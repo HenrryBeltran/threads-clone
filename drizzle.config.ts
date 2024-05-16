@@ -9,6 +9,9 @@ export default defineConfig({
     url: process.env.DATABASE_URL!,
     authToken: process.env.DATABASE_AUTH_TOKEN,
   },
+  migrations: {
+    schema: "public",
+  },
   verbose: true,
   strict: true,
 });

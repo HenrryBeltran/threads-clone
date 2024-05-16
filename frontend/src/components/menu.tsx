@@ -8,12 +8,12 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTheme } from "@/hooks/theme";
+import { api } from "@/lib/api";
+import { safeTry } from "@server/lib/safe-try";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Theme } from "./theme-provider";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AuthUser, api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
 
 export default function Menu() {
   const { theme, setTheme } = useTheme();
@@ -59,24 +59,16 @@ type OptionsProps = {
 function MenuOptions({ setState, close: close }: OptionsProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const auth = queryClient.getQueryData<AuthUser>(["auth", "user"]);
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!auth?.id) {
-        console.warn("Session not found.");
-        return null;
-      }
-
-      const { error } = await safeTry(
-        api.auth.logout[":id"].$delete({ param: { id: auth.id } }),
-      );
+      const { error } = await safeTry(api.auth.logout.$post());
 
       if (error) {
         return null;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "account"] });
       navigate({ to: "/login" });
     },
   });

@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { follows } from "./follows";
 import { searchHistory } from "./search-history";
 import { sessions } from "./sessions";
@@ -17,6 +17,8 @@ export const users = sqliteTable("users", {
   roles: text("roles", { enum: ["user", "admin", "viewer"] })
     .notNull()
     .default("user"),
+  followersCount: integer("followers_count", { mode: "number" }).notNull().default(0),
+  followingsCount: integer("followings_count", { mode: "number" }).notNull().default(0),
   emailVerified: text("email_verified"),
   createdAt: text("created_at")
     .notNull()
@@ -28,8 +30,8 @@ export const users = sqliteTable("users", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   threads: many(threads),
-  followers: many(follows, { relationName: "followers" }),
-  followings: many(follows, { relationName: "followings" }),
+  followers: many(follows, { relationName: "follower" }),
+  followings: many(follows, { relationName: "following" }),
   sessions: many(sessions),
   owner: many(searchHistory, { relationName: "owner" }),
   userSearch: many(searchHistory, { relationName: "user_search" }),

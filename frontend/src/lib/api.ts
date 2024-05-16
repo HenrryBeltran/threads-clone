@@ -7,25 +7,33 @@ const client = hc<ApiRoutes>("/");
 
 export const api = client.api;
 
-export async function getAuthUser() {
-  const res = await safeTry(api.auth.user.$get());
+export type UserAccount = InferResponseType<typeof api.account.user.$get>;
+
+export async function getUserAccount(): Promise<UserAccount | null> {
+  const res = await safeTry(api.account.user.$get());
 
   if (res.error) {
-    throw new Error(res.error.message);
+    console.error(res.error.message);
+    return null;
   }
 
   if (!res.result.ok) {
-    throw new Error("Server error");
+    console.error("~ Server error");
+    return null;
   }
 
-  return res.result.json();
+  const data = await safeTry(res.result.json());
+
+  if (data.error) {
+    return null;
+  }
+
+  return data.result;
 }
 
-export type AuthUser = InferResponseType<typeof api.auth.user.$get>;
-
-export const userAuthQueryOptions = queryOptions({
-  queryKey: ["auth", "user"],
-  queryFn: getAuthUser,
+export const userAccountQueryOptions = queryOptions({
+  queryKey: ["user", "account"],
+  queryFn: getUserAccount,
   retry: false,
   refetchOnWindowFocus: false,
   refetchOnReconnect: false,

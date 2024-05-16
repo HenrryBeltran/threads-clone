@@ -1,7 +1,7 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "sqlite",
-  "id": "e419e42a-2e4d-442f-aaae-94373ad12b11",
+  "id": "423149a7-56e8-4b6e-90fd-9b60782cff75",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "follows": {
@@ -14,15 +14,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "follower": {
-          "name": "follower",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "following": {
-          "name": "following",
+        "target_id": {
+          "name": "target_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -47,12 +47,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "follows_follower_users_id_fk": {
-          "name": "follows_follower_users_id_fk",
+        "follows_user_id_users_id_fk": {
+          "name": "follows_user_id_users_id_fk",
           "tableFrom": "follows",
           "tableTo": "users",
           "columnsFrom": [
-            "follower"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -60,12 +60,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "follows_following_users_id_fk": {
-          "name": "follows_following_users_id_fk",
+        "follows_target_id_users_id_fk": {
+          "name": "follows_target_id_users_id_fk",
           "tableFrom": "follows",
           "tableTo": "users",
           "columnsFrom": [
-            "following"
+            "target_id"
           ],
           "columnsTo": [
             "id"
@@ -418,16 +418,16 @@
           "notNull": false,
           "autoincrement": false
         },
-        "likes_amount": {
-          "name": "likes_amount",
+        "likes_count": {
+          "name": "likes_count",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": 0
         },
-        "replies_amount": {
-          "name": "replies_amount",
+        "replies_count": {
+          "name": "replies_count",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -556,6 +556,22 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'user'"
+        },
+        "followers_count": {
+          "name": "followers_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "followings_count": {
+          "name": "followings_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "email_verified": {
           "name": "email_verified",

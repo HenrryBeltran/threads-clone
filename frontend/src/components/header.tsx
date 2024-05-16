@@ -1,16 +1,16 @@
 import { ThreadsCloneLogo } from "@/components/icons/custom-icons";
 import useScreenSize from "@/hooks/screen-size";
-import { AuthUser } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
 import { Link, useNavigate } from "@tanstack/react-router";
 import Menu from "./menu";
 import Navbar from "./navbar";
 import { Button } from "./ui/button";
 
 type Props = {
-  auth?: AuthUser;
+  user: UserAccount | null;
 };
 
-export default function Header({ auth }: Props) {
+export default function Header({ user }: Props) {
   const screen = useScreenSize();
   const navigate = useNavigate();
 
@@ -19,16 +19,26 @@ export default function Header({ auth }: Props) {
       <Link
         href="/"
         className="group col-start-2 ml-4 flex h-12 w-12 items-center justify-center justify-self-center sm:col-start-1 sm:justify-self-start"
-        onClick={() => {}}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (window.scrollY < 100) {
+            /// TODO: This should be a revalidation for the posts.
+            window.location.href = "/";
+          } else {
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }
+        }}
       >
         <ThreadsCloneLogo className="h-8 w-8 transition duration-200 group-hover:scale-110 group-active:scale-100 dark:fill-white" />
       </Link>
       {screen.width > 640 && (
         <div className="w-full max-w-lg px-16 md:max-w-screen-sm">
-          <Navbar username={auth?.user.username} />
+          <Navbar username={user ? user.data.username : undefined} />
         </div>
       )}
-      {auth ? (
+      {user ? (
         <Menu />
       ) : (
         <div className="mr-5 flex justify-end">

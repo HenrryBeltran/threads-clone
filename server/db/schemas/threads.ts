@@ -15,8 +15,8 @@ export const threads = sqliteTable(
     gifUrl: text("gif_url"),
     hashtags: text("hashtags", { mode: "json" }).$type<string[]>(),
     mentions: text("mentions", { mode: "json" }).$type<string[]>(),
-    likesAmount: integer("likes_amount", { mode: "number" }).notNull().default(0),
-    repliesAmount: integer("replies_amount", { mode: "number" }).notNull().default(0),
+    likesCount: integer("likes_count", { mode: "number" }).notNull().default(0),
+    repliesCount: integer("replies_count", { mode: "number" }).notNull().default(0),
     replyId: text("reply_id"),
     createdAt: text("created_at")
       .notNull()

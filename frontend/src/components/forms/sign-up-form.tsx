@@ -4,25 +4,25 @@ import { Input } from "@/components/ui/input";
 import { InputPassword } from "@/components/ui/input-password";
 import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@server/common/schemas/auth";
+import { signUpSchema } from "@server/common/schemas/auth";
 import { safeTry } from "@server/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
-type LoginForm = z.infer<typeof loginSchema>;
+type LoginForm = z.infer<typeof signUpSchema>;
 
-export default function LoginForm() {
+export default function SignUpForm() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const form = useForm<LoginForm>({
-    defaultValues: { username: "", password: "" },
-    resolver: zodResolver(loginSchema),
+    defaultValues: { username: "", email: "", password: "", confirmPassword: "" },
+    resolver: zodResolver(signUpSchema),
   });
 
   const onSubmit: SubmitHandler<LoginForm> = async (value) => {
-    const res = await safeTry(api.auth.login.$post({ json: value }));
+    const res = await safeTry(api.auth["sign-up"].$post({ json: value }));
 
     if (res.error) {
       form.setError("root", { message: "Something went wrong." });
@@ -35,7 +35,11 @@ export default function LoginForm() {
         path?: string;
       };
 
-      form.setError((path as "username" | "password" | "root") ?? "root", { message });
+      form.setError(
+        (path as "username" | "email" | "password" | "confirmPassword" | "root") ??
+          "root",
+        { message },
+      );
       return;
     }
 
@@ -62,7 +66,16 @@ export default function LoginForm() {
           error={form.formState.errors.username?.message}
           required
           autoFocus
-          placeholder="Username or email address"
+          placeholder="Username"
+        />
+        <Input
+          {...form.register("email")}
+          id="email"
+          name="email"
+          type="email"
+          error={form.formState.errors.username?.message}
+          required
+          placeholder="Email address"
         />
         <InputPassword
           {...form.register("password")}
@@ -72,11 +85,21 @@ export default function LoginForm() {
           required
           placeholder="Password"
         />
+        <InputPassword
+          {...form.register("confirmPassword")}
+          id="confirmPassword"
+          name="confirmPassword"
+          error={form.formState.errors.confirmPassword?.message}
+          required
+          placeholder="Confirm password"
+        />
         <Button
           type="submit"
           aria-disabled={
             form.watch("username") === "" ||
+            form.watch("email") === "" ||
             form.watch("password") === "" ||
+            form.watch("confirmPassword") === "" ||
             form.formState.isSubmitting
           }
           className="!mt-8 w-full rounded-xl py-7 text-base shadow-none aria-disabled:cursor-not-allowed aria-disabled:text-muted-foreground aria-disabled:hover:bg-primary"
@@ -96,7 +119,7 @@ export default function LoginForm() {
               className="text-secondary"
             />
           ) : (
-            "Log in"
+            "Sign up"
           )}
         </Button>
       </form>
@@ -105,16 +128,29 @@ export default function LoginForm() {
           ⓧ {form.formState.errors.root.message}
         </span>
       )}
-      {(form.formState.errors.username || form.formState.errors.password) && (
+      {(form.formState.errors.username ||
+        form.formState.errors.email ||
+        form.formState.errors.password ||
+        form.formState.errors.confirmPassword) && (
         <div className="!mt-5 flex flex-col text-destructive dark:text-red-400">
           {form.formState.errors.username && (
             <span className="text-pretty text-sm font-medium">
               ⓧ {form.formState.errors.username.message}
             </span>
           )}
+          {form.formState.errors.email && (
+            <span className="text-pretty text-sm font-medium">
+              ⓧ {form.formState.errors.email.message}
+            </span>
+          )}
           {form.formState.errors.password && (
             <span className="text-pretty text-sm font-medium">
               ⓧ {form.formState.errors.password.message}
+            </span>
+          )}
+          {form.formState.errors.confirmPassword && (
+            <span className="text-pretty text-sm font-medium">
+              ⓧ {form.formState.errors.confirmPassword.message}
             </span>
           )}
         </div>
