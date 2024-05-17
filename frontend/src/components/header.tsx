@@ -35,7 +35,7 @@ export default function Header({ user }: Props) {
       </Link>
       {screen.width > 640 && (
         <div className="w-full max-w-lg px-16 md:max-w-screen-sm">
-          <Navbar username={user ? user.data.username : undefined} />
+          <Navbar username={user ? user.username : undefined} />
         </div>
       )}
       {user ? (

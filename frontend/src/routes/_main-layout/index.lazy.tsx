@@ -27,20 +27,20 @@ function Index() {
       {user && (
         <div className="mx-auto mt-[74px] max-w-[620px] px-6">
           <div className="flex items-center justify-between border-b border-muted-foreground/20 py-4">
-            <Link to={`/@${user.data.username}`}>
-              {user.data.profilePictureUrl ?
+            <Link to={`/@${user.username}`}>
+              {user.profilePictureUrl ? (
                 <img
-                  src={user.data.profilePictureUrl}
-                  alt={`${user.data.username} profile picture`}
+                  src={user.profilePictureUrl}
+                  alt={`${user.username} profile picture`}
                   className="h-10 w-10 rounded-full border-[0.5px] border-muted-foreground/30"
                 />
-              :
+              ) : (
                 <img
                   src="/images/empty-profile-picture/64x64.jpg"
-                  alt={`${user.data.username} profile picture`}
+                  alt="Empty profile picture"
                   className="h-10 w-10 rounded-full border-[0.5px] border-muted-foreground/30"
                 />
-              }
+              )}
             </Link>
             <button
               className="flex-grow self-stretch px-3 text-start text-muted-foreground/90"

@@ -13,7 +13,7 @@ import { z } from "zod";
 
 type LoginForm = z.infer<typeof signUpSchema>;
 
-export default function SignUpForm() {
+export function SignUpForm() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const form = useForm<LoginForm>({
@@ -26,6 +26,12 @@ export default function SignUpForm() {
 
     if (res.error) {
       form.setError("root", { message: "Something went wrong." });
+      return;
+    }
+
+    if (res.result.status === 307) {
+      queryClient.invalidateQueries({ queryKey: ["user", "account"] });
+      navigate({ to: "/account/verification", replace: true });
       return;
     }
 
@@ -45,14 +51,18 @@ export default function SignUpForm() {
 
     queryClient.invalidateQueries({ queryKey: ["user", "account"] });
 
-    const next = new URLSearchParams(document.location.search).get("next");
+    const { result } = await safeTry(res.result.json());
 
-    if (next) {
-      navigate({ to: next, replace: true });
+    if (!result) {
+      navigate({ to: "/account/verification", replace: true });
       return;
     }
 
-    navigate({ to: "/", replace: true });
+    navigate({
+      to: "/account/verification",
+      search: { token: result.token },
+      replace: true,
+    });
   };
 
   return (

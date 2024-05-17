@@ -17,14 +17,10 @@ const selectUserSchema = createSelectSchema(users);
 const authUserSchema = selectUserSchema.omit({ password: true });
 
 export type User = z.infer<typeof authUserSchema>;
-export type AuthUser = {
-  sessionId: string;
-  data: User;
-};
 
 type Env = {
   Variables: {
-    user: AuthUser;
+    user: User;
   };
 };
 
@@ -70,6 +66,6 @@ export const getUser = createMiddleware<Env>(async (ctx, next) => {
     return ctx.json({ message: "Session expired" }, { status: 498 });
   }
 
-  ctx.set("user", { sessionId: session.result.id, data: session.result.userId });
+  ctx.set("user", session.result.userId);
   await next();
 });

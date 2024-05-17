@@ -21,6 +21,7 @@ const SignUpLazyImport = createFileRoute('/sign-up')()
 const LoginLazyImport = createFileRoute('/login')()
 const ForgottenPasswordLazyImport = createFileRoute('/forgotten-password')()
 const MainLayoutIndexLazyImport = createFileRoute('/_main-layout/')()
+const AccountVerificationLazyImport = createFileRoute('/account/verification')()
 const MainLayoutSearchLazyImport = createFileRoute('/_main-layout/search')()
 const MainLayoutSavedLazyImport = createFileRoute('/_main-layout/saved')()
 const MainLayoutLikedLazyImport = createFileRoute('/_main-layout/liked')()
@@ -58,6 +59,13 @@ const MainLayoutIndexLazyRoute = MainLayoutIndexLazyImport.update({
   getParentRoute: () => MainLayoutRoute,
 } as any).lazy(() =>
   import('./routes/_main-layout/index.lazy').then((d) => d.Route),
+)
+
+const AccountVerificationLazyRoute = AccountVerificationLazyImport.update({
+  path: '/account/verification',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/account/verification.lazy').then((d) => d.Route),
 )
 
 const MainLayoutSearchLazyRoute = MainLayoutSearchLazyImport.update({
@@ -162,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutSearchLazyImport
       parentRoute: typeof MainLayoutImport
     }
+    '/account/verification': {
+      id: '/account/verification'
+      path: '/account/verification'
+      fullPath: '/account/verification'
+      preLoaderRoute: typeof AccountVerificationLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/_main-layout/': {
       id: '/_main-layout/'
       path: '/'
@@ -186,6 +201,7 @@ export const routeTree = rootRoute.addChildren({
   ForgottenPasswordLazyRoute,
   LoginLazyRoute,
   SignUpLazyRoute,
+  AccountVerificationLazyRoute,
 })
 
 /* prettier-ignore-end */

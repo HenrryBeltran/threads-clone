@@ -11,7 +11,7 @@ export const account = new Hono()
   .get("/user", getUser, async (ctx) => {
     const user = ctx.get("user");
 
-    return ctx.json(user);
+    return ctx.json(user, 200);
   })
   .put("/user", zValidator("json", insertUserSchema), getUser, async (ctx) => {
     const body = ctx.req.valid("json");
@@ -20,7 +20,7 @@ export const account = new Hono()
     const newData = { ...user, ...body };
 
     const { error } = await safeTry(
-      db.update(users).set(newData).where(eq(users.id, user.data.id)),
+      db.update(users).set(newData).where(eq(users.id, user.id)),
     );
 
     if (error) {
@@ -32,7 +32,7 @@ export const account = new Hono()
   .delete("/user", getUser, async (ctx) => {
     const user = ctx.get("user");
 
-    const { error } = await safeTry(db.delete(users).where(eq(users.id, user.data.id)));
+    const { error } = await safeTry(db.delete(users).where(eq(users.id, user.id)));
 
     if (error) {
       return ctx.json(error, 500);

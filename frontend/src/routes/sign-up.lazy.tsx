@@ -1,4 +1,4 @@
-import SignUpForm from "@/components/forms/sign-up-form";
+import { SignUpForm } from "@/components/forms/sign-up-form";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/sign-up")({

@@ -1,9 +1,10 @@
 import { ErrorComponent } from "@/components/error";
 import { NotFound } from "@/components/not-found";
 import { userAccountQueryOptions } from "@/lib/api";
+import { accountVerificationQueryOptions } from "@/lib/api/get-account-verification-query";
 import { safeTry } from "@server/lib/safe-try";
 import { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, Outlet, redirect } from "@tanstack/react-router";
+import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
 // import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 
 const authRoutes = ["/login", "/sign-up", "/forgotten-password"];
@@ -26,7 +27,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     }
 
     const allowedRoutes = () =>
-      location.pathname !== "/" && !location.pathname.startsWith("/@");
+      location.pathname !== "/" &&
+      !location.pathname.startsWith("/@") &&
+      !authRoutes.includes(location.pathname);
 
     if (user === null) {
       queryClient.setQueryData(["user", "account"], null);
@@ -34,6 +37,20 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
     if (user === null && allowedRoutes()) {
       throw redirect({ to: "/login" });
+    }
+
+    if (
+      user &&
+      user.emailVerified === null &&
+      location.pathname !== "/account/verification"
+    ) {
+      const { token } = await queryClient.fetchQuery(accountVerificationQueryOptions);
+
+      throw redirect({
+        to: "/account/verification",
+        search: { token },
+        replace: true,
+      });
     }
 
     if (user && authRoutes.includes(location.pathname)) {

@@ -1,7 +1,7 @@
 import { LinkButton } from "@/components/ui/link-button";
 import { Link } from "@tanstack/react-router";
 
-export default function LoginFooter() {
+export function LoginFooter() {
   return (
     <div className="w-full max-w-sm">
       <Link

@@ -1,5 +1,5 @@
-import LoginForm from "@/components/forms/login-form";
-import LoginFooter from "@/components/login-footer";
+import { LoginForm } from "@/components/forms/login-form";
+import { LoginFooter } from "@/components/login-footer";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/login")({

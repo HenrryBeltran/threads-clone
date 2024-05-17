@@ -12,7 +12,7 @@ export default function BottomNavbar({ user }: Props) {
   return (
     <>
       {screen.width !== 0 && screen.width < 640 && (
-        <Navbar username={user ? user.data.username : undefined} />
+        <Navbar username={user ? user.username : undefined} />
       )}
     </>
   );
