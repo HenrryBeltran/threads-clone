@@ -1,9 +1,4 @@
-type Props = {
-  username: string;
-  verificationCode: string;
-};
-
-export function WelcomeTemplate({ username, verificationCode }: Props) {
+export function WelcomeTemplate(username: string, verificationCode: string) {
   return `
     <section>
       <h1 style="fontSize: 20px;">Dear ${username},</h1>

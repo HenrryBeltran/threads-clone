@@ -1,39 +1,60 @@
-import { UserAccount } from "@/lib/api";
-import { useQueryClient } from "@tanstack/react-query";
-import { Link, createLazyFileRoute } from "@tanstack/react-router";
-import { OTPForm } from "@/components/forms/otp-form";
+import ResetPasswordForm from "@/components/forms/reset-password-form";
 import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
+import { temporalTokenSchema } from "@server/common/schemas";
+import { safeTry } from "@server/lib/safe-try";
+import { Link, createFileRoute, useSearch } from "@tanstack/react-router";
+import { z } from "zod";
 
-export const Route = createLazyFileRoute("/account/verification")({
-  component: AccountVerification,
+const resetPasswordSearchSchema = z.object({
+  temporal_token: temporalTokenSchema,
 });
 
-function AccountVerification() {
-  const queryClient = useQueryClient();
-  const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
-
-  if (user?.emailVerified) {
-    return (
-      <PageLayout>
-        <h1 className="text-lg font-medium">Your account already verified.</h1>
-        <Link to="/">
-          <Button className="mt-8 w-full rounded-xl py-6 text-base aria-disabled:cursor-not-allowed aria-disabled:text-muted-foreground aria-disabled:hover:bg-primary">
-            Go Home
-          </Button>
-        </Link>
-      </PageLayout>
+export const Route = createFileRoute("/account/reset-password")({
+  component: AccountResetPassword,
+  validateSearch: resetPasswordSearchSchema,
+  loaderDeps: ({ search: { temporal_token } }) => ({ temporal_token }),
+  loader: async ({ deps: { temporal_token } }) => {
+    const res = await safeTry(
+      api.auth["reset-password"][":temporal-token"].$get({ param: { "temporal-token": temporal_token } }),
     );
+
+    if (res.error) return null;
+    if (!res.result.ok) return null;
+
+    const { result: data } = await safeTry(res.result.json());
+
+    if (!data) return null;
+
+    return data;
+  },
+  errorComponent: NotValidToken,
+});
+
+function AccountResetPassword() {
+  const search = useSearch({ from: "/account/reset-password" });
+  const data = Route.useLoaderData();
+
+  if (!data) {
+    return NotValidToken();
   }
 
   return (
     <PageLayout>
-      <div className="mx-auto max-w-sm md:max-w-lg">
-        <h1 className="tracking-tigh text-center text-3xl font-bold sm:text-4xl">Account Verification</h1>
-        <p className="mt-4 text-pretty text-center text-sm text-muted-foreground">
-          We have sent a verification code to your email to verify your account.
-        </p>
-        <OTPForm />
-      </div>
+      <ResetPasswordForm temporalToken={search.temporal_token} />
+    </PageLayout>
+  );
+}
+
+function NotValidToken() {
+  return (
+    <PageLayout>
+      <h1 className="mt-8 text-center text-lg">Token provided is invalid.</h1>
+      <Link to="/login">
+        <Button className="mt-8 w-full rounded-xl py-6 text-base aria-disabled:cursor-not-allowed aria-disabled:text-muted-foreground aria-disabled:hover:bg-primary">
+          Return to login
+        </Button>
+      </Link>
     </PageLayout>
   );
 }
@@ -44,7 +65,7 @@ function PageLayout({ children }: { children: React.ReactNode }) {
       <section className="flex min-h-[calc(100svh-48px)] w-full flex-col items-center justify-center px-5 pt-6 sm:px-5">
         <header className="w-full space-y-12 py-8">
           <div className="mx-auto h-12 w-12">
-            <Link to="/" aria-label="link to home">
+            <Link to="/login">
               <svg
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"

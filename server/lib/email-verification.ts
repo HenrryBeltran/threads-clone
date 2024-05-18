@@ -14,8 +14,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 type User = {
   id: string;
-  email?: string;
-  username?: string;
+  email: string;
+  username: string;
 };
 
 export async function emailVerification(user: User) {
@@ -50,7 +50,7 @@ export async function emailVerification(user: User) {
     await safeTry(
       db.insert(verifyUser).values({
         id: nanoid(),
-        email: user.email!,
+        email: user.email,
         expires,
         token: verificationToken,
         code: verificationCode,
@@ -64,9 +64,9 @@ export async function emailVerification(user: User) {
         process.env.NODE_ENV === "development"
           ? "Threads Clone <onboarding@resend.dev>"
           : "Threads Clone <noreply@threads-clone.henrryb.site>",
-      to: [user.email!],
+      to: [user.email],
       subject: "Welcome to Threads Clone! Confirm Your Account",
-      html: WelcomeTemplate({ username: user.username!, verificationCode }),
+      html: WelcomeTemplate(user.username, verificationCode),
     }),
   );
 

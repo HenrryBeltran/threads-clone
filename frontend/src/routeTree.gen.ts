@@ -14,6 +14,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as MainLayoutImport } from './routes/_main-layout'
+import { Route as AccountResetPasswordImport } from './routes/account/reset-password'
 
 // Create Virtual Routes
 
@@ -103,6 +104,11 @@ const MainLayoutUsernameLazyRoute = MainLayoutUsernameLazyImport.update({
   import('./routes/_main-layout/$username.lazy').then((d) => d.Route),
 )
 
+const AccountResetPasswordRoute = AccountResetPasswordImport.update({
+  path: '/account/reset-password',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -133,6 +139,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/account/reset-password': {
+      id: '/account/reset-password'
+      path: '/account/reset-password'
+      fullPath: '/account/reset-password'
+      preLoaderRoute: typeof AccountResetPasswordImport
       parentRoute: typeof rootRoute
     }
     '/_main-layout/$username': {
@@ -201,6 +214,7 @@ export const routeTree = rootRoute.addChildren({
   ForgottenPasswordLazyRoute,
   LoginLazyRoute,
   SignUpLazyRoute,
+  AccountResetPasswordRoute,
   AccountVerificationLazyRoute,
 })
 

@@ -1,5 +1,6 @@
 import { ErrorComponent } from "@/components/error";
 import { NotFound } from "@/components/not-found";
+import { Toaster } from "@/components/ui/sonner";
 import { userAccountQueryOptions } from "@/lib/api";
 import { accountVerificationQueryOptions } from "@/lib/api/get-account-verification-query";
 import { safeTry } from "@server/lib/safe-try";
@@ -7,7 +8,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
 // import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 
-const authRoutes = ["/login", "/sign-up", "/forgotten-password"];
+const authRoutes = ["/login", "/sign-up", "/forgotten-password", "/account/reset-password"];
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -18,18 +19,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   beforeLoad: async ({ context, location }) => {
     const queryClient = context.queryClient;
 
-    const { error, result: user } = await safeTry(
-      queryClient.fetchQuery(userAccountQueryOptions),
-    );
+    const { error, result: user } = await safeTry(queryClient.fetchQuery(userAccountQueryOptions));
 
     if (error) {
       throw new Error("Something went wrong.");
     }
 
     const allowedRoutes = () =>
-      location.pathname !== "/" &&
-      !location.pathname.startsWith("/@") &&
-      !authRoutes.includes(location.pathname);
+      location.pathname !== "/" && !location.pathname.startsWith("/@") && !authRoutes.includes(location.pathname);
 
     if (user === null) {
       queryClient.setQueryData(["user", "account"], null);
@@ -39,11 +36,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       throw redirect({ to: "/login" });
     }
 
-    if (
-      user &&
-      user.emailVerified === null &&
-      location.pathname !== "/account/verification"
-    ) {
+    if (user && user.emailVerified === null && location.pathname !== "/account/verification") {
       const { token } = await queryClient.fetchQuery(accountVerificationQueryOptions);
 
       throw redirect({
@@ -67,7 +60,8 @@ function RootLayout() {
   return (
     <>
       <Outlet />
-      {/* <TanStackRouterDevtools /> */}
+      <Toaster />
+      {/* <TanStackRouterDevtools initialIsOpen={false} /> */}
     </>
   );
 }

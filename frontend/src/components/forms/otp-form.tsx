@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { inputOTPSchema } from "@server/common/schemas/auth";
 import { safeTry } from "@server/lib/safe-try";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,9 +21,20 @@ export function OTPForm() {
     defaultValues: { pin: "" },
     resolver: zodResolver(inputOTPSchema),
   });
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await safeTry(api.auth.logout.$post());
 
-  /// TODO: Henrry you have to implement the resend feature for the account verification.
-  /// TODO: Also add the logout buttom to get out of verification page. The work line is below the code.
+      if (error) {
+        return null;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", "account"] });
+      navigate({ to: "/login" });
+    },
+  });
+
   const onSubmit: SubmitHandler<OTPForm> = async (value) => {
     const res = await safeTry(api.auth["verify-account"].$post({ json: value }));
 
@@ -44,7 +55,7 @@ export function OTPForm() {
 
     queryClient.invalidateQueries({ queryKey: ["user", "account"] });
 
-    /// TODO: navigate to complete account when the page is ready to update this.
+    /// TODO: navigate to 'complete account' when the page is ready to update this.
     navigate({ to: "/", replace: true });
   };
 
@@ -113,13 +124,22 @@ export function OTPForm() {
       <div>
         <OTPResendButton />
       </div>
-      <a
-        ///TODO: This should logout the user.
-        href="/login"
-        className="inline-block w-full cursor-pointer select-none text-center text-muted-foreground"
-      >
-        Return to login
-      </a>
+      <div className="flex w-full select-none flex-col items-center justify-center gap-3">
+        <button
+          type="button"
+          className="flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          onClick={() => mutation.mutate()}
+        >
+          Log out and to return to login
+        </button>
+        <Loading03AnimatedIcon
+          aria-hidden={!mutation.isPending}
+          className="text-foreground aria-hidden:invisible"
+          strokeWidth={3}
+          width={20}
+          height={20}
+        />
+      </div>
     </form>
   );
 }
