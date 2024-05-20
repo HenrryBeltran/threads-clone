@@ -96,7 +96,7 @@ export default function ResetPasswordForm({ temporalToken }: Props) {
             }}
           >
             {form.formState.isSubmitting ? (
-              <Loading03AnimatedIcon strokeWidth={2} width={28} height={28} className="text-secondary" />
+              <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="text-secondary" />
             ) : (
               "Save"
             )}

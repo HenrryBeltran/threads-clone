@@ -6,7 +6,7 @@ export function ResetPasswordTemplate(email: string, resetPasswordLink: string) 
         We received a request to reset the password for the threads clone account
         associated with ${email}
       </p>
-      <a href="resetPasswordLink">${resetPasswordLink}</a>
+      <a href="${resetPasswordLink}">${resetPasswordLink}</a>
       <p style="maxWidth: 512px;">
         Please be aware that if you do not complete this process within 1 hour, the above
         URL will become invalid.
