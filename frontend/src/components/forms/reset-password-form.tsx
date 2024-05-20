@@ -74,13 +74,11 @@ export default function ResetPasswordForm({ temporalToken }: Props) {
             {...form.register("newPassword")}
             error={form.formState.errors.newPassword?.message}
             placeholder="Password"
-            className="flex-grow border-none bg-transparent px-4 py-7 focus-visible:ring-transparent focus-visible:ring-offset-transparent"
           />
           <InputPassword
             {...form.register("confirmNewPassword")}
             error={form.formState.errors.confirmNewPassword?.message}
             placeholder="Confirm password"
-            className="flex-grow border-none bg-transparent px-4 py-7 focus-visible:ring-transparent focus-visible:ring-offset-transparent"
           />
           <Button
             type="submit"

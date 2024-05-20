@@ -1,6 +1,6 @@
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { users } from "../../db/schemas/users";
-import { createInsertSchema } from "drizzle-zod";
 
 export const insertUserSchema = createInsertSchema(users, {
   name: z
@@ -10,24 +10,32 @@ export const insertUserSchema = createInsertSchema(users, {
       message: "User name must be at least 2 characters.",
     })
     .max(48, { message: "Username cannot exceed 48 characters." }),
-  bio: z
-    .string()
-    .max(150, { message: "Biography must be less then 150 characters." })
-    .optional(),
+  bio: z.string().max(150, { message: "Biography must be less then 150 characters." }),
   link: z
     .string()
     .url({ message: "Invalid url." })
     .max(60, { message: "Link cannot be longer than 60 characters." })
-    .optional()
     .or(z.literal("")),
 }).omit({
   id: true,
   username: true,
   email: true,
   password: true,
+  profilePictureUrl: true,
   followersCount: true,
   followingsCount: true,
   roles: true,
   emailVerified: true,
   createdAt: true,
+});
+
+export const insertUserProfileSchema = insertUserSchema.extend({
+  profilePicture: z
+    .object({
+      name: z.string(),
+      base64: z.string().refine((s) => s.includes("data:image/jpeg;base64,"), {
+        message: "Invalid base64 format.",
+      }),
+    })
+    .optional(),
 });

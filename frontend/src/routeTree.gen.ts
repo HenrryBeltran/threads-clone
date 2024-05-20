@@ -23,6 +23,9 @@ const LoginLazyImport = createFileRoute('/login')()
 const ForgottenPasswordLazyImport = createFileRoute('/forgotten-password')()
 const MainLayoutIndexLazyImport = createFileRoute('/_main-layout/')()
 const AccountVerificationLazyImport = createFileRoute('/account/verification')()
+const AccountCompleteProfileLazyImport = createFileRoute(
+  '/account/complete-profile',
+)()
 const MainLayoutSearchLazyImport = createFileRoute('/_main-layout/search')()
 const MainLayoutSavedLazyImport = createFileRoute('/_main-layout/saved')()
 const MainLayoutLikedLazyImport = createFileRoute('/_main-layout/liked')()
@@ -67,6 +70,15 @@ const AccountVerificationLazyRoute = AccountVerificationLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() =>
   import('./routes/account/verification.lazy').then((d) => d.Route),
+)
+
+const AccountCompleteProfileLazyRoute = AccountCompleteProfileLazyImport.update(
+  {
+    path: '/account/complete-profile',
+    getParentRoute: () => rootRoute,
+  } as any,
+).lazy(() =>
+  import('./routes/account/complete-profile.lazy').then((d) => d.Route),
 )
 
 const MainLayoutSearchLazyRoute = MainLayoutSearchLazyImport.update({
@@ -183,6 +195,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutSearchLazyImport
       parentRoute: typeof MainLayoutImport
     }
+    '/account/complete-profile': {
+      id: '/account/complete-profile'
+      path: '/account/complete-profile'
+      fullPath: '/account/complete-profile'
+      preLoaderRoute: typeof AccountCompleteProfileLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/account/verification': {
       id: '/account/verification'
       path: '/account/verification'
@@ -215,6 +234,7 @@ export const routeTree = rootRoute.addChildren({
   LoginLazyRoute,
   SignUpLazyRoute,
   AccountResetPasswordRoute,
+  AccountCompleteProfileLazyRoute,
   AccountVerificationLazyRoute,
 })
 

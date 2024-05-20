@@ -57,7 +57,6 @@ export function LoginForm() {
     }
 
     queryClient.invalidateQueries({ queryKey: ["user", "account"] });
-
     navigate({ to: "/", replace: true });
   };
 
@@ -84,11 +83,7 @@ export function LoginForm() {
         />
         <Button
           type="submit"
-          aria-disabled={
-            form.watch("username") === "" ||
-            form.watch("password") === "" ||
-            form.formState.isSubmitting
-          }
+          aria-disabled={form.watch("username") === "" || form.watch("password") === "" || form.formState.isSubmitting}
           className="!mt-8 w-full rounded-xl py-7 text-base shadow-none aria-disabled:cursor-not-allowed aria-disabled:text-muted-foreground aria-disabled:hover:bg-primary"
           onClick={(e) => {
             if (e.currentTarget.ariaDisabled === "true") {
@@ -99,12 +94,7 @@ export function LoginForm() {
           }}
         >
           {form.formState.isSubmitting ? (
-            <Loading03AnimatedIcon
-              strokeWidth={3}
-              width={24}
-              height={24}
-              className="text-secondary"
-            />
+            <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="text-secondary" />
           ) : (
             "Log in"
           )}
@@ -118,14 +108,10 @@ export function LoginForm() {
       {(form.formState.errors.username || form.formState.errors.password) && (
         <div className="!mt-5 flex flex-col text-destructive dark:text-red-400">
           {form.formState.errors.username && (
-            <span className="text-pretty text-sm font-medium">
-              ⓧ {form.formState.errors.username.message}
-            </span>
+            <span className="text-pretty text-sm font-medium">ⓧ {form.formState.errors.username.message}</span>
           )}
           {form.formState.errors.password && (
-            <span className="text-pretty text-sm font-medium">
-              ⓧ {form.formState.errors.password.message}
-            </span>
+            <span className="text-pretty text-sm font-medium">ⓧ {form.formState.errors.password.message}</span>
           )}
         </div>
       )}

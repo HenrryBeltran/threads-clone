@@ -58,7 +58,6 @@ export default function ForgottenPasswordForm() {
             error={form.formState.errors.email?.message}
             type="email"
             placeholder="Email address"
-            className="flex-grow border-none bg-transparent px-4 py-7 focus-visible:ring-transparent focus-visible:ring-offset-transparent"
             autoFocus
           />
           <Button
