@@ -7,14 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import { optimizeImage } from "@/lib/optimize-image";
 import { zodResolver } from "@hookform/resolvers/zod";
-import emptyProfilePicture from "@public/images/empty-profile-picture/128x128.jpg";
 import { insertUserSchema } from "@server/common/schemas/user";
-import { safeTry } from "@server/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import emptyProfilePicture from "/images/empty-profile-picture/128x128.jpg";
 
 type ProfilePicture = {
   name: string;
@@ -55,16 +54,15 @@ export function CompleteProfileForm() {
   }
 
   async function onSubmit(data: z.infer<typeof insertUserSchema>) {
-    const res = await safeTry(api.account.user.$put({ json: { ...data, profilePicture } }));
-
-    if (!res.error) {
+    try {
+      await api.account.user.$put({ json: { ...data, profilePicture } });
+    } catch (error) {
       form.setError("root", { message: "Something went wrong." });
       return;
     }
 
-    /// TODO: solve an error after succesfully submit the profile
     queryClient.invalidateQueries({ queryKey: ["user", "account"] });
-    navigate({ to: "/" });
+    navigate({ to: "/", replace: true });
   }
 
   return (

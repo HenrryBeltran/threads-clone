@@ -46,10 +46,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       });
     }
 
-    if (user && user.name.length === 0 && location.pathname !== "/account/complete-profile") {
+    if (user && user.name === "" && user.emailVerified && location.pathname !== "/account/complete-profile") {
       throw redirect({ to: "/account/complete-profile" });
-    } else if (user && user.name.length > 0 && location.pathname === "/account/complete-profile") {
-      throw redirect({ to: "/", replace: true });
+    }
+
+    if (user && user.name !== "" && user.emailVerified && location.pathname === "/account/complete-profile") {
+      throw redirect({ to: "/" });
     }
 
     if (user && authRoutes.includes(location.pathname)) {

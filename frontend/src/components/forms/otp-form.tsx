@@ -55,8 +55,7 @@ export function OTPForm() {
 
     queryClient.invalidateQueries({ queryKey: ["user", "account"] });
 
-    /// TODO: navigate to 'complete account' when the page is ready to update this.
-    navigate({ to: "/", replace: true });
+    navigate({ to: "/account/complete-profile", replace: true });
   };
 
   return (
@@ -96,14 +95,10 @@ export function OTPForm() {
         )}
       />
       {form.formState.errors.root && (
-        <p className="!mt-4 text-center text-destructive dark:text-red-400">
-          {form.formState.errors.root.message}
-        </p>
+        <p className="!mt-4 text-center text-destructive dark:text-red-400">{form.formState.errors.root.message}</p>
       )}
       {form.formState.errors.pin && (
-        <p className="!mt-4 text-center text-destructive dark:text-red-400">
-          {form.formState.errors.pin.message}
-        </p>
+        <p className="!mt-4 text-center text-destructive dark:text-red-400">{form.formState.errors.pin.message}</p>
       )}
       <Button
         type="submit"
@@ -111,12 +106,7 @@ export function OTPForm() {
         className="mx-auto mt-8 flex w-44 rounded-xl py-7 text-base aria-disabled:cursor-not-allowed aria-disabled:text-muted-foreground aria-disabled:hover:bg-primary"
       >
         {form.formState.isSubmitting ? (
-          <Loading03AnimatedIcon
-            strokeWidth={3}
-            width={24}
-            height={24}
-            className="text-secondary"
-          />
+          <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="text-secondary" />
         ) : (
           "Verify"
         )}
