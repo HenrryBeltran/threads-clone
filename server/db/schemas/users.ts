@@ -13,7 +13,7 @@ export const users = sqliteTable("users", {
   name: text("name").notNull(),
   bio: text("bio").notNull(),
   link: text("link"),
-  profilePictureUrl: text("profile_picture_url"),
+  profilePictureId: text("profile_picture_id"),
   roles: text("roles", { enum: ["user", "admin", "viewer"] })
     .notNull()
     .default("user"),
@@ -30,8 +30,8 @@ export const users = sqliteTable("users", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   threads: many(threads),
-  followers: many(follows, { relationName: "follower" }),
-  followings: many(follows, { relationName: "following" }),
+  userId: many(follows, { relationName: "user_id" }),
+  targetId: many(follows, { relationName: "target_id" }),
   sessions: many(sessions),
   owner: many(searchHistory, { relationName: "owner" }),
   userSearch: many(searchHistory, { relationName: "user_search" }),

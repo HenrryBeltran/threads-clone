@@ -28,16 +28,22 @@ function Index() {
         <div className="mx-auto mt-[74px] max-w-[620px] px-6">
           <div className="flex items-center justify-between border-b border-muted-foreground/20 py-4">
             <Link to={`/@${user.username}`}>
-              {user.profilePictureUrl ? (
+              {user.profilePictureId ? (
                 <img
-                  src={user.profilePictureUrl}
+                  src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_64,w_64/dpr_2.0/v1716403676/${user.profilePictureId}.jpg`}
                   alt={`${user.username} profile picture`}
+                  // @ts-ignore
+                  fetchpriority="high"
+                  loading="lazy"
                   className="h-10 w-10 rounded-full border-[0.5px] border-muted-foreground/30"
                 />
               ) : (
                 <img
                   src="/images/empty-profile-picture/64x64.jpg"
                   alt="Empty profile picture"
+                  // @ts-ignore
+                  fetchpriority="high"
+                  loading="lazy"
                   className="h-10 w-10 rounded-full border-[0.5px] border-muted-foreground/30"
                 />
               )}

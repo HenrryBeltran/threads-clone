@@ -21,7 +21,7 @@ export const insertUserSchema = createInsertSchema(users, {
   username: true,
   email: true,
   password: true,
-  profilePictureUrl: true,
+  profilePictureId: true,
   followersCount: true,
   followingsCount: true,
   roles: true,

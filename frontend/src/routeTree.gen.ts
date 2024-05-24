@@ -15,6 +15,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as MainLayoutImport } from './routes/_main-layout'
 import { Route as AccountResetPasswordImport } from './routes/account/reset-password'
+import { Route as MainLayoutProfileLayoutImport } from './routes/_main-layout/_profile-layout'
 
 // Create Virtual Routes
 
@@ -30,8 +31,8 @@ const MainLayoutSearchLazyImport = createFileRoute('/_main-layout/search')()
 const MainLayoutSavedLazyImport = createFileRoute('/_main-layout/saved')()
 const MainLayoutLikedLazyImport = createFileRoute('/_main-layout/liked')()
 const MainLayoutActivityLazyImport = createFileRoute('/_main-layout/activity')()
-const MainLayoutUsernameLazyImport = createFileRoute(
-  '/_main-layout/$username',
+const MainLayoutProfileLayoutUsernameLazyImport = createFileRoute(
+  '/_main-layout/_profile-layout/$username',
 )()
 
 // Create/Update Routes
@@ -109,17 +110,25 @@ const MainLayoutActivityLazyRoute = MainLayoutActivityLazyImport.update({
   import('./routes/_main-layout/activity.lazy').then((d) => d.Route),
 )
 
-const MainLayoutUsernameLazyRoute = MainLayoutUsernameLazyImport.update({
-  path: '/$username',
-  getParentRoute: () => MainLayoutRoute,
-} as any).lazy(() =>
-  import('./routes/_main-layout/$username.lazy').then((d) => d.Route),
-)
-
 const AccountResetPasswordRoute = AccountResetPasswordImport.update({
   path: '/account/reset-password',
   getParentRoute: () => rootRoute,
 } as any)
+
+const MainLayoutProfileLayoutRoute = MainLayoutProfileLayoutImport.update({
+  id: '/_profile-layout',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
+
+const MainLayoutProfileLayoutUsernameLazyRoute =
+  MainLayoutProfileLayoutUsernameLazyImport.update({
+    path: '/$username',
+    getParentRoute: () => MainLayoutProfileLayoutRoute,
+  } as any).lazy(() =>
+    import('./routes/_main-layout/_profile-layout/$username.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -153,19 +162,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpLazyImport
       parentRoute: typeof rootRoute
     }
+    '/_main-layout/_profile-layout': {
+      id: '/_main-layout/_profile-layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof MainLayoutProfileLayoutImport
+      parentRoute: typeof MainLayoutImport
+    }
     '/account/reset-password': {
       id: '/account/reset-password'
       path: '/account/reset-password'
       fullPath: '/account/reset-password'
       preLoaderRoute: typeof AccountResetPasswordImport
       parentRoute: typeof rootRoute
-    }
-    '/_main-layout/$username': {
-      id: '/_main-layout/$username'
-      path: '/$username'
-      fullPath: '/$username'
-      preLoaderRoute: typeof MainLayoutUsernameLazyImport
-      parentRoute: typeof MainLayoutImport
     }
     '/_main-layout/activity': {
       id: '/_main-layout/activity'
@@ -216,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutIndexLazyImport
       parentRoute: typeof MainLayoutImport
     }
+    '/_main-layout/_profile-layout/$username': {
+      id: '/_main-layout/_profile-layout/$username'
+      path: '/$username'
+      fullPath: '/$username'
+      preLoaderRoute: typeof MainLayoutProfileLayoutUsernameLazyImport
+      parentRoute: typeof MainLayoutProfileLayoutImport
+    }
   }
 }
 
@@ -223,7 +239,9 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   MainLayoutRoute: MainLayoutRoute.addChildren({
-    MainLayoutUsernameLazyRoute,
+    MainLayoutProfileLayoutRoute: MainLayoutProfileLayoutRoute.addChildren({
+      MainLayoutProfileLayoutUsernameLazyRoute,
+    }),
     MainLayoutActivityLazyRoute,
     MainLayoutLikedLazyRoute,
     MainLayoutSavedLazyRoute,

@@ -20,4 +20,12 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: (path) => path.split("/").reverse()[path.split("/").reverse().indexOf("node_modules") - 1],
+      },
+    },
+  },
 });

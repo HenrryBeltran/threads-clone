@@ -1,12 +1,11 @@
-import { type ApiRoutes } from "@server/app";
+import type { HonoApiRoutes } from "@server/app";
 import { safeTry } from "@server/lib/safe-try";
 import { queryOptions } from "@tanstack/react-query";
 import { hc, type InferResponseType } from "hono/client";
 
-const client = hc<ApiRoutes>("/");
+const client = hc<HonoApiRoutes>("/");
 
 export const api = client.api;
-
 export type UserAccount = InferResponseType<typeof api.account.user.$get>;
 
 export async function getUserAccount(): Promise<UserAccount | null> {

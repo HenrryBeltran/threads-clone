@@ -19,15 +19,15 @@ export const follows = sqliteTable("follows", {
 });
 
 export const followsRelations = relations(follows, ({ one }) => ({
-  follower: one(users, {
+  userId: one(users, {
     fields: [follows.userId],
     references: [users.id],
-    relationName: "follower",
+    relationName: "user_id",
   }),
-  following: one(users, {
+  targetId: one(users, {
     fields: [follows.targetId],
     references: [users.id],
-    relationName: "following",
+    relationName: "target_id",
   }),
 }));
 
