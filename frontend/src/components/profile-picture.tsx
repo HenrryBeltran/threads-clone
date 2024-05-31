@@ -49,6 +49,8 @@ export default function ProfilePicture({ src, alt }: Props) {
           width={84}
           height={84}
           data-open={open}
+          // @ts-ignore
+          fetchpriority="high"
           className="h-[84px] w-[84px] rounded-full border border-muted-foreground/70 transition-all dark:border-muted-foreground sm:h-[84px] sm:w-[84px]"
           alt={alt}
         />
@@ -72,6 +74,8 @@ export default function ProfilePicture({ src, alt }: Props) {
           height={224}
           data-open={open}
           className="h-56 w-56 scale-[.8] rounded-full shadow-xl transition-all delay-75 duration-300 data-[open=true]:scale-100 dark:border-muted-foreground"
+          // @ts-ignore
+          fetchpriority="high"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();

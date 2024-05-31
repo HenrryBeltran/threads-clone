@@ -16,7 +16,13 @@ dayjs.extend(utc);
 const selectUserSchema = createSelectSchema(users);
 const authUserSchema = selectUserSchema.omit({ password: true });
 
-export type User = z.infer<typeof authUserSchema>;
+export interface User extends z.infer<typeof authUserSchema> {
+  targetId: {
+    userId: {
+      profilePictureId: string | null;
+    };
+  }[];
+}
 
 type Env = {
   Variables: {
@@ -34,8 +40,16 @@ export const getUser = createMiddleware<Env>(async (ctx, next) => {
 
   const session = await safeTry(
     db.query.sessions.findFirst({
-      columns: { id: true, userId: true, token: true, expires: true },
-      with: { userId: { columns: { password: false } } },
+      columns: { id: true, userId: false, token: true, expires: true },
+      with: {
+        userId: {
+          columns: { password: false },
+          with: {
+            targetId: { columns: {}, with: { userId: { columns: { profilePictureId: true } } }, limit: 2 },
+          },
+        },
+      },
+
       where: eq(sessions.token, sessionToken),
     }),
   );
@@ -53,9 +67,7 @@ export const getUser = createMiddleware<Env>(async (ctx, next) => {
   const expires = dayjs.utc(session.result.expires);
 
   if (now.isAfter(expires)) {
-    const { error: logoutError } = await safeTry(
-      db.delete(sessions).where(eq(sessions.id, session.result.id)),
-    );
+    const { error: logoutError } = await safeTry(db.delete(sessions).where(eq(sessions.id, session.result.id)));
 
     if (logoutError) {
       return ctx.json(logoutError, 500);
@@ -66,6 +78,8 @@ export const getUser = createMiddleware<Env>(async (ctx, next) => {
     return ctx.json({ message: "Session expired" }, { status: 498 });
   }
 
-  ctx.set("user", session.result.userId);
+  const user = session.result.userId;
+
+  ctx.set("user", user);
   await next();
 });

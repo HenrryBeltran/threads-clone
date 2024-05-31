@@ -1,8 +1,18 @@
-import { Hono } from "hono";
-import { safeTry } from "../lib/safe-try";
-import { db } from "../db";
 import { eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { db } from "../db";
 import { users } from "../db/schemas/users";
+import { safeTry } from "../lib/safe-try";
+
+export type UserProfile = {
+  username: string;
+  name: string;
+  bio: string;
+  link: string | null;
+  profilePictureId: string | null;
+  followersCount: number;
+  followingsCount: number;
+};
 
 export const user = new Hono().get("/profile/:username", async (ctx) => {
   const username = ctx.req.param("username");
@@ -16,6 +26,9 @@ export const user = new Hono().get("/profile/:username", async (ctx) => {
         link: true,
         followersCount: true,
         followingsCount: true,
+      },
+      with: {
+        targetId: { columns: {}, with: { userId: { columns: { profilePictureId: true } } }, limit: 2 },
       },
       where: eq(users.username, username),
     }),

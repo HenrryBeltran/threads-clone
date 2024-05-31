@@ -1,5 +1,5 @@
 import { NotFound } from "@/components/not-found";
-import { api } from "@/lib/api";
+import { UserAccount, api } from "@/lib/api";
 import { safeTry } from "@server/lib/safe-try";
 import { queryOptions } from "@tanstack/react-query";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
@@ -60,12 +60,14 @@ const profileFetchOptions = (username: string) =>
   queryOptions({
     queryKey: ["profile", username],
     queryFn: () => getProfile(username),
+    refetchOnWindowFocus: false,
   });
 
 const followStatusFetchOptions = (targetUsername: string) =>
   queryOptions({
     queryKey: ["follow", targetUsername],
     queryFn: () => getFollowStatus(targetUsername),
+    refetchOnWindowFocus: false,
   });
 
 export const Route = createFileRoute("/_main-layout/_profile-layout")({
@@ -76,7 +78,7 @@ export const Route = createFileRoute("/_main-layout/_profile-layout")({
     }
 
     const queryClient = context.queryClient;
-    const user = queryClient.getQueryData(["user", "account"]) as any;
+    const user = queryClient.getQueryData(["user", "account"]) as UserAccount;
     const username = location.pathname.slice(2);
 
     if (user && location.pathname.slice(2) === user.username) {
@@ -88,9 +90,7 @@ export const Route = createFileRoute("/_main-layout/_profile-layout")({
     if (user) {
       const followStatus = await queryClient.fetchQuery(followStatusFetchOptions(username));
 
-      if (followStatus) {
-        return { user: null, profile, ...followStatus };
-      }
+      return { user: null, profile, ...followStatus };
     }
 
     return { user: null, profile, follow: null };

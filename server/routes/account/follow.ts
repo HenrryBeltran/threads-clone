@@ -32,7 +32,7 @@ export const accountFollow = new Hono()
     }
 
     const { error, result } = await safeTry(
-      db.query.follows.findMany({
+      db.query.follows.findFirst({
         where: and(eq(follows.userId, user.id), eq(follows.targetId, target.id)),
       }),
     );
@@ -41,7 +41,7 @@ export const accountFollow = new Hono()
       return ctx.json(error, 500);
     }
 
-    if (result.length === 0) {
+    if (result === undefined) {
       return ctx.json({ follow: false }, 200);
     }
 
@@ -64,6 +64,16 @@ export const accountFollow = new Hono()
 
     if (!target) {
       return ctx.json({ message: "Target not found." }, 404);
+    }
+
+    const { result: followDuplicate } = await safeTry(
+      db.query.follows.findFirst({
+        where: and(eq(follows.userId, user.id), eq(follows.targetId, target.id)),
+      }),
+    );
+
+    if (followDuplicate) {
+      return ctx.json({ follow: true }, 200);
     }
 
     const { error: addFollowingCountError } = await safeTry(
@@ -98,7 +108,7 @@ export const accountFollow = new Hono()
 
     return ctx.json({ follow: true }, 200);
   })
-  .delete("/unfollow/:target-username", getUser, async (ctx) => {
+  .post("/unfollow/:target-username", getUser, async (ctx) => {
     const user = ctx.get("user");
     const targetUsername = ctx.req.param("target-username");
 
@@ -117,6 +127,16 @@ export const accountFollow = new Hono()
       return ctx.json({ message: "Target not found." }, 404);
     }
 
+    const { result: followDuplicate } = await safeTry(
+      db.query.follows.findFirst({
+        where: and(eq(follows.userId, user.id), eq(follows.targetId, target.id)),
+      }),
+    );
+
+    if (followDuplicate === undefined) {
+      return ctx.json({ follow: true }, 200);
+    }
+
     const { error: subtractFollowingCountError } = await safeTry(
       db
         .update(users)
@@ -130,7 +150,7 @@ export const accountFollow = new Hono()
       db
         .update(users)
         .set({
-          followersCount: target.followersCount + 1,
+          followersCount: target.followersCount - 1,
           updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
         })
         .where(eq(users.id, target.id)),
