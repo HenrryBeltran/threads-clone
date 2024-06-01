@@ -13,7 +13,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import emptyProfilePicture from "/images/empty-profile-picture/128x128.jpg";
 
 type ProfilePicture = {
   name: string;
@@ -73,7 +72,7 @@ export function CompleteProfileForm() {
           <figure className="h-[84px] w-[84px] rounded-full">
             {!profilePicture ? (
               <img
-                src={emptyProfilePicture}
+                src="/images/empty-profile-picture/128x128.jpg"
                 width={84}
                 height={84}
                 alt="Profile picture"

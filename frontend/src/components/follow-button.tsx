@@ -19,8 +19,8 @@ export function FollowButton({ className, targetUsername }: Props) {
     mutationKey: ["follow", targetUsername],
     mutationFn: async () => {
       const res = await safeTry(
-        api.account.profile.follow[":target-username"].$post({
-          param: { "target-username": targetUsername },
+        api.account.profile.follow[":targetUsername"].$post({
+          param: { targetUsername },
         }),
       );
 
@@ -51,8 +51,8 @@ export function FollowButton({ className, targetUsername }: Props) {
     mutationKey: ["follow", targetUsername],
     mutationFn: async () => {
       const res = await safeTry(
-        api.account.profile.unfollow[":target-username"].$post({
-          param: { "target-username": targetUsername },
+        api.account.profile.unfollow[":targetUsername"].$post({
+          param: { targetUsername },
         }),
       );
 

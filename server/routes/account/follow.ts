@@ -1,6 +1,7 @@
+import camelcaseKeys from "camelcase-keys";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { nanoid } from "nanoid";
 import { db } from "../../db";
@@ -11,10 +12,12 @@ import { getUser } from "../../middleware/getUser";
 
 dayjs.extend(utc);
 
+type FollowsResult = { username: string; name: string; profilePictureId: string | null; followStatus: number }[];
+
 export const accountFollow = new Hono()
-  .get("/follow/:target-username", getUser, async (ctx) => {
+  .get("/follow/:targetUsername", getUser, async (ctx) => {
     const user = ctx.get("user");
-    const targetUsername = ctx.req.param("target-username");
+    const targetUsername = ctx.req.param("targetUsername");
 
     const { error: targetError, result: target } = await safeTry(
       db.query.users.findFirst({
@@ -47,9 +50,9 @@ export const accountFollow = new Hono()
 
     return ctx.json({ follow: true }, 200);
   })
-  .post("/follow/:target-username", getUser, async (ctx) => {
+  .post("/follow/:targetUsername", getUser, async (ctx) => {
     const user = ctx.get("user");
-    const targetUsername = ctx.req.param("target-username");
+    const targetUsername = ctx.req.param("targetUsername");
 
     const { error: targetError, result: target } = await safeTry(
       db.query.users.findFirst({
@@ -108,9 +111,9 @@ export const accountFollow = new Hono()
 
     return ctx.json({ follow: true }, 200);
   })
-  .post("/unfollow/:target-username", getUser, async (ctx) => {
+  .post("/unfollow/:targetUsername", getUser, async (ctx) => {
     const user = ctx.get("user");
-    const targetUsername = ctx.req.param("target-username");
+    const targetUsername = ctx.req.param("targetUsername");
 
     const { error: targetError, result: target } = await safeTry(
       db.query.users.findFirst({
@@ -164,4 +167,70 @@ export const accountFollow = new Hono()
     }
 
     return ctx.json({ follow: false }, 200);
+  })
+  .get("/followers/:targetId", getUser, async (ctx) => {
+    const user = ctx.get("user");
+    const targetId = ctx.req.param("targetId");
+
+    const { error, result } = await safeTry(
+      db.run(
+        sql`
+          SELECT
+            users.username,
+            users.name,
+            users.profile_picture_id,
+            (
+              SELECT COUNT(follows.id)
+              FROM follows
+              WHERE follows.target_id = users.id AND follows.user_id = ${user.id}
+            ) AS 'follow_status'
+          FROM follows 
+          INNER JOIN users
+            ON users.id = follows.user_id
+          WHERE follows.target_id = ${targetId}
+          ORDER BY follows.created_at DESC;
+        `,
+      ),
+    );
+
+    if (error) {
+      return ctx.json(error, 500);
+    }
+
+    const rows = camelcaseKeys(JSON.parse(JSON.stringify(result.rows))) as FollowsResult;
+
+    return ctx.json(rows, 200);
+  })
+  .get("/followings/:targetId", getUser, async (ctx) => {
+    const user = ctx.get("user");
+    const targetId = ctx.req.param("targetId");
+
+    const { error, result } = await safeTry(
+      db.run(
+        sql`
+          SELECT
+            users.username,
+            users.name,
+            users.profile_picture_id,
+            (
+              SELECT COUNT(follows.id)
+              FROM follows
+              WHERE follows.target_id = users.id AND follows.user_id = ${user.id}
+            ) AS 'follow_status'
+          FROM follows 
+          INNER JOIN users
+            ON users.id = follows.target_id
+          WHERE follows.user_id = ${targetId}
+          ORDER BY follows.created_at DESC;
+        `,
+      ),
+    );
+
+    if (error) {
+      return ctx.json(error, 500);
+    }
+
+    const rows = camelcaseKeys(JSON.parse(JSON.stringify(result.rows))) as FollowsResult;
+
+    return ctx.json(rows, 200);
   });

@@ -1,86 +1,101 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FollowersCard } from "./followers-card";
+import { UserImage } from "./user-image";
 
 type Props = {
+  username: string;
   followersCount: number;
+  followingsCount: number;
   profilePictureIdOne: string | null;
   profilePictureIdTwo: string | null;
+  userId?: string;
+  targetId: string;
 };
 
-export function ProfileFollowersCount({ followersCount, profilePictureIdOne, profilePictureIdTwo }: Props) {
+export function ProfileFollowersCount({
+  username,
+  followersCount,
+  followingsCount,
+  profilePictureIdOne,
+  profilePictureIdTwo,
+  userId,
+  targetId,
+}: Props) {
   const [open, setOpen] = useState(false);
+  const dialog = useRef<HTMLDialogElement | null>(null);
+
+  useEffect(() => {
+    if (dialog.current === null) return;
+
+    function handleToggle(e: Event) {
+      const event = e as ToggleEvent;
+
+      if (event.newState === "open") {
+        setOpen(true);
+      } else {
+        setOpen(false);
+      }
+    }
+
+    dialog.current.addEventListener("toggle", handleToggle);
+
+    return () => dialog.current?.removeEventListener("toggle", handleToggle);
+  });
 
   return (
     <>
       {followersCount !== 0 && (
         <div
           data-small={followersCount === 1}
-          className="relative h-8 w-9 data-[small=true]:w-6"
-          onClick={() => setOpen(true)}
+          className="peer relative h-8 w-9 cursor-pointer data-[small=true]:w-6"
+          onClick={() => dialog.current?.showPopover()}
         >
           <div className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border-2 border-background bg-background">
-            {profilePictureIdOne ? (
-              <img
-                src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_20,w_20/dpr_2.0/v1716403676/${profilePictureIdOne}.jpg`}
-                width={20}
-                height={20}
-                // @ts-ignore
-                fetchpriority="high"
-                className="rounded-full"
-                alt="Empty profile picture"
-              />
-            ) : (
-              <img
-                src="/images/empty-profile-picture/64x64.jpg"
-                width={20}
-                height={20}
-                // @ts-ignore
-                fetchpriority="high"
-                className="rounded-full"
-                alt="Empty profile picture"
-              />
-            )}
+            <UserImage
+              username={username}
+              profilePictureId={profilePictureIdOne}
+              width={20}
+              height={20}
+              fetchPriority="high"
+              className="border-none"
+            />
           </div>
           {followersCount > 1 && (
             <div className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border-2 border-background bg-background">
-              {profilePictureIdTwo ? (
-                <img
-                  src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_20,w_20/dpr_2.0/v1716403676/${profilePictureIdTwo}.jpg`}
-                  width={20}
-                  height={20}
-                  // @ts-ignore
-                  fetchpriority="high"
-                  className="rounded-full"
-                  alt="Empty profile picture"
-                />
-              ) : (
-                <img
-                  src="/images/empty-profile-picture/64x64.jpg"
-                  width={20}
-                  height={20}
-                  // @ts-ignore
-                  fetchpriority="high"
-                  className="rounded-full"
-                  alt="Empty profile picture"
-                />
-              )}
+              <UserImage
+                username={username}
+                profilePictureId={profilePictureIdTwo}
+                width={20}
+                height={20}
+                fetchPriority="high"
+                className="border-none"
+              />
             </div>
           )}
         </div>
       )}
       <span
-        className="text-sm font-light text-muted-foreground group-hover:underline group-hover:underline-offset-2"
-        onClick={() => setOpen(true)}
+        className="cursor-pointer text-sm font-light text-muted-foreground underline-offset-2 hover:underline peer-[:hover]:underline"
+        onClick={() => dialog.current?.showPopover()}
       >
         {followersCount === 1 && "1 follower"}
         {followersCount !== 1 && `${followersCount} followers`}
       </span>
-      {open && (
-        <div className="absolute left-1/2 top-1/2 m-5 -translate-x-1/2 -translate-y-1/2 rounded-lg border p-5">
-          Followers content
-          <button onClick={() => setOpen(false)}>Close</button>
-        </div>
-      )}
-      {/* </ProfileFollowersDialog> */}
+      <dialog
+        ref={dialog}
+        // @ts-ignore
+        popover="auto"
+        className="w-full max-w-sm bg-transparent p-5 backdrop:bg-neutral-700/50 dark:backdrop:bg-background/60 sm:max-w-md"
+      >
+        {open && (
+          <FollowersCard
+            followersCount={followersCount}
+            followingsCount={followingsCount}
+            userId={userId}
+            targetId={targetId}
+          />
+        )}
+      </dialog>
     </>
   );
 }

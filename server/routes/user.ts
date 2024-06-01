@@ -5,6 +5,7 @@ import { users } from "../db/schemas/users";
 import { safeTry } from "../lib/safe-try";
 
 export type UserProfile = {
+  id: string;
   username: string;
   name: string;
   bio: string;
@@ -19,6 +20,7 @@ export const user = new Hono().get("/profile/:username", async (ctx) => {
   const { error, result } = await safeTry(
     db.query.users.findFirst({
       columns: {
+        id: true,
         username: true,
         name: true,
         bio: true,

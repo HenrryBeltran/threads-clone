@@ -12,6 +12,7 @@ export const Route = createLazyFileRoute("/_main-layout/_profile-layout/$usernam
 });
 
 function Profile() {
+  // const location = useLocation();
   const ctx = useRouteContext({ from: "/_main-layout/_profile-layout" });
 
   if (typeof ctx.profile === "number") {
@@ -35,9 +36,13 @@ function Profile() {
         <ProfileBio text={profile.bio} />
         <div className="flex min-h-8 items-center gap-1.5">
           <ProfileFollowersCount
+            username={profile.username}
             followersCount={profile.followersCount}
+            followingsCount={profile.followingsCount}
             profilePictureIdOne={profile.targetId[0] ? profile.targetId[0].userId.profilePictureId : null}
             profilePictureIdTwo={profile.targetId[1] ? profile.targetId[1].userId.profilePictureId : null}
+            userId={ctx.user?.id}
+            targetId={profile.id}
           />
           <ProfileLink link={profile.link} />
         </div>

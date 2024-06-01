@@ -33,7 +33,7 @@ async function getProfile(username: string) {
 
 async function getFollowStatus(targetUsername: string) {
   const res = await safeTry(
-    api.account.profile.follow[":target-username"].$get({ param: { "target-username": targetUsername } }),
+    api.account.profile.follow[":targetUsername"].$get({ param: { targetUsername } }),
   );
 
   if (res.error) {
