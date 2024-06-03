@@ -12,7 +12,13 @@ import { getUser } from "../../middleware/getUser";
 
 dayjs.extend(utc);
 
-type FollowsResult = { username: string; name: string; profilePictureId: string | null; followStatus: number }[];
+type FollowsResult = {
+  id: string;
+  username: string;
+  name: string;
+  profilePictureId: string | null;
+  followStatus: number;
+}[];
 
 export const accountFollow = new Hono()
   .get("/follow/:targetUsername", getUser, async (ctx) => {
@@ -176,6 +182,7 @@ export const accountFollow = new Hono()
       db.run(
         sql`
           SELECT
+            users.id,
             users.username,
             users.name,
             users.profile_picture_id,
@@ -209,6 +216,7 @@ export const accountFollow = new Hono()
       db.run(
         sql`
           SELECT
+            users.id,
             users.username,
             users.name,
             users.profile_picture_id,

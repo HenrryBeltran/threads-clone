@@ -5,14 +5,20 @@ import { ProfileHeader } from "@/components/profile-header";
 import { ProfileLink } from "@/components/profile-link";
 import { Button } from "@/components/ui/button";
 import { type UserAccount } from "@/lib/api";
-import { createLazyFileRoute, useRouteContext } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { createLazyFileRoute, useLocation, useRouteContext } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_main-layout/_profile-layout/$username")({
   component: Profile,
 });
 
 function Profile() {
-  // const location = useLocation();
+  const location = useLocation();
+  const queryClient = useQueryClient();
+
+  const username = location.pathname.slice(2);
+  const userData = queryClient.getQueryData<UserAccount>(["user", "account"]);
+  const followData = queryClient.getQueryData<{ follow: boolean } | null>(["follow", username]);
   const ctx = useRouteContext({ from: "/_main-layout/_profile-layout" });
 
   if (typeof ctx.profile === "number") {
@@ -41,24 +47,24 @@ function Profile() {
             followingsCount={profile.followingsCount}
             profilePictureIdOne={profile.targetId[0] ? profile.targetId[0].userId.profilePictureId : null}
             profilePictureIdTwo={profile.targetId[1] ? profile.targetId[1].userId.profilePictureId : null}
-            userId={ctx.user?.id}
+            userId={userData?.id}
             targetId={profile.id}
           />
           <ProfileLink link={profile.link} />
         </div>
-        {ctx.follow !== null &&
-          ((profile as UserAccount).id ? (
+        {userData && userData.username === username && (
+          <Button variant="outline" className="my-4 w-full rounded-xl border-muted-foreground/40">
+            Edit profile
+          </Button>
+        )}
+        {followData && userData && userData.username !== username && (
+          <div className="flex gap-4">
+            <FollowButton targetUsername={profile.username} />
             <Button variant="outline" className="my-4 w-full rounded-xl border-muted-foreground/40">
-              Edit profile
+              Mention
             </Button>
-          ) : (
-            <div className="flex gap-4">
-              <FollowButton targetUsername={profile.username} />
-              <Button variant="outline" className="my-4 w-full rounded-xl border-muted-foreground/40">
-                Mention
-              </Button>
-            </div>
-          ))}
+          </div>
+        )}
       </div>
     </div>
   );

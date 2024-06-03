@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { FollowersCard } from "./followers-card";
 import { UserImage } from "./user-image";
@@ -23,6 +24,7 @@ export function ProfileFollowersCount({
 }: Props) {
   const [open, setOpen] = useState(false);
   const dialog = useRef<HTMLDialogElement | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (dialog.current === null) return;
@@ -48,7 +50,14 @@ export function ProfileFollowersCount({
         <div
           data-small={followersCount === 1}
           className="peer relative h-8 w-9 cursor-pointer data-[small=true]:w-6"
-          onClick={() => dialog.current?.showPopover()}
+          onClick={() => {
+            if (userId === undefined) {
+              navigate({ to: "/login" });
+              return;
+            }
+
+            dialog.current?.showPopover();
+          }}
         >
           <div className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border-2 border-background bg-background">
             <UserImage
@@ -76,7 +85,14 @@ export function ProfileFollowersCount({
       )}
       <span
         className="cursor-pointer text-sm font-light text-muted-foreground underline-offset-2 hover:underline peer-[:hover]:underline"
-        onClick={() => dialog.current?.showPopover()}
+        onClick={() => {
+          if (userId === undefined) {
+            navigate({ to: "/login" });
+            return;
+          }
+
+          dialog.current?.showPopover();
+        }}
       >
         {followersCount === 1 && "1 follower"}
         {followersCount !== 1 && `${followersCount} followers`}
@@ -85,9 +101,9 @@ export function ProfileFollowersCount({
         ref={dialog}
         // @ts-ignore
         popover="auto"
-        className="w-full max-w-sm bg-transparent p-5 backdrop:bg-neutral-700/50 dark:backdrop:bg-background/60 sm:max-w-md"
+        className="w-full max-w-md bg-transparent p-5 backdrop:bg-neutral-700/50 dark:backdrop:bg-background/60"
       >
-        {open && (
+        {open && userId && (
           <FollowersCard
             followersCount={followersCount}
             followingsCount={followingsCount}

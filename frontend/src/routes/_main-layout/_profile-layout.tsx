@@ -24,7 +24,7 @@ async function getProfile(username: string) {
   const data = await safeTry(res.result.json());
 
   if (data.error) {
-    console.log("Fail to parse data.");
+    console.error("Fail to parse data.");
     return null;
   }
 
@@ -32,9 +32,7 @@ async function getProfile(username: string) {
 }
 
 async function getFollowStatus(targetUsername: string) {
-  const res = await safeTry(
-    api.account.profile.follow[":targetUsername"].$get({ param: { targetUsername } }),
-  );
+  const res = await safeTry(api.account.profile.follow[":targetUsername"].$get({ param: { targetUsername } }));
 
   if (res.error) {
     console.error("Unexpected error.");
@@ -49,7 +47,7 @@ async function getFollowStatus(targetUsername: string) {
   const data = await safeTry(res.result.json());
 
   if (data.error) {
-    console.log("Fail to parse data.");
+    console.error("Fail to parse data.");
     return null;
   }
 

@@ -9,12 +9,15 @@ import { toast } from "sonner";
 type Props = {
   className?: string;
   targetUsername: string;
+  followStatus?: boolean;
 };
 
-export function FollowButton({ className, targetUsername }: Props) {
+export function FollowButton({ className, targetUsername, followStatus }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const queryData = queryClient.getQueryData<{ follow: boolean }>(["follow", targetUsername]);
+  const queryData = queryClient.getQueryData<{ follow: boolean }>(["follow", targetUsername]) ?? {
+    follow: followStatus,
+  };
   const followMutation = useMutation({
     mutationKey: ["follow", targetUsername],
     mutationFn: async () => {

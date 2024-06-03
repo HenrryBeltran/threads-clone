@@ -12,11 +12,11 @@ type Props = {
   targetId: string;
 };
 
-/// TODO: fix all the missing props & integrate the followersContent to completed
+/// TODO: Fix the closing card popover when a make click to others profile
 
 export function FollowersCard({ followersCount, followingsCount, userId, targetId }: Props) {
   return (
-    <div className="max-h-[520px] w-full max-w-sm rounded-2xl border border-muted-foreground/10 bg-background dark:bg-neutral-900 sm:max-w-md">
+    <div className="max-h-[520px] w-full max-w-md rounded-2xl border border-muted-foreground/10 bg-background dark:bg-neutral-900">
       <Tabs defaultValue="followers" className="w-full">
         <TabsList className="grid h-16 w-full grid-cols-2 rounded-none bg-transparent p-0">
           <TabsTrigger
@@ -68,7 +68,8 @@ function FollowersContent({ userId, targetId }: FollowsProps) {
                   name={follower.name}
                   username={follower.username}
                   profilePictureId={follower.profilePictureId}
-                  isMyProfile={userId === targetId}
+                  followStatus={follower.followStatus}
+                  isMyProfile={userId === follower.id}
                 />
               ))
             ) : (
@@ -108,7 +109,8 @@ function FollowingsContent({ userId, targetId }: FollowsProps) {
                   name={following.name}
                   username={following.username}
                   profilePictureId={following.profilePictureId}
-                  isMyProfile={userId === targetId}
+                  followStatus={following.followStatus}
+                  isMyProfile={userId === following.id}
                 />
               ))
             ) : (
