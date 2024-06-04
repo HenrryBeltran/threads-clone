@@ -10,11 +10,12 @@ type Props = {
   followingsCount: number;
   userId: string;
   targetId: string;
+  handleOnClick?: () => void;
 };
 
 /// TODO: Fix the closing card popover when a make click to others profile
 
-export function FollowersCard({ followersCount, followingsCount, userId, targetId }: Props) {
+export function FollowersCard({ followersCount, followingsCount, userId, targetId, handleOnClick }: Props) {
   return (
     <div className="max-h-[520px] w-full max-w-md rounded-2xl border border-muted-foreground/10 bg-background dark:bg-neutral-900">
       <Tabs defaultValue="followers" className="w-full">
@@ -34,8 +35,8 @@ export function FollowersCard({ followersCount, followingsCount, userId, targetI
             <span className="text-sm leading-none text-muted-foreground">{followingsCount}</span>
           </TabsTrigger>
         </TabsList>
-        <FollowersContent userId={userId} targetId={targetId} />
-        <FollowingsContent userId={userId} targetId={targetId} />
+        <FollowersContent userId={userId} targetId={targetId} handleOnClick={handleOnClick} />
+        <FollowingsContent userId={userId} targetId={targetId} handleOnClick={handleOnClick} />
       </Tabs>
     </div>
   );
@@ -44,9 +45,10 @@ export function FollowersCard({ followersCount, followingsCount, userId, targetI
 type FollowsProps = {
   userId: string;
   targetId: string;
+  handleOnClick?: () => void;
 };
 
-function FollowersContent({ userId, targetId }: FollowsProps) {
+function FollowersContent({ userId, targetId, handleOnClick }: FollowsProps) {
   const followers = useQuery({
     queryKey: ["followers", targetId],
     queryFn: async () => {
@@ -70,6 +72,7 @@ function FollowersContent({ userId, targetId }: FollowsProps) {
                   profilePictureId={follower.profilePictureId}
                   followStatus={follower.followStatus}
                   isMyProfile={userId === follower.id}
+                  handleOnClick={handleOnClick}
                 />
               ))
             ) : (
@@ -87,7 +90,8 @@ function FollowersContent({ userId, targetId }: FollowsProps) {
     </TabsContent>
   );
 }
-function FollowingsContent({ userId, targetId }: FollowsProps) {
+
+function FollowingsContent({ userId, targetId, handleOnClick: onClick }: FollowsProps) {
   const followings = useQuery({
     queryKey: ["followings", targetId],
     queryFn: async () => {
@@ -111,6 +115,7 @@ function FollowingsContent({ userId, targetId }: FollowsProps) {
                   profilePictureId={following.profilePictureId}
                   followStatus={following.followStatus}
                   isMyProfile={userId === following.id}
+                  handleOnClick={onClick}
                 />
               ))
             ) : (

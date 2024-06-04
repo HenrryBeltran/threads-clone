@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { FollowButton } from "./follow-button";
 import { UserImage } from "./user-image";
 
@@ -8,12 +8,23 @@ type Props = {
   profilePictureId: string | null;
   followStatus: number;
   isMyProfile: boolean;
+  handleOnClick?: () => void;
 };
 
-export function ProfileRow({ name, username, profilePictureId, followStatus, isMyProfile }: Props) {
+export function ProfileRow({ name, username, profilePictureId, followStatus, isMyProfile, handleOnClick }: Props) {
+  const navigate = useNavigate();
+
   return (
     <div className="flex items-center justify-between">
-      <Link to={`/@${username}`} className="flex flex-grow items-center gap-4">
+      <div
+        className="flex flex-grow cursor-pointer items-center gap-4"
+        onClick={() => {
+          if (handleOnClick) {
+            handleOnClick();
+          }
+          navigate({ to: `/@${username}` });
+        }}
+      >
         <UserImage
           username={username}
           profilePictureId={profilePictureId}
@@ -27,7 +38,7 @@ export function ProfileRow({ name, username, profilePictureId, followStatus, isM
           <span className="font-medium leading-none underline-offset-2 hover:underline">{username}</span>
           <span className="font-light text-muted-foreground">{name}</span>
         </div>
-      </Link>
+      </div>
       {isMyProfile === false && (
         <FollowButton targetUsername={username} followStatus={followStatus === 1} className="my-0 w-fit" />
       )}

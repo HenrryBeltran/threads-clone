@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FollowersCard } from "./followers-card";
 import { UserImage } from "./user-image";
 
@@ -23,11 +23,13 @@ export function ProfileFollowersCount({
   targetId,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const dialog = useRef<HTMLDialogElement | null>(null);
   const navigate = useNavigate();
+  let dialog: HTMLDialogElement | null;
 
   useEffect(() => {
-    if (dialog.current === null) return;
+    dialog = document.querySelector("#followers-popover");
+
+    if (dialog === null) return;
 
     function handleToggle(e: Event) {
       const event = e as ToggleEvent;
@@ -39,9 +41,9 @@ export function ProfileFollowersCount({
       }
     }
 
-    dialog.current.addEventListener("toggle", handleToggle);
+    dialog.addEventListener("toggle", handleToggle);
 
-    return () => dialog.current?.removeEventListener("toggle", handleToggle);
+    return () => dialog?.removeEventListener("toggle", handleToggle);
   });
 
   return (
@@ -56,7 +58,7 @@ export function ProfileFollowersCount({
               return;
             }
 
-            dialog.current?.showPopover();
+            dialog?.showPopover();
           }}
         >
           <div className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border-2 border-background bg-background">
@@ -91,14 +93,14 @@ export function ProfileFollowersCount({
             return;
           }
 
-          dialog.current?.showPopover();
+          dialog?.showPopover();
         }}
       >
         {followersCount === 1 && "1 follower"}
         {followersCount !== 1 && `${followersCount} followers`}
       </span>
       <dialog
-        ref={dialog}
+        id="followers-popover"
         // @ts-ignore
         popover="auto"
         className="w-full max-w-md bg-transparent p-5 backdrop:bg-neutral-700/50 dark:backdrop:bg-background/60"
@@ -109,6 +111,7 @@ export function ProfileFollowersCount({
             followingsCount={followingsCount}
             userId={userId}
             targetId={targetId}
+            handleOnClick={() => dialog?.hidePopover()}
           />
         )}
       </dialog>
