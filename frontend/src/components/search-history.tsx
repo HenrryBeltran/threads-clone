@@ -72,7 +72,7 @@ export function SearchHistory({ result }: Props) {
         {result.map((row) => (
           <div
             key={row.userSearch.username}
-            data-deleting={deleteOneRow.isPending}
+            data-deleting={deleteOneRow.isPending || clearHistory.isPending}
             className="flex items-center gap-5 transition-opacity data-[deleting=true]:opacity-30"
           >
             <Link to={`/@${row.userSearch.username}`} className="flex h-16 cursor-pointer items-center">

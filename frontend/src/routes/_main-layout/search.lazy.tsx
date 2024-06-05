@@ -30,6 +30,7 @@ function Search() {
     <main className="mx-auto flex min-h-svh max-w-lg flex-col items-center px-6 pt-24 sm:px-0">
       <div className="relative w-full">
         <SearchForm />
+        {/* TODO: Check if this loading is working propertly */}
         {query.isLoading && <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} />}
         {query.data && <SearchHistory result={query.data} />}
       </div>
