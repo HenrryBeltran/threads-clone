@@ -204,7 +204,7 @@ export const accountFollow = new Hono()
       return ctx.json(error, 500);
     }
 
-    const rows = camelcaseKeys(JSON.parse(JSON.stringify(result.rows))) as FollowsResult;
+    const rows = camelcaseKeys<FollowsResult>(result.rows as any);
 
     return ctx.json(rows, 200);
   })
@@ -238,7 +238,7 @@ export const accountFollow = new Hono()
       return ctx.json(error, 500);
     }
 
-    const rows = camelcaseKeys(JSON.parse(JSON.stringify(result.rows))) as FollowsResult;
+    const rows = camelcaseKeys<FollowsResult>(result.rows as any);
 
     return ctx.json(rows, 200);
   });

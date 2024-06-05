@@ -1,9 +1,8 @@
-// import { Loading03AnimatedIcon } from "./icons/hugeicons";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
+import { Loading03AnimatedIcon } from "./icons/hugeicons";
 import { ProfileRow } from "./profile-row";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Loading03AnimatedIcon } from "./icons/hugeicons";
 
 type Props = {
   followersCount: number;
@@ -12,8 +11,6 @@ type Props = {
   targetId: string;
   handleOnClick?: () => void;
 };
-
-/// TODO: Fix the closing card popover when a make click to others profile
 
 export function FollowersCard({ followersCount, followingsCount, userId, targetId, handleOnClick }: Props) {
   return (
