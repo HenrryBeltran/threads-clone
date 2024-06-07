@@ -50,6 +50,7 @@ export const accountUser = new Hono()
     const newData = {
       ...user,
       ...validBody,
+      link: !validBody.link ? null : validBody.link.length > 0 ? validBody.link : null,
       profilePictureId: profilePictureId,
       updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
     };

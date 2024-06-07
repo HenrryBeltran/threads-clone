@@ -1,10 +1,5 @@
 import { MenuIcon } from "@/components/icons/custom-icons";
-import {
-  ArrowLeft02Icon,
-  Loading03AnimatedIcon,
-  Moon02Icon,
-  Sun03Icon,
-} from "@/components/icons/hugeicons";
+import { ArrowLeft02Icon, Loading03AnimatedIcon, Moon02Icon, Sun03Icon } from "@/components/icons/hugeicons";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTheme } from "@/hooks/theme";
@@ -35,16 +30,9 @@ export default function Menu() {
         onCloseAutoFocus={() => setState("options")}
       >
         {state === "options" ? (
-          <MenuOptions
-            setState={() => setState("appearance")}
-            close={() => setOpen(false)}
-          />
+          <MenuOptions setState={() => setState("appearance")} close={() => setOpen(false)} />
         ) : (
-          <AppearanceMenu
-            setState={() => setState("options")}
-            setTheme={setTheme}
-            theme={theme}
-          />
+          <AppearanceMenu setState={() => setState("options")} setTheme={setTheme} theme={theme} />
         )}
       </PopoverContent>
     </Popover>
@@ -68,7 +56,7 @@ function MenuOptions({ setState, close: close }: OptionsProps) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", "account"] });
+      queryClient.clear();
       navigate({ to: "/login" });
     },
   });
@@ -76,36 +64,22 @@ function MenuOptions({ setState, close: close }: OptionsProps) {
   return (
     <ul className="relative z-[60] divide-y divide-muted-foreground/20 py-1 font-[550]">
       <li>
-        <button
-          onClick={() => setState()}
-          className="w-full px-5 py-2.5 text-start outline-none"
-        >
+        <button onClick={() => setState()} className="w-full px-5 py-2.5 text-start outline-none">
           Appearance
         </button>
       </li>
       <li>
-        <Link
-          to="/saved"
-          onClick={() => close()}
-          className="inline-block w-full px-5 py-2.5"
-        >
+        <Link to="/saved" onClick={() => close()} className="inline-block w-full px-5 py-2.5">
           Saved
         </Link>
       </li>
       <li>
-        <Link
-          to="/liked"
-          onClick={() => close()}
-          className="inline-block w-full px-5 py-2.5"
-        >
+        <Link to="/liked" onClick={() => close()} className="inline-block w-full px-5 py-2.5">
           Your likes
         </Link>
       </li>
       <li>
-        <button
-          className="flex w-full items-center justify-between px-5 py-2.5"
-          onClick={() => mutation.mutate()}
-        >
+        <button className="flex w-full items-center justify-between px-5 py-2.5" onClick={() => mutation.mutate()}>
           Log out
           <Loading03AnimatedIcon
             aria-hidden={!mutation.isPending}
@@ -130,10 +104,7 @@ function AppearanceMenu({ setState, setTheme, theme }: AppearanceProps) {
   return (
     <div className="relative z-[60] w-80">
       <div className="flex w-full items-center justify-between">
-        <button
-          onClick={() => setState()}
-          className="flex h-12 w-12 items-center justify-center"
-        >
+        <button onClick={() => setState()} className="flex h-12 w-12 items-center justify-center">
           <ArrowLeft02Icon strokeWidth={1.5} width={20} height={20} />
         </button>
         <h2 className="text-center font-[550]">Appearance</h2>

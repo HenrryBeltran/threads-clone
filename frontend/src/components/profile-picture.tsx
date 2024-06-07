@@ -13,10 +13,9 @@ type Props = {
 
 export default function ProfilePicture({ profilePictureId, src, alt }: Props) {
   const [open, setOpen] = useState(false);
+  const body = document.querySelector("body");
 
   useEffect(() => {
-    const body = document.querySelector("body");
-
     if (!body) return;
 
     if (open) {

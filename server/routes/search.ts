@@ -12,6 +12,8 @@ import { getSession } from "../middleware/getSession";
 
 dayjs.extend(utc);
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export type SearchResult = {
   id: string;
   username: string;
@@ -57,6 +59,8 @@ export const search = new Hono()
   })
   .get("/history", getUser, async (ctx) => {
     const user = ctx.get("user");
+
+    await delay(3000);
 
     const { error, result } = await safeTry(
       db.query.searchHistory.findMany({

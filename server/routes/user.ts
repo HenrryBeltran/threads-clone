@@ -30,7 +30,12 @@ export const user = new Hono().get("/profile/:username", async (ctx) => {
         followingsCount: true,
       },
       with: {
-        targetId: { columns: {}, with: { userId: { columns: { profilePictureId: true } } }, limit: 2 },
+        targetId: {
+          columns: {},
+          with: { userId: { columns: { profilePictureId: true } } },
+          limit: 2,
+          orderBy: ({ createdAt }, { desc }) => [desc(createdAt)],
+        },
       },
       where: eq(users.username, username),
     }),

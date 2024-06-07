@@ -5,9 +5,10 @@ type Props = {
   href?: string;
   pathname?: string;
   username?: string;
+  handleOnClick?: () => void;
 };
 
-export function NavbarItem({ children, href, pathname, username }: Props) {
+export function NavbarItem({ children, href, pathname, username, handleOnClick }: Props) {
   const navigate = useNavigate();
 
   return (
@@ -38,11 +39,11 @@ export function NavbarItem({ children, href, pathname, username }: Props) {
               return;
             }
 
-            if (!href) {
+            if (!href && handleOnClick) {
               e.preventDefault();
               e.stopPropagation();
 
-              alert("Works as a button");
+              handleOnClick();
               return;
             }
           }}

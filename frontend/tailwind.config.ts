@@ -76,10 +76,10 @@ export default {
           "0%": {
             opacity: "1",
           },
-          "88%, 90%": {
-            opacity: "0",
+          "65%, 78%": {
+            opacity: "0.1",
           },
-          "100%": {
+          "85%": {
             opacity: "1",
           },
         },
@@ -97,7 +97,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "depth-pulse": "depth-pulse 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) infinite",
+        "depth-pulse": "depth-pulse 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite",
         appear: "appear 0.15s ease-out",
       },
     },

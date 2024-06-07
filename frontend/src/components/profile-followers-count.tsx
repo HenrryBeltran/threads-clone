@@ -1,3 +1,4 @@
+import { useBackdropStore } from "@/store";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { FollowersCard } from "./followers-card";
@@ -24,6 +25,7 @@ export function ProfileFollowersCount({
 }: Props) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const backdrop = useBackdropStore();
   let dialog: HTMLDialogElement | null;
 
   useEffect(() => {
@@ -36,8 +38,10 @@ export function ProfileFollowersCount({
 
       if (event.newState === "open") {
         setOpen(true);
+        backdrop.show();
       } else {
         setOpen(false);
+        backdrop.hide();
       }
     }
 
@@ -103,7 +107,7 @@ export function ProfileFollowersCount({
         id="followers-popover"
         // @ts-ignore
         popover="auto"
-        className="w-full max-w-md bg-transparent p-5 backdrop:bg-neutral-700/50 dark:backdrop:bg-background/60"
+        className="w-full max-w-md bg-transparent p-5"
       >
         {open && userId && (
           <FollowersCard

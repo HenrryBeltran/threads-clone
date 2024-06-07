@@ -57,7 +57,7 @@ export function SearchHistory({ result }: Props) {
   return (
     <>
       {result.length > 0 && (
-        <div className="mt-24 flex items-end justify-between">
+        <div className="flex items-end justify-between">
           <span className="text-lg font-bold">Recent</span>
           <button
             type="button"

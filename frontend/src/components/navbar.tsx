@@ -1,12 +1,7 @@
-import {
-  FavouriteIcon,
-  Home06Icon,
-  PencilEdit02Icon,
-  Search01Icon,
-  UserIcon,
-} from "@/components/icons/hugeicons";
+import { FavouriteIcon, Home06Icon, PencilEdit02Icon, Search01Icon, UserIcon } from "@/components/icons/hugeicons";
 import { useLocation } from "@tanstack/react-router";
 import { NavbarItem } from "./navbar-item";
+import { useCreateThreadStore } from "@/store";
 
 const menuIconsProps: React.SVGProps<SVGSVGElement> = {
   className: "relative fill-inherit w-[28px] h-[26px]",
@@ -21,6 +16,7 @@ type Props = {
 
 export default function Navbar({ username }: Props) {
   const location = useLocation();
+  const showCreateThread = useCreateThreadStore((state) => state.show);
 
   return (
     <nav className="fixed bottom-0 left-0 z-10 grid h-[68px] w-full grid-cols-5 grid-rows-1 items-center bg-background/85 backdrop-blur-3xl sm:static sm:z-auto sm:h-full sm:bg-transparent sm:backdrop-blur-0">
@@ -30,17 +26,13 @@ export default function Navbar({ username }: Props) {
       <NavbarItem href="/search" pathname={location.pathname} username={username}>
         <Search01Icon {...menuIconsProps} className="relative z-10 !fill-none" />
       </NavbarItem>
-      <NavbarItem username={username}>
+      <NavbarItem username={username} handleOnClick={() => showCreateThread()}>
         <PencilEdit02Icon {...menuIconsProps} />
       </NavbarItem>
       <NavbarItem href="/activity" pathname={location.pathname} username={username}>
         <FavouriteIcon {...menuIconsProps} />
       </NavbarItem>
-      <NavbarItem
-        href={`/@${username ?? ""}`}
-        pathname={location.pathname}
-        username={username}
-      >
+      <NavbarItem href={`/@${username ?? ""}`} pathname={location.pathname} username={username}>
         <UserIcon {...menuIconsProps} />
       </NavbarItem>
     </nav>

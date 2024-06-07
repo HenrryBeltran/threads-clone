@@ -45,7 +45,12 @@ export const getUser = createMiddleware<Env>(async (ctx, next) => {
         userId: {
           columns: { password: false },
           with: {
-            targetId: { columns: {}, with: { userId: { columns: { profilePictureId: true } } }, limit: 2 },
+            targetId: {
+              columns: {},
+              with: { userId: { columns: { profilePictureId: true } } },
+              limit: 2,
+              orderBy: ({ createdAt }, { desc }) => [desc(createdAt)],
+            },
           },
         },
       },

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { UserImage } from "@/components/user-image";
 import { UserAccount } from "@/lib/api";
+import { useCreateThreadStore } from "@/store";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
 
@@ -20,13 +21,15 @@ export const Route = createLazyFileRoute("/_main-layout/")({
 });
 
 function Index() {
+  const showCreateThread = useCreateThreadStore((state) => state.show);
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount | null>(["user", "account"]);
 
   return (
     <>
+      <div className="h-[74px] w-full"></div>
       {user && (
-        <div className="mx-auto mt-[74px] max-w-[620px] px-6">
+        <div className="mx-auto max-w-[620px] px-6">
           <div className="flex items-center justify-between border-b border-muted-foreground/20 py-4">
             <Link to={`/@${user.username}`}>
               <UserImage
@@ -41,12 +44,16 @@ function Index() {
             </Link>
             <button
               className="flex-grow self-stretch px-3 text-start text-muted-foreground/90"
-              onClick={() => alert("In the future you can post here. 👷🏽‍")}
+              onClick={() => showCreateThread()}
             >
               Start a thread...
             </button>
             <span className="block cursor-not-allowed">
-              <Button disabled className="max-h-12 rounded-full disabled:opacity-40">
+              <Button
+                variant="outline"
+                className="rounded-xl border-muted-foreground/30 font-semibold transition-transform duration-200 active:scale-95"
+                onClick={() => showCreateThread()}
+              >
                 Post
               </Button>
             </span>

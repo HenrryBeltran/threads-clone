@@ -50,49 +50,49 @@ export const Loading03AnimatedIcon = (props: React.SVGProps<SVGSVGElement>) => (
   >
     <path
       d="M12 3V6"
-      className="animate-depth-pulse [animation-delay:-700ms]"
+      className="animate-depth-pulse [animation-delay:-525ms]"
       stroke="currentColor"
       strokeWidth={props.strokeWidth}
       strokeLinecap="round"
     />
     <path
       d="M18.3635 5.63672L16.2422 7.75804"
-      className="animate-depth-pulse [animation-delay:-600ms]"
+      className="animate-depth-pulse [animation-delay:-450ms]"
       stroke="currentColor"
       strokeWidth={props.strokeWidth}
       strokeLinecap="round"
     />
     <path
       d="M21 12L18 12"
-      className="animate-depth-pulse [animation-delay:-500ms]"
+      className="animate-depth-pulse [animation-delay:-375ms]"
       stroke="currentColor"
       strokeWidth={props.strokeWidth}
       strokeLinecap="round"
     />
     <path
       d="M18.3635 18.3635L16.2422 16.2422"
-      className="animate-depth-pulse [animation-delay:-400ms]"
-      stroke="currentColor"
-      strokeWidth={props.strokeWidth}
-      strokeLinecap="round"
-    />
-    <path
-      d="M12 18V21"
       className="animate-depth-pulse [animation-delay:-300ms]"
       stroke="currentColor"
       strokeWidth={props.strokeWidth}
       strokeLinecap="round"
     />
     <path
+      d="M12 18V21"
+      className="animate-depth-pulse [animation-delay:-225ms]"
+      stroke="currentColor"
+      strokeWidth={props.strokeWidth}
+      strokeLinecap="round"
+    />
+    <path
       d="M7.75706 16.2422L5.63574 18.3635"
-      className="animate-depth-pulse [animation-delay:-200ms]"
+      className="animate-depth-pulse [animation-delay:-150ms]"
       stroke="currentColor"
       strokeWidth={props.strokeWidth}
       strokeLinecap="round"
     />
     <path
       d="M6 12L3 12"
-      className="animate-depth-pulse [animation-delay:-100ms]"
+      className="animate-depth-pulse [animation-delay:-75ms]"
       stroke="currentColor"
       strokeWidth={props.strokeWidth}
       strokeLinecap="round"

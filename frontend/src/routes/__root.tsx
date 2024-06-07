@@ -1,3 +1,5 @@
+import { Backdrop } from "@/components/backdrop";
+import { CreateThread } from "@/components/create-thread";
 import { ErrorComponent } from "@/components/error";
 import { NotFound } from "@/components/not-found";
 import { Toaster } from "@/components/ui/sonner";
@@ -70,6 +72,8 @@ function RootLayout() {
     <>
       <Outlet />
       <Toaster />
+      <CreateThread />
+      <Backdrop />
       {/* <TanStackRouterDevtools initialIsOpen={false} /> */}
     </>
   );
