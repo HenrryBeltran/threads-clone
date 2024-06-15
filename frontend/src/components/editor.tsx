@@ -7,7 +7,7 @@ type Props = {
 
 export function Editor(props: Props) {
   const [innerText, setInnerText] = useState(props.value ?? "");
-  const [textContent, setTextContent] = useState(props.value ?? null);
+  const [textContent, setTextContent] = useState<string | null>(innerText);
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const highlightContentRef = useRef<HTMLDivElement>(null);
 
@@ -53,9 +53,21 @@ export function Editor(props: Props) {
   }
 
   useEffect(() => {
-    if (contentEditableRef.current) {
-      contentEditableRef.current.focus();
+    const el = contentEditableRef.current;
+
+    if (el) {
+      if (innerText.length > 0) {
+        el.innerHTML = innerText;
+      }
+
+      el.focus();
+      restoreCursorPosition(contentEditableRef.current, { start: innerText.length, end: innerText.length });
     }
+
+    return () => {
+      setInnerText(props.value ?? "");
+      setTextContent(innerText);
+    };
   }, []);
 
   useEffect(() => {
@@ -89,4 +101,56 @@ export function Editor(props: Props) {
       </div>
     </div>
   );
+}
+
+type CursorPosition = {
+  start: number;
+  end: number;
+};
+
+function restoreCursorPosition(el: HTMLElement, positions: CursorPosition | null) {
+  if (!positions) return;
+
+  function createRange(node: Node, chars: { count: number }): { node: Node; offset: number } | null {
+    if (!node || chars.count === 0) return { node, offset: 0 };
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      const length = node.textContent?.length || 0;
+
+      if (chars.count <= length) {
+        return { node, offset: chars.count };
+      } else {
+        chars.count -= length;
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        const result = createRange(node.childNodes[i], chars);
+        if (result) {
+          return result;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function setCursorPosition(el: HTMLElement, cursorPosition: CursorPosition) {
+    const selection = window.getSelection();
+
+    if (!selection) return;
+
+    const start = createRange(el, { count: cursorPosition.start });
+    const end = createRange(el, { count: cursorPosition.end });
+
+    if (start && end) {
+      const range = document.createRange();
+      range.setStart(start.node, start.offset);
+      range.setEnd(end.node, end.offset);
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+
+  setCursorPosition(el, positions);
 }
