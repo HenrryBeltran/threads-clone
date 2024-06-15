@@ -5,6 +5,7 @@ import { ProfileHeader } from "@/components/profile-header";
 import { ProfileLink } from "@/components/profile-link";
 import { Button } from "@/components/ui/button";
 import { type UserAccount } from "@/lib/api";
+import { useCreateThreadStore } from "@/store";
 import { useQueryClient } from "@tanstack/react-query";
 import { createLazyFileRoute, useLocation, useRouteContext } from "@tanstack/react-router";
 
@@ -20,6 +21,8 @@ function Profile() {
   const userData = queryClient.getQueryData<UserAccount>(["user", "account"]);
   const followData = queryClient.getQueryData<{ follow: boolean } | null>(["follow", username]);
   const ctx = useRouteContext({ from: "/_main-layout/_profile-layout" });
+
+  const showCreateThread = useCreateThreadStore((state) => state.show);
 
   if (typeof ctx.profile === "number") {
     return (
@@ -60,7 +63,11 @@ function Profile() {
         {followData && userData && userData.username !== username && (
           <div className="flex gap-4">
             <FollowButton targetUsername={profile.username} />
-            <Button variant="outline" className="my-4 w-full rounded-xl border-muted-foreground/40">
+            <Button
+              variant="outline"
+              className="my-4 w-full rounded-xl border-muted-foreground/40"
+              onClick={() => showCreateThread(`@${profile.username}`)}
+            >
               Mention
             </Button>
           </div>

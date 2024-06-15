@@ -1,15 +1,18 @@
 import { UserAccount } from "@/lib/api";
 import { useCreateThreadStore } from "@/store";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Editor } from "./editor";
 import { UserImage } from "./user-image";
+import { Button } from "./ui/button";
 
 export function CreateThread() {
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
   const createThread = useCreateThreadStore();
   const body = document.querySelector("body");
+
+  const [thread, setThread] = useState("");
 
   useEffect(() => {
     if (!body) return;
@@ -45,7 +48,7 @@ export function CreateThread() {
             <h2 className="text-center text-lg font-bold text-white [text-shadow:0px_4px_4px_rgba(23,23,23,0.6)]">
               New Thread
             </h2>
-            <div className="h-full w-full rounded-lg border border-muted-foreground/20 bg-background p-5 dark:bg-neutral-900">
+            <div className="w-full space-y-4 rounded-lg border border-muted-foreground/20 bg-background p-5 dark:bg-neutral-900">
               <div className="flex gap-4">
                 <UserImage
                   profilePictureId={user.profilePictureId ?? null}
@@ -55,10 +58,15 @@ export function CreateThread() {
                   fetchPriority="high"
                   className="h-12 w-12"
                 />
-                <div className="h-full w-full">
+                <div className="flex w-[calc(100%-48px-16px)] flex-col">
                   <span className="font-semibold leading-snug">{user.username}</span>
-                  <Editor />
+                  <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
                 </div>
+              </div>
+              <div className="flex justify-end">
+                <Button className="h-9 rounded-2xl px-5" onClick={() => alert(`Submitted:\n${thread}`)}>
+                  Post
+                </Button>
               </div>
             </div>
           </div>
