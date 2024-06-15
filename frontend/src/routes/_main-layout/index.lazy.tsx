@@ -43,7 +43,7 @@ function Index() {
               />
             </Link>
             <button
-              className="flex-grow self-stretch px-3 text-start text-muted-foreground/90"
+              className="flex-grow cursor-text self-stretch px-3 text-start text-muted-foreground/90"
               onClick={() => showCreateThread()}
             >
               Start a thread...

@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Editor } from "./editor";
 import { Button } from "./ui/button";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { UserImage } from "./user-image";
 
 export function CreateThread() {
@@ -28,18 +28,26 @@ export function CreateThread() {
     }
   }, [createThread.data.open]);
 
+  useEffect(() => {
+    setThread("");
+  }, [createThread.data.open]);
+
   return (
     <>
       {user && createThread.data.open && (
         <>
           <Dialog open={openDiscard} onOpenChange={(value) => setOpenDiscard(value)}>
-            <DialogContent className="max-w-[288px] divide-y divide-muted-foreground/30 rounded-3xl p-0">
+            <DialogContent className="max-w-[288px] divide-y divide-muted-foreground/30 !rounded-3xl border border-muted-foreground/30 p-0">
               <DialogHeader>
-                <DialogTitle className="pt-4 text-xl">Discard Thread?</DialogTitle>
+                <DialogTitle className="pt-4 text-center text-xl">Discard Thread?</DialogTitle>
               </DialogHeader>
-              <DialogFooter className="flex flex-row divide-x divide-muted-foreground/30">
+              <div className="flex gap-0 divide-x divide-muted-foreground/30">
                 <DialogClose asChild className="basis-1/2">
-                  <Button type="button" variant="ghost" className="h-12 rounded-none rounded-bl-3xl text-lg">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-12 rounded-none rounded-bl-3xl text-lg focus-visible:ring-blue-500"
+                  >
                     Cancel
                   </Button>
                 </DialogClose>
@@ -47,13 +55,13 @@ export function CreateThread() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-12 rounded-none rounded-br-3xl text-lg text-destructive hover:text-destructive dark:text-red-400 hover:dark:text-red-400"
+                    className="h-12 rounded-none rounded-br-3xl text-lg text-destructive hover:text-destructive focus-visible:ring-blue-500 dark:text-red-400 hover:dark:text-red-400"
                     onClick={() => createThread.hide()}
                   >
                     Discard
                   </Button>
                 </DialogClose>
-              </DialogFooter>
+              </div>
             </DialogContent>
           </Dialog>
           <section
@@ -67,7 +75,6 @@ export function CreateThread() {
             }}
             onKeyDown={(e) => {
               if (e.key === "Escape") {
-                console.log("~ thread length", thread.length);
                 if (thread.length > 0) {
                   setOpenDiscard(true);
                 } else {
@@ -86,7 +93,7 @@ export function CreateThread() {
               <h2 className="text-center text-lg font-bold text-white [text-shadow:0px_4px_4px_rgba(23,23,23,0.24)]">
                 New Thread
               </h2>
-              <div className="w-full space-y-4 rounded-lg border border-muted-foreground/20 bg-background p-5 dark:bg-neutral-900">
+              <div className="w-full space-y-4 rounded-2xl border border-muted-foreground/20 bg-background p-5 dark:bg-neutral-900">
                 <div className="flex gap-4">
                   <UserImage
                     profilePictureId={user.profilePictureId ?? null}
@@ -102,7 +109,16 @@ export function CreateThread() {
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <Button className="h-9 rounded-2xl px-5" onClick={() => alert(`Submitted:\n${thread}`)}>
+                  <Button
+                    aria-disabled={thread.split("\n").join("").length === 0}
+                    className="h-9 rounded-2xl px-5 aria-disabled:cursor-not-allowed aria-disabled:opacity-35 aria-disabled:hover:bg-primary"
+                    onClick={(e) => {
+                      if (e.currentTarget.ariaDisabled === "true") {
+                        return;
+                      }
+                      alert(`Submitted:\n${thread}`);
+                    }}
+                  >
                     Post
                   </Button>
                 </div>

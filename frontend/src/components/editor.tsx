@@ -66,7 +66,7 @@ export function Editor(props: Props) {
 
     return () => {
       setInnerText(props.value ?? "");
-      setTextContent(innerText);
+      setTextContent(props.value ?? "");
     };
   }, []);
 
@@ -85,9 +85,8 @@ export function Editor(props: Props) {
         contentEditable
         suppressContentEditableWarning={true}
         onInput={handleInput}
-        className="break-words text-transparent caret-foreground outline-none"
+        className="break-words leading-snug text-sky-500/25 caret-foreground outline-none"
       >
-        {/* TODO: fix the mentions are getting eraser */}
         <br />
       </div>
       {(textContent === null || textContent.length === 0) && (
@@ -95,7 +94,7 @@ export function Editor(props: Props) {
       )}
       <div
         ref={highlightContentRef}
-        className="pointer-events-none absolute top-0 w-full select-none break-words outline-none"
+        className="pointer-events-none absolute top-0 w-full select-none break-words leading-snug outline-none"
       >
         <br />
       </div>
