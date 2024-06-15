@@ -27,6 +27,14 @@ export default function ProfilePicture({ profilePictureId, src, alt }: Props) {
     }
   }, [open]);
 
+  useEffect(() => {
+    window.onkeydown = (e) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+    };
+  }, []);
+
   const handleOnClick = <T,>(e: MouseEvent<T, globalThis.MouseEvent>, value: boolean) => {
     e.preventDefault();
     e.stopPropagation();
@@ -65,6 +73,7 @@ export default function ProfilePicture({ profilePictureId, src, alt }: Props) {
           >
             <Button
               className="absolute left-8 top-8 h-fit w-fit scale-100 rounded-full bg-secondary-foreground/40 p-2 transition-all hover:scale-110 hover:bg-secondary-foreground/50 active:scale-100"
+              autoFocus
               onClick={(e) => handleOnClick(e, false)}
             >
               <Cancel01Icon width={28} height={28} strokeWidth={2.5} className="h-5 w-5 sm:h-7 sm:w-7" />

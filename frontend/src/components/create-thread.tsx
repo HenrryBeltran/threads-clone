@@ -37,7 +37,7 @@ export function CreateThread() {
       {user && createThread.data.open && (
         <>
           <Dialog open={openDiscard} onOpenChange={(value) => setOpenDiscard(value)}>
-            <DialogContent className="max-w-[288px] divide-y divide-muted-foreground/30 !rounded-3xl border border-muted-foreground/30 p-0">
+            <DialogContent className="max-w-[288px] divide-y divide-muted-foreground/30 !rounded-2xl border border-muted-foreground/30 p-0">
               <DialogHeader>
                 <DialogTitle className="pt-4 text-center text-xl">Discard Thread?</DialogTitle>
               </DialogHeader>
@@ -46,7 +46,7 @@ export function CreateThread() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-12 rounded-none rounded-bl-3xl text-lg focus-visible:ring-blue-500"
+                    className="h-12 rounded-none rounded-bl-2xl text-lg focus-visible:ring-blue-500"
                   >
                     Cancel
                   </Button>
@@ -55,7 +55,7 @@ export function CreateThread() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-12 rounded-none rounded-br-3xl text-lg text-destructive hover:text-destructive focus-visible:ring-blue-500 dark:text-red-400 hover:dark:text-red-400"
+                    className="h-12 rounded-none rounded-br-2xl text-lg text-destructive hover:text-destructive focus-visible:ring-blue-500 dark:text-red-400 hover:dark:text-red-400"
                     onClick={() => createThread.hide()}
                   >
                     Discard
@@ -65,8 +65,12 @@ export function CreateThread() {
             </DialogContent>
           </Dialog>
           <section
-            className="absolute left-0 top-0 z-50 flex h-svh w-svw items-center justify-center bg-neutral-700/50 dark:bg-black/80"
-            onClick={() => {
+            className="absolute left-0 top-0 z-50 flex h-svh w-svw border border-muted-foreground/20 bg-background dark:bg-neutral-900 sm:items-center sm:justify-center sm:border-none sm:bg-neutral-700/50 sm:dark:bg-black/80"
+            onClick={(e) => {
+              if (e.currentTarget.clientWidth < 640) {
+                return;
+              }
+
               if (thread.length > 0) {
                 setOpenDiscard(true);
               } else {
@@ -84,34 +88,59 @@ export function CreateThread() {
             }}
           >
             <div
-              className="w-full max-w-md space-y-4"
+              className="mt-2 w-full space-y-4 sm:mt-0 sm:max-w-md"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
             >
-              <h2 className="text-center text-lg font-bold text-white [text-shadow:0px_4px_4px_rgba(23,23,23,0.24)]">
-                New Thread
-              </h2>
-              <div className="w-full space-y-4 rounded-2xl border border-muted-foreground/20 bg-background p-5 dark:bg-neutral-900">
-                <div className="flex gap-4">
+              <div className="flex items-center justify-between px-6">
+                <Button
+                  variant="link"
+                  className="px-0 text-base sm:hidden"
+                  onClick={() => {
+                    if (thread.length > 0) {
+                      setOpenDiscard(true);
+                    } else {
+                      createThread.hide();
+                    }
+                  }}
+                >
+                  Cancel
+                </Button>
+                <h2 className="flex-grow text-center text-base font-bold sm:text-white sm:[text-shadow:0px_4px_4px_rgba(23,23,23,0.24)]">
+                  New Thread
+                </h2>
+                <div className="w-[53px] sm:hidden" />
+              </div>
+              <div className="w-full space-y-4 bg-background px-6 py-3 dark:bg-neutral-900 sm:rounded-2xl sm:border sm:border-muted-foreground/20 sm:py-6">
+                <div className="flex gap-3">
                   <UserImage
                     profilePictureId={user.profilePictureId ?? null}
                     username={user.username}
-                    width={48}
-                    height={48}
+                    width={44}
+                    height={44}
                     fetchPriority="high"
-                    className="h-12 w-12"
+                    className="h-11 w-11"
                   />
-                  <div className="flex w-[calc(100%-48px-16px)] flex-col">
+                  <div className="flex w-[calc(100%-44px-12px)] flex-col">
                     <span className="font-semibold leading-snug">{user.username}</span>
                     <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
                   </div>
                 </div>
-                <div className="flex justify-end">
+                <div className="flex items-center justify-end gap-4">
+                  {thread.length >= 450 && (
+                    <span
+                      aria-invalid={thread.length > 500}
+                      className="aria-[invalid=true]:text-destructive dark:aria-[invalid=true]:text-red-400"
+                    >
+                      {500 - thread.length}
+                    </span>
+                  )}
                   <Button
-                    aria-disabled={thread.split("\n").join("").length === 0}
-                    className="h-9 rounded-2xl px-5 aria-disabled:cursor-not-allowed aria-disabled:opacity-35 aria-disabled:hover:bg-primary"
+                    variant="outline"
+                    aria-disabled={thread.split("\n").join("").length === 0 || thread.length > 500}
+                    className="rounded-xl border-muted-foreground/30 aria-disabled:cursor-not-allowed aria-disabled:opacity-60 aria-disabled:hover:!bg-transparent"
                     onClick={(e) => {
                       if (e.currentTarget.ariaDisabled === "true") {
                         return;
