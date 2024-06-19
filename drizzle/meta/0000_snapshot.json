@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "423149a7-56e8-4b6e-90fd-9b60782cff75",
+  "id": "5db32c4d-0dc8-433e-9dc9-e9052623169b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "follows": {
@@ -376,11 +376,32 @@
           "notNull": true,
           "autoincrement": false
         },
+        "post_id": {
+          "name": "post_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "author_id": {
           "name": "author_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "root_id": {
+          "name": "root_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "text": {
@@ -390,15 +411,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "images_url": {
-          "name": "images_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "gif_url": {
-          "name": "gif_url",
+        "resources": {
+          "name": "resources",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -434,13 +448,6 @@
           "autoincrement": false,
           "default": 0
         },
-        "reply_id": {
-          "name": "reply_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "text",
@@ -466,19 +473,6 @@
           "tableTo": "users",
           "columnsFrom": [
             "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "reply_fk": {
-          "name": "reply_fk",
-          "tableFrom": "threads",
-          "tableTo": "threads",
-          "columnsFrom": [
-            "reply_id"
           ],
           "columnsTo": [
             "id"
@@ -542,8 +536,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "profile_picture_url": {
-          "name": "profile_picture_url",
+        "profile_picture_id": {
+          "name": "profile_picture_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -698,5 +692,8 @@
     "schemas": {},
     "tables": {},
     "columns": {}
+  },
+  "internal": {
+    "indexes": {}
   }
 }

@@ -49,19 +49,19 @@ CREATE TABLE `sessions` (
 --> statement-breakpoint
 CREATE TABLE `threads` (
 	`id` text PRIMARY KEY NOT NULL,
+	`post_id` text NOT NULL,
 	`author_id` text NOT NULL,
+	`root_id` text NOT NULL,
+	`parent_id` text,
 	`text` text NOT NULL,
-	`images_url` text,
-	`gif_url` text,
+	`resources` text,
 	`hashtags` text,
 	`mentions` text,
 	`likes_count` integer DEFAULT 0 NOT NULL,
 	`replies_count` integer DEFAULT 0 NOT NULL,
-	`reply_id` text,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`reply_id`) REFERENCES `threads`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
@@ -72,7 +72,7 @@ CREATE TABLE `users` (
 	`name` text NOT NULL,
 	`bio` text NOT NULL,
 	`link` text,
-	`profile_picture_url` text,
+	`profile_picture_id` text,
 	`roles` text DEFAULT 'user' NOT NULL,
 	`followers_count` integer DEFAULT 0 NOT NULL,
 	`followings_count` integer DEFAULT 0 NOT NULL,

@@ -1,46 +1,41 @@
 import { relations, sql } from "drizzle-orm";
-import { foreignKey, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { likes } from "./likes";
 import { users } from "./users";
 
-export const threads = sqliteTable(
-  "threads",
-  {
-    id: text("id").primaryKey().notNull(),
-    authorId: text("author_id")
-      .notNull()
-      .references(() => users.id),
-    text: text("text").notNull(),
-    imagesUrl: text("images_url", { mode: "json" }).$type<string[]>(),
-    gifUrl: text("gif_url"),
-    hashtags: text("hashtags", { mode: "json" }).$type<string[]>(),
-    mentions: text("mentions", { mode: "json" }).$type<string[]>(),
-    likesCount: integer("likes_count", { mode: "number" }).notNull().default(0),
-    repliesCount: integer("replies_count", { mode: "number" }).notNull().default(0),
-    replyId: text("reply_id"),
-    createdAt: text("created_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
-  },
-  (table) => ({
-    foreignKeys: foreignKey({
-      columns: [table.replyId],
-      foreignColumns: [table.id],
-      name: "reply_fk",
-    }),
-  }),
-);
+export const threads = sqliteTable("threads", {
+  id: text("id").primaryKey().notNull(),
+  postId: text("post_id").notNull(),
+  authorId: text("author_id")
+    .notNull()
+    .references(() => users.id),
+  rootId: text("root_id").notNull(),
+  parentId: text("parent_id"),
+  text: text("text").notNull(),
+  resources: text("resources", { mode: "json" }).$type<string[]>(),
+  hashtags: text("hashtags", { mode: "json" }).$type<string[]>(),
+  mentions: text("mentions", { mode: "json" }).$type<string[]>(),
+  likesCount: integer("likes_count", { mode: "number" }).notNull().default(0),
+  repliesCount: integer("replies_count", { mode: "number" }).notNull().default(0),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`),
+});
 
 export const threadsRelations = relations(threads, ({ one, many }) => ({
   author: one(users, {
     fields: [threads.authorId],
     references: [users.id],
   }),
-  reply: one(threads, {
-    fields: [threads.replyId],
+  parent: one(threads, {
+    fields: [threads.parentId],
+    references: [threads.id],
+  }),
+  root: one(threads, {
+    fields: [threads.rootId],
     references: [threads.id],
   }),
   likedPost: many(likes),

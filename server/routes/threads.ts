@@ -1,0 +1,149 @@
+import { zValidator } from "@hono/zod-validator";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import { eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { customAlphabet, nanoid } from "nanoid";
+import { postThreadSchema, replyThreadSchema } from "../common/schemas/thread";
+import { db } from "../db";
+import { threads as threadsTable } from "../db/schemas/threads";
+import { safeTry } from "../lib/safe-try";
+import { getUser } from "../middleware/getUser";
+
+dayjs.extend(utc);
+
+const shortNanoId = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 11);
+
+function filterHashtagAndMentions(text: string, char: "#" | "@") {
+  const splitSpaces = text.split(/[\s]/).filter((s) => s.startsWith(char));
+  const splitChars = splitSpaces
+    .join("")
+    .split(char)
+    .filter((s) => s.length > 1);
+  const reduceDuplicates = [...new Set(splitChars)];
+  const words = reduceDuplicates.map((word) => `${char}${word.toLowerCase()}`);
+
+  return words;
+}
+
+export const threads = new Hono()
+  .get("/posts", async (ctx) => {
+    const { error, result } = await safeTry(
+      db.query.threads.findMany({
+        with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
+        limit: 6,
+      }),
+    );
+
+    if (error) {
+      return ctx.json(error, 500);
+    }
+
+    return ctx.json(result);
+  })
+  .get("/post/:postId", async (ctx) => {
+    const postId = ctx.req.param("postId");
+
+    const { error, result } = await safeTry(
+      db.query.threads.findFirst({
+        with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
+        where: eq(threadsTable.postId, postId),
+      }),
+    );
+
+    if (error) {
+      return ctx.json(error, 500);
+    }
+
+    if (result === undefined) {
+      return ctx.json({ message: "Thread not found." }, 404);
+    }
+
+    return ctx.json(result);
+  })
+  .post("/post", getUser, zValidator("json", postThreadSchema), async (ctx) => {
+    const user = ctx.get("user");
+    const body = ctx.req.valid("json");
+
+    const hashtags = filterHashtagAndMentions(body.text, "#");
+    const mentions = filterHashtagAndMentions(body.text, "@");
+
+    const { error, result } = await safeTry(
+      db.insert(threadsTable).values({
+        id: nanoid(),
+        postId: shortNanoId(),
+        authorId: user.id,
+        rootId: user.id,
+        parentId: null,
+        text: body.text,
+        resources: body.resources,
+        hashtags,
+        mentions,
+        likesCount: 0,
+        repliesCount: 0,
+        createdAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
+        updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
+      }),
+    );
+
+    if (error) {
+      return ctx.json(error, 500);
+    }
+
+    return ctx.json(result, 200);
+  })
+  .post("/reply", getUser, zValidator("json", replyThreadSchema), async (ctx) => {
+    const user = ctx.get("user");
+    const body = ctx.req.valid("json");
+
+    const findRootThread = await safeTry(
+      db.query.threads.findFirst({ columns: { id: true }, where: eq(threadsTable.id, body.rootId) }),
+    );
+
+    if (findRootThread.error) {
+      return ctx.json(findRootThread.error, 500);
+    }
+
+    if (findRootThread.result === undefined) {
+      return ctx.json({ message: "Wrong root id" }, 404);
+    }
+
+    const findParentThread = await safeTry(
+      db.query.threads.findFirst({ columns: { id: true }, where: eq(threadsTable.id, body.parentId) }),
+    );
+
+    if (findParentThread.error) {
+      return ctx.json(findParentThread.error, 500);
+    }
+
+    if (findParentThread.result === undefined) {
+      return ctx.json({ message: "Wrong parent id" }, 404);
+    }
+
+    const hashtags = filterHashtagAndMentions(body.text, "#");
+    const mentions = filterHashtagAndMentions(body.text, "@");
+
+    const { error, result } = await safeTry(
+      db.insert(threadsTable).values({
+        id: nanoid(),
+        postId: shortNanoId(),
+        authorId: user.id,
+        rootId: body.rootId,
+        parentId: body.parentId,
+        text: body.text,
+        resources: body.resources,
+        hashtags,
+        mentions,
+        likesCount: 0,
+        repliesCount: 0,
+        createdAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
+        updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
+      }),
+    );
+
+    if (error) {
+      return ctx.json(error, 500);
+    }
+
+    return ctx.json(result, 200);
+  });
