@@ -47,6 +47,7 @@ export function UploadAlbumView({ images, setImages }: Props) {
             pointX.current = null;
           }
         }}
+        onPointerLeave={() => (pointX.current = null)}
       >
         <div className="absolute left-0 top-0 flex w-max gap-4 border-2 border-cyan-500 active:cursor-grabbing">
           {images?.map((image, idx) => (
@@ -67,21 +68,22 @@ export function UploadAlbumView({ images, setImages }: Props) {
               >
                 <Cancel01Icon width={16} height={16} strokeWidth={2.5} className="h-4 w-4" />
               </Button>
-              {/* <figure className="border border-red-500"> */}
-              <img
-                src={image.base64}
-                width={image.size.width * 0.4}
-                height={image.size.height * 0.4}
-                alt="Profile picture"
-                style={{
-                  width:
-                    image.size.width > image.size.height
-                      ? `calc(${containerRef.current?.clientWidth! / 2}px - 8px)`
-                      : "9rem",
-                }}
-                className="pointer-events-none h-52 select-none rounded-xl border border-muted-foreground/30 object-cover"
-              />
-              {/* </figure> */}
+              <figure className="">
+                <img
+                  src={image.base64}
+                  width={image.size.width * 0.4}
+                  height={image.size.height * 0.4}
+                  alt="Profile picture"
+                  draggable="false"
+                  style={{
+                    width:
+                      image.size.width > image.size.height
+                        ? `calc(${containerRef.current?.clientWidth! / 2}px - 8px)`
+                        : "9rem",
+                  }}
+                  className="pointer-events-none h-52 select-none rounded-xl border border-current object-cover [border-image-outset:0] [border-image-repeat:stretch] [border-image-slice:100%] [border-image-source:none] [border-image-width:1]"
+                />
+              </figure>
             </div>
           ))}
         </div>

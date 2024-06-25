@@ -30,6 +30,7 @@ export function UserImage({
           fetchpriority={fetchPriority}
           loading={loading}
           alt={`${username} profile picture`}
+          draggable="false"
           className={cn("rounded-full border border-muted-foreground/30", className)}
         />
       ) : (
@@ -40,6 +41,7 @@ export function UserImage({
           // @ts-ignore
           fetchpriority={fetchPriority}
           loading={loading}
+          draggable="false"
           className={cn("rounded-full border border-muted-foreground/30", className)}
           alt="Empty profile picture"
         />

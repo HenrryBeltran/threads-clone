@@ -85,7 +85,7 @@ export function Editor(props: Props) {
         contentEditable
         suppressContentEditableWarning={true}
         onInput={handleInput}
-        className="break-words leading-snug text-sky-500/25 caret-foreground outline-none"
+        className="break-words leading-snug text-transparent caret-foreground outline-none"
       >
         <br />
       </div>
