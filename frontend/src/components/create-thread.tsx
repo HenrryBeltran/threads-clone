@@ -7,7 +7,7 @@ import { Editor } from "./editor";
 import { Button } from "./ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { UploadAlbumButton } from "./upload-album-button";
-import { Resource, UploadAlbumView } from "./upload-album-view";
+import { Resource, UploadedAlbumCarousel, UploadedAlbumDouble, UploadedSingleView } from "./upload-album-view";
 import { UserImage } from "./user-image";
 
 export function CreateThread() {
@@ -17,7 +17,7 @@ export function CreateThread() {
   const body = document.querySelector("body");
 
   const [thread, setThread] = useState("");
-  const [images, setImages] = useState<Resource[]>();
+  const [images, setImages] = useState<Resource[]>([]);
   const [openDiscard, setOpenDiscard] = useState(false);
 
   useEffect(() => {
@@ -34,6 +34,7 @@ export function CreateThread() {
 
   useEffect(() => {
     setThread("");
+    setImages([]);
   }, [createThread.data.open]);
 
   async function handleUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -43,15 +44,7 @@ export function CreateThread() {
     const files = Array.from<File>(e.target.files);
 
     for (const file of files) {
-      const { base64, size } = await optimizeImage(
-        file,
-        undefined,
-        // {
-        //   x: 1080,
-        //   y: 1080,
-        // },
-        0.8,
-      );
+      const { base64, size } = await optimizeImage(file, undefined, 0.8);
 
       setImages((prev) => {
         if (prev) {
@@ -101,7 +94,7 @@ export function CreateThread() {
                 return;
               }
 
-              if (thread.length > 0) {
+              if (thread.length > 0 || images.length > 0) {
                 setOpenDiscard(true);
               } else {
                 createThread.hide();
@@ -109,7 +102,7 @@ export function CreateThread() {
             }}
             onKeyDown={(e) => {
               if (e.key === "Escape") {
-                if (thread.length > 0) {
+                if (thread.length > 0 || images.length > 0) {
                   setOpenDiscard(true);
                 } else {
                   createThread.hide();
@@ -118,17 +111,17 @@ export function CreateThread() {
             }}
           >
             <div
-              className="mx-4 mt-2 w-full space-y-4 sm:mt-0 sm:max-w-2xl"
+              className="flex w-full flex-col space-y-4 pt-2 sm:mx-4 sm:max-w-2xl sm:pt-0"
               onClick={(e) => {
                 e.stopPropagation();
               }}
             >
-              <div className="flex items-center justify-between px-6">
+              <div className="flex items-center justify-between px-3 text-sm">
                 <Button
                   variant="link"
                   className="px-0 text-base sm:hidden"
                   onClick={() => {
-                    if (thread.length > 0) {
+                    if (thread.length > 0 || images.length > 0) {
                       setOpenDiscard(true);
                     } else {
                       createThread.hide();
@@ -142,8 +135,8 @@ export function CreateThread() {
                 </h2>
                 <div className="w-[53px] sm:hidden" />
               </div>
-              <div className="w-full space-y-4 bg-background px-6 py-3 dark:bg-neutral-900 sm:rounded-2xl sm:border sm:border-muted-foreground/20 sm:py-6">
-                <div className="flex gap-3">
+              <div className="w-full flex-grow space-y-4 bg-background p-3 dark:bg-neutral-900 sm:rounded-2xl sm:border sm:border-muted-foreground/20 sm:p-6">
+                <div className="flex h-[calc(100%-64px)]">
                   <UserImage
                     profilePictureId={user.profilePictureId ?? null}
                     username={user.username}
@@ -153,10 +146,16 @@ export function CreateThread() {
                     className="h-11 w-11"
                   />
                   <div className="flex w-[calc(100%-44px-12px)] flex-col">
-                    <span className="font-semibold leading-snug">{user.username}</span>
-                    <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
-                    <UploadAlbumButton handleUploadFile={handleUploadFile} />
-                    <UploadAlbumView images={images} setImages={setImages} />
+                    <div className="px-3">
+                      <span className="font-semibold leading-snug">{user.username}</span>
+                      <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
+                    </div>
+                    <div className="flex px-1 pt-1">
+                      <UploadAlbumButton handleUploadFile={handleUploadFile} />
+                    </div>
+                    {images.length === 1 && <UploadedSingleView images={images} setImages={setImages} />}
+                    {images.length === 2 && <UploadedAlbumDouble images={images} setImages={setImages} />}
+                    {images.length > 2 && <UploadedAlbumCarousel images={images} setImages={setImages} />}
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-4">

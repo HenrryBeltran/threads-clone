@@ -8,22 +8,19 @@ export type Resource = {
 };
 
 type Props = {
-  images?: Resource[];
-  setImages: React.Dispatch<React.SetStateAction<Resource[] | undefined>>;
+  images: Resource[];
+  setImages: React.Dispatch<React.SetStateAction<Resource[]>>;
 };
 
-// TODO: See if I can add some velocity when your dragging the carousel
-export function UploadAlbumView({ images, setImages }: Props) {
-  // const initialVelocity = useRef<number | null>(null);
-  // const finalVelocity = useRef<number | null>(null);
+export function UploadedAlbumCarousel({ images, setImages }: Props) {
   const pointX = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="h-[220px] overflow-hidden border-2 border-orange-500">
+    <div className="h-[220px] overflow-hidden">
       <div
         ref={containerRef}
-        className="relative h-60 overflow-x-scroll border-2 border-purple-500"
+        className="relative h-60 overflow-x-scroll"
         onPointerDown={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -38,37 +35,29 @@ export function UploadAlbumView({ images, setImages }: Props) {
 
             e.currentTarget.scrollLeft += delta;
             pointX.current = x;
-
-            console.log("~ delta", delta);
           }
         }}
-        onPointerUp={(e) => {
+        onPointerUp={() => {
           if (pointX.current) {
             pointX.current = null;
           }
         }}
         onPointerLeave={() => (pointX.current = null)}
       >
-        <div className="absolute left-0 top-0 flex w-max gap-4 border-2 border-cyan-500 active:cursor-grabbing">
+        <div className="absolute left-0 top-0 flex w-max gap-4 active:cursor-grabbing">
           {images?.map((image, idx) => (
             <div key={idx} className="relative">
               <Button
-                variant="outline"
+                variant="secondary"
                 type="button"
                 size="icon"
                 disabled={image == undefined}
                 className="absolute right-2 top-2 h-8 w-8 rounded-full opacity-70 transition-all active:scale-95"
-                onClick={() => {
-                  // TODO: check if I need this
-                  // if (ref.current) {
-                  //   ref.current.value = "";
-                  // }
-                  setImages((prev) => prev?.filter((_, index) => index !== idx));
-                }}
+                onClick={() => setImages((prev) => prev?.filter((_, index) => index !== idx))}
               >
                 <Cancel01Icon width={16} height={16} strokeWidth={2.5} className="h-4 w-4" />
               </Button>
-              <figure className="">
+              <figure>
                 <img
                   src={image.base64}
                   width={image.size.width * 0.4}
@@ -81,11 +70,97 @@ export function UploadAlbumView({ images, setImages }: Props) {
                         ? `calc(${containerRef.current?.clientWidth! / 2}px - 8px)`
                         : "9rem",
                   }}
-                  className="pointer-events-none h-52 select-none rounded-xl border border-current object-cover [border-image-outset:0] [border-image-repeat:stretch] [border-image-slice:100%] [border-image-source:none] [border-image-width:1]"
+                  className="pointer-events-none h-52 select-none rounded-xl"
                 />
               </figure>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function UploadedAlbumDouble({ images, setImages }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div ref={containerRef} className="">
+      <div className="">
+        <div className="flex w-max gap-4 active:cursor-grabbing">
+          {images?.map((image, idx) => (
+            <div key={idx} className="relative">
+              <Button
+                variant="secondary"
+                type="button"
+                size="icon"
+                disabled={image == undefined}
+                className="absolute right-2 top-2 h-8 w-8 rounded-full opacity-70 transition-all active:scale-95"
+                onClick={() => setImages((prev) => prev?.filter((_, index) => index !== idx))}
+              >
+                <Cancel01Icon width={16} height={16} strokeWidth={2.5} className="h-4 w-4" />
+              </Button>
+              <figure>
+                <img
+                  src={image.base64}
+                  width={image.size.width * 0.4}
+                  height={image.size.height * 0.4}
+                  alt="Profile picture"
+                  draggable="false"
+                  style={{
+                    width:
+                      image.size.width > image.size.height
+                        ? `calc(${containerRef.current?.clientWidth! / 2}px - 8px)`
+                        : "9rem",
+                  }}
+                  className="pointer-events-none h-52 select-none rounded-xl"
+                />
+              </figure>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function UploadedSingleView({ images, setImages }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const image = images[0];
+
+  return (
+    <div ref={containerRef} className="">
+      <div className="">
+        <div className="flex w-max gap-4 active:cursor-grabbing">
+          <div className="relative">
+            <Button
+              variant="secondary"
+              type="button"
+              size="icon"
+              disabled={image == undefined}
+              className="absolute right-2 top-2 h-8 w-8 rounded-full opacity-70 transition-all active:scale-95"
+              onClick={() => setImages([])}
+            >
+              <Cancel01Icon width={16} height={16} strokeWidth={2.5} className="h-4 w-4" />
+            </Button>
+            <figure>
+              <img
+                src={image.base64}
+                width={image.size.width * 0.4}
+                height={image.size.height * 0.4}
+                alt="Profile picture"
+                draggable="false"
+                style={{
+                  width:
+                    image.size.width > image.size.height
+                      ? `calc(${containerRef.current?.clientWidth! / 2}px - 8px)`
+                      : "9rem",
+                }}
+                className="pointer-events-none h-52 select-none rounded-xl"
+              />
+            </figure>
+          </div>
         </div>
       </div>
     </div>
