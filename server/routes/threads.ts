@@ -1,4 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
+import { v2 as cloudinary } from "cloudinary";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { eq } from "drizzle-orm";
@@ -11,6 +12,13 @@ import { safeTry } from "../lib/safe-try";
 import { getUser } from "../middleware/getUser";
 
 dayjs.extend(utc);
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 
 const shortNanoId = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 11);
 
@@ -68,6 +76,25 @@ export const threads = new Hono()
     const hashtags = filterHashtagAndMentions(body.text, "#");
     const mentions = filterHashtagAndMentions(body.text, "@");
 
+    let resources: string[] = [];
+
+    if (body.resources) {
+      if (body.resources[0].includes("data:image/jpeg;base64,")) {
+        for (const resource in body.resources) {
+          const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
+            if (error) {
+              console.error(error);
+              return ctx.json(error, 500);
+            }
+          });
+
+          resources.push(uploadResult.public_id);
+        }
+      } else {
+        resources = body.resources;
+      }
+    }
+
     const { error, result } = await safeTry(
       db.insert(threadsTable).values({
         id: nanoid(),
@@ -76,7 +103,7 @@ export const threads = new Hono()
         rootId: user.id,
         parentId: null,
         text: body.text,
-        resources: body.resources,
+        resources: resources.length > 0 ? resources : null,
         hashtags,
         mentions,
         likesCount: 0,
@@ -123,6 +150,25 @@ export const threads = new Hono()
     const hashtags = filterHashtagAndMentions(body.text, "#");
     const mentions = filterHashtagAndMentions(body.text, "@");
 
+    let resources: string[] = [];
+
+    if (body.resources) {
+      if (body.resources[0].includes("data:image/jpeg;base64,")) {
+        for (const resource in body.resources) {
+          const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
+            if (error) {
+              console.error(error);
+              return ctx.json(error, 500);
+            }
+          });
+
+          resources.push(uploadResult.public_id);
+        }
+      } else {
+        resources = body.resources;
+      }
+    }
+
     const { error, result } = await safeTry(
       db.insert(threadsTable).values({
         id: nanoid(),
@@ -131,7 +177,7 @@ export const threads = new Hono()
         rootId: body.rootId,
         parentId: body.parentId,
         text: body.text,
-        resources: body.resources,
+        resources: resources.length > 0 ? resources : null,
         hashtags,
         mentions,
         likesCount: 0,

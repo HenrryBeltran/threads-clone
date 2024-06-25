@@ -1,10 +1,13 @@
 import { UserAccount } from "@/lib/api";
+import { optimizeImage } from "@/lib/optimize-image";
 import { useCreateThreadStore } from "@/store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Editor } from "./editor";
 import { Button } from "./ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { UploadAlbumButton } from "./upload-album-button";
+import { Resource, UploadAlbumView } from "./upload-album-view";
 import { UserImage } from "./user-image";
 
 export function CreateThread() {
@@ -14,6 +17,7 @@ export function CreateThread() {
   const body = document.querySelector("body");
 
   const [thread, setThread] = useState("");
+  const [images, setImages] = useState<Resource[]>();
   const [openDiscard, setOpenDiscard] = useState(false);
 
   useEffect(() => {
@@ -31,6 +35,32 @@ export function CreateThread() {
   useEffect(() => {
     setThread("");
   }, [createThread.data.open]);
+
+  async function handleUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files) {
+      return;
+    }
+    const files = Array.from<File>(e.target.files);
+
+    for (const file of files) {
+      const { base64, size } = await optimizeImage(
+        file,
+        undefined,
+        // {
+        //   x: 1080,
+        //   y: 1080,
+        // },
+        0.8,
+      );
+
+      setImages((prev) => {
+        if (prev) {
+          return [...prev, { base64, size }];
+        }
+        return [{ base64, size }];
+      });
+    }
+  }
 
   return (
     <>
@@ -88,9 +118,8 @@ export function CreateThread() {
             }}
           >
             <div
-              className="mt-2 w-full space-y-4 sm:mt-0 sm:max-w-md"
+              className="mx-4 mt-2 w-full space-y-4 sm:mt-0 sm:max-w-2xl"
               onClick={(e) => {
-                e.preventDefault();
                 e.stopPropagation();
               }}
             >
@@ -126,6 +155,8 @@ export function CreateThread() {
                   <div className="flex w-[calc(100%-44px-12px)] flex-col">
                     <span className="font-semibold leading-snug">{user.username}</span>
                     <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
+                    <UploadAlbumButton handleUploadFile={handleUploadFile} />
+                    <UploadAlbumView images={images} setImages={setImages} />
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-4">

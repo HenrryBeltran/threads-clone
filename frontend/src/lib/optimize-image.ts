@@ -2,11 +2,12 @@ type OptimizeImage = {
   file: File;
   base64: string;
   name: string;
+  size: { width: number; height: number };
 };
 
 export function optimizeImage(
   file: File,
-  targetSize: { x: number; y: number },
+  targetSize?: { x: number; y: number },
   quality: number = 0.6,
   type: string = "image/jpeg",
 ): Promise<OptimizeImage> {
@@ -19,9 +20,8 @@ export function optimizeImage(
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      canvas.width = targetSize.x;
-      canvas.height = targetSize.y;
-
+      let newTargetWidth: number;
+      let newTargetHeight: number;
       let newWidth: number;
       let newHeight: number;
 
@@ -31,9 +31,15 @@ export function optimizeImage(
       }
 
       if (image.naturalWidth > image.naturalHeight) {
+        newTargetWidth = image.naturalWidth < 1440 ? image.naturalWidth : 1440;
+        newTargetHeight = newTargetWidth * (image.naturalHeight / image.naturalWidth);
+
         newWidth = image.naturalHeight;
         newHeight = image.naturalHeight;
       } else {
+        newTargetHeight = image.naturalHeight < 1920 ? image.naturalHeight : 1920;
+        newTargetWidth = newTargetHeight * (image.naturalWidth / image.naturalHeight);
+
         newHeight = image.naturalWidth;
         newWidth = image.naturalWidth;
       }
@@ -41,7 +47,17 @@ export function optimizeImage(
       const sx = (image.naturalWidth - newWidth) / 2;
       const sy = (image.naturalHeight - newHeight) / 2;
 
-      ctx?.drawImage(image, sx, sy, newWidth, newHeight, 0, 0, targetSize.x, targetSize.y);
+      if (targetSize) {
+        canvas.width = targetSize.x;
+        canvas.height = targetSize.y;
+
+        ctx?.drawImage(image, sx, sy, newWidth, newHeight, 0, 0, targetSize.y, targetSize.y);
+      } else {
+        canvas.width = newTargetWidth;
+        canvas.height = newTargetHeight;
+
+        ctx?.drawImage(image, 0, 0, newTargetWidth, newTargetHeight);
+      }
 
       const dataURL = canvas.toDataURL(type, quality);
 
@@ -58,7 +74,12 @@ export function optimizeImage(
 
       URL.revokeObjectURL(url);
 
-      resolve({ file: newFile, base64: dataURL, name: file.name });
+      resolve({
+        file: newFile,
+        base64: dataURL,
+        name: file.name,
+        size: { width: canvas.width, height: canvas.height },
+      });
     };
   });
 }
