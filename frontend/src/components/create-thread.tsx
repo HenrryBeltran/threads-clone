@@ -1,24 +1,56 @@
-import { UserAccount } from "@/lib/api";
+import { UserAccount, api } from "@/lib/api";
 import { optimizeImage } from "@/lib/optimize-image";
 import { useCreateThreadStore } from "@/store";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Editor } from "./editor";
 import { Button } from "./ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { UploadAlbumButton } from "./upload-album-button";
 import { Resource, UploadedAlbumCarousel, UploadedAlbumDouble, UploadedSingleView } from "./upload-album-view";
 import { UserImage } from "./user-image";
+import { safeTry } from "@server/lib/safe-try";
+
+const upTo10AttachmentsMessage = () =>
+  toast("You can have up to 10 attachments.", {
+    position: "bottom-center",
+    classNames: {
+      title:
+        "text-base text-center text-secondary font-medium shadow-xl py-3.5 px-6 border border-muted-foreground/10 dark:bg-white bg-neutral-900 rounded-xl",
+      toast: "!bg-transparent pointer-events-none p-0 flex justify-center border-none !shadow-none",
+    },
+  });
+
+async function postThread({ text, resources }: { text: string; resources?: string[] }) {
+  const res = await safeTry(api.threads.post.$post({ json: { text, resources } }));
+
+  if (res.error) throw new Error("Something went wrong");
+  if (!res.result.ok) throw new Error("Something went wrong");
+
+  const { error, result } = await safeTry(res.result.json());
+
+  if (error) throw new Error("Something went wrong");
+
+  return result;
+}
 
 export function CreateThread() {
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
   const createThread = useCreateThreadStore();
   const body = document.querySelector("body");
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   const [thread, setThread] = useState("");
   const [images, setImages] = useState<Resource[]>([]);
   const [openDiscard, setOpenDiscard] = useState(false);
+
+  const mutation = useMutation({
+    mutationKey: ["threads"],
+    mutationFn: postThread,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["threads"] }),
+  });
 
   useEffect(() => {
     if (!body) return;
@@ -41,18 +73,45 @@ export function CreateThread() {
     if (!e.target.files) {
       return;
     }
-    const files = Array.from<File>(e.target.files);
 
-    for (const file of files) {
+    const files = Array.from<File>(e.target.files);
+    const optimizedImages: Resource[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (i > 9) {
+        upTo10AttachmentsMessage();
+        break;
+      }
+
       const { base64, size } = await optimizeImage(file, undefined, 0.8);
 
-      setImages((prev) => {
-        if (prev) {
-          return [...prev, { base64, size }];
-        }
-        return [{ base64, size }];
-      });
+      optimizedImages.push({ base64, size });
     }
+
+    setImages((prev) => {
+      const totalLength = prev.length + optimizedImages.length;
+
+      if (totalLength >= 10) {
+        upTo10AttachmentsMessage();
+
+        const upTo10List: Resource[] = [];
+
+        for (let i = 0; i < 10; i++) {
+          const newItem = prev[i] !== undefined ? prev[i] : optimizedImages[i - prev.length];
+          upTo10List.push(newItem);
+        }
+
+        return upTo10List;
+      }
+
+      if (prev) {
+        return [...prev, ...optimizedImages];
+      }
+
+      return optimizedImages;
+    });
   }
 
   return (
@@ -137,7 +196,7 @@ export function CreateThread() {
               </div>
               <div className="flex w-full flex-grow flex-col bg-background dark:bg-neutral-900 sm:max-w-xl sm:rounded-2xl sm:border sm:border-muted-foreground/20">
                 <div className="w-full flex-grow overflow-y-scroll p-3 sm:max-w-xl sm:p-6">
-                  <div className="flex h-[calc(100%-64px)]">
+                  <div ref={imageContainerRef} className="flex h-[calc(100%-64px)]">
                     <UserImage
                       profilePictureId={user.profilePictureId ?? null}
                       username={user.username}
@@ -146,17 +205,38 @@ export function CreateThread() {
                       fetchPriority="high"
                       className="h-11 w-11"
                     />
-                    <div className="flex max-h-[520px] w-full flex-col">
+                    <div
+                      style={{ width: `${imageContainerRef.current?.clientWidth! - 44}px` }}
+                      className="flex max-h-[520px] flex-col"
+                    >
                       <div className="px-3">
                         <span className="font-semibold leading-snug">{user.username}</span>
                         <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
                       </div>
                       <div className="flex px-1 pb-3 pt-1">
-                        <UploadAlbumButton handleUploadFile={handleUploadFile} />
+                        <UploadAlbumButton imagesLength={images.length} handleUploadFile={handleUploadFile} />
                       </div>
-                      {images.length === 1 && <UploadedSingleView images={images} setImages={setImages} />}
-                      {images.length === 2 && <UploadedAlbumDouble images={images} setImages={setImages} />}
-                      {images.length > 2 && <UploadedAlbumCarousel images={images} setImages={setImages} />}
+                      {images.length === 1 && (
+                        <UploadedSingleView
+                          containerWidth={imageContainerRef.current?.clientWidth!}
+                          images={images}
+                          setImages={setImages}
+                        />
+                      )}
+                      {images.length === 2 && (
+                        <UploadedAlbumDouble
+                          containerWidth={imageContainerRef.current?.clientWidth!}
+                          images={images}
+                          setImages={setImages}
+                        />
+                      )}
+                      {images.length >= 3 && (
+                        <UploadedAlbumCarousel
+                          containerWidth={imageContainerRef.current?.clientWidth!}
+                          images={images}
+                          setImages={setImages}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -171,13 +251,22 @@ export function CreateThread() {
                   )}
                   <Button
                     variant="outline"
-                    aria-disabled={thread.split("\n").join("").length === 0 || thread.length > 500}
+                    aria-disabled={
+                      (images.length === 0 && thread.split("\n").join("").length === 0) || thread.length > 500
+                    }
                     className="rounded-xl border-muted-foreground/30 aria-disabled:cursor-not-allowed aria-disabled:opacity-60 aria-disabled:hover:!bg-transparent"
                     onClick={(e) => {
                       if (e.currentTarget.ariaDisabled === "true") {
                         return;
                       }
-                      alert(`Submitted:\n${thread}`);
+                      /// TODO: Delete this after;
+                      // alert(`Submitted:\n${thread}\n\nImages:\n${images.length}`);
+                      const resources = images.length === 0 ? undefined : images.map((img) => img.base64);
+
+                      console.log("~ resources", resources);
+
+                      mutation.mutate({ text: thread, resources });
+                      createThread.hide();
                     }}
                   >
                     Post

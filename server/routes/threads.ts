@@ -2,7 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { v2 as cloudinary } from "cloudinary";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
 import { postThreadSchema, replyThreadSchema } from "../common/schemas/thread";
@@ -40,6 +40,7 @@ export const threads = new Hono()
       db.query.threads.findMany({
         with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
         limit: 6,
+        orderBy: desc(threadsTable.createdAt),
       }),
     );
 
@@ -80,7 +81,8 @@ export const threads = new Hono()
 
     if (body.resources) {
       if (body.resources[0].includes("data:image/jpeg;base64,")) {
-        for (const resource in body.resources) {
+        const resourceList = body.resources;
+        for (const resource of resourceList) {
           const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
             if (error) {
               console.error(error);

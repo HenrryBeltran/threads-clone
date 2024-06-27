@@ -6,6 +6,7 @@ import { accountFollow } from "./routes/account/follow";
 import { auth } from "./routes/auth";
 import { root } from "./routes/root";
 import { search } from "./routes/search";
+import { threads } from "./routes/threads";
 import { user } from "./routes/user";
 
 const app = new Hono();
@@ -15,6 +16,7 @@ app.use(logger());
 const apiRoutes = app
   .basePath("/api")
   .route("/", root)
+  .route("/threads", threads)
   .route("/search", search)
   .route("/user", user)
   .route("/auth", auth)
