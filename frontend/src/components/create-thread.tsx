@@ -111,7 +111,7 @@ export function CreateThread() {
             }}
           >
             <div
-              className="flex w-full flex-col space-y-4 pt-2 sm:mx-4 sm:max-w-2xl sm:pt-0"
+              className="flex w-full flex-col space-y-4 pt-2 sm:mx-4 sm:max-w-xl sm:pt-0"
               onClick={(e) => {
                 e.stopPropagation();
               }}
@@ -135,30 +135,32 @@ export function CreateThread() {
                 </h2>
                 <div className="w-[53px] sm:hidden" />
               </div>
-              <div className="w-full flex-grow space-y-4 bg-background p-3 dark:bg-neutral-900 sm:rounded-2xl sm:border sm:border-muted-foreground/20 sm:p-6">
-                <div className="flex h-[calc(100%-64px)]">
-                  <UserImage
-                    profilePictureId={user.profilePictureId ?? null}
-                    username={user.username}
-                    width={44}
-                    height={44}
-                    fetchPriority="high"
-                    className="h-11 w-11"
-                  />
-                  <div className="flex w-[calc(100%-44px-12px)] flex-col">
-                    <div className="px-3">
-                      <span className="font-semibold leading-snug">{user.username}</span>
-                      <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
+              <div className="flex w-full flex-grow flex-col bg-background dark:bg-neutral-900 sm:max-w-xl sm:rounded-2xl sm:border sm:border-muted-foreground/20">
+                <div className="w-full flex-grow overflow-y-scroll p-3 sm:max-w-xl sm:p-6">
+                  <div className="flex h-[calc(100%-64px)]">
+                    <UserImage
+                      profilePictureId={user.profilePictureId ?? null}
+                      username={user.username}
+                      width={44}
+                      height={44}
+                      fetchPriority="high"
+                      className="h-11 w-11"
+                    />
+                    <div className="flex max-h-[520px] w-full flex-col">
+                      <div className="px-3">
+                        <span className="font-semibold leading-snug">{user.username}</span>
+                        <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
+                      </div>
+                      <div className="flex px-1 pb-3 pt-1">
+                        <UploadAlbumButton handleUploadFile={handleUploadFile} />
+                      </div>
+                      {images.length === 1 && <UploadedSingleView images={images} setImages={setImages} />}
+                      {images.length === 2 && <UploadedAlbumDouble images={images} setImages={setImages} />}
+                      {images.length > 2 && <UploadedAlbumCarousel images={images} setImages={setImages} />}
                     </div>
-                    <div className="flex px-1 pt-1">
-                      <UploadAlbumButton handleUploadFile={handleUploadFile} />
-                    </div>
-                    {images.length === 1 && <UploadedSingleView images={images} setImages={setImages} />}
-                    {images.length === 2 && <UploadedAlbumDouble images={images} setImages={setImages} />}
-                    {images.length > 2 && <UploadedAlbumCarousel images={images} setImages={setImages} />}
                   </div>
                 </div>
-                <div className="flex items-center justify-end gap-4">
+                <div className="flex items-center justify-end gap-4 p-3 sm:p-6 sm:pt-3">
                   {thread.length >= 450 && (
                     <span
                       aria-invalid={thread.length > 500}
