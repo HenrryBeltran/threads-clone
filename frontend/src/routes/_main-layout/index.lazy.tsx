@@ -6,17 +6,6 @@ import { useCreateThreadStore } from "@/store";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
 
-// const links = [
-//   "https://media1.giphy.com/media/xoHntNXFYkfzGAftEv/200.webp",
-//   "https://media0.giphy.com/media/zCpYQh5YVhdI1rVYpE/200.webp",
-//   "https://media0.giphy.com/media/7QdUZvxWxxDTH9vb0u/200.webp",
-//   "https://media4.giphy.com/media/1nfwnYf5Uz7hzhYof8/200.webp",
-//   "https://media3.giphy.com/media/H2u46cKU3VaXht6Iv9/200.webp",
-//   "https://media3.giphy.com/media/4pMX5rJ4PYAEM/200.webp",
-//   "https://media0.giphy.com/media/1qZ7Ny4dYqhxwftGvG/200.webp",
-//   "https://media1.giphy.com/media/bCcxY1ADkAqfS/200.webp",
-// ];
-
 export const Route = createLazyFileRoute("/_main-layout/")({
   component: Index,
 });

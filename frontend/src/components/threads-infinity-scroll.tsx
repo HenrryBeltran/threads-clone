@@ -24,11 +24,11 @@ export function ThreadsInfinityScroll() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="mx-auto flex min-h-svh max-w-[620px] flex-col gap-8 divide-y divide-muted-foreground/30 px-6 pb-16 pt-8">
+    <div className="mx-auto flex min-h-svh max-w-[620px] flex-col space-y-4 divide-y divide-muted-foreground/30 px-6 pb-16">
       {query.isLoading && <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto" />}
       {query.data &&
         query.data.map((thread, i) => (
-          <div key={i} className="flex gap-3">
+          <div key={i} className="flex gap-3 pt-4">
             <Link to={`/@${thread.author.username}`}>
               <UserImage
                 username={thread.author.username}

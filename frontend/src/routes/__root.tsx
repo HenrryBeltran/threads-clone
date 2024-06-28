@@ -24,7 +24,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     const { error, result: user } = await safeTry(queryClient.fetchQuery(userAccountQueryOptions));
 
     if (error) {
-      // throw new Error("Something went wrong.");
       queryClient.setQueryData(["user", "account"], null);
     }
 

@@ -259,12 +259,8 @@ export function CreateThread() {
                       if (e.currentTarget.ariaDisabled === "true") {
                         return;
                       }
-                      /// TODO: Delete this after;
-                      // alert(`Submitted:\n${thread}\n\nImages:\n${images.length}`);
+
                       const resources = images.length === 0 ? undefined : images.map((img) => img.base64);
-
-                      console.log("~ resources", resources);
-
                       mutation.mutate({ text: thread, resources });
                       createThread.hide();
                     }}

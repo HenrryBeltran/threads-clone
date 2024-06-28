@@ -24,15 +24,7 @@ function OptimizeImageTest() {
     const files = Array.from<File>(e.target.files);
 
     for (const file of files) {
-      const { base64, size } = await optimizeImage(
-        file,
-        undefined,
-        // {
-        //   x: 1080,
-        //   y: 1080,
-        // },
-        0.8,
-      );
+      const { base64, size } = await optimizeImage(file, undefined, 0.8);
 
       setImages((prev) => {
         if (prev) {
