@@ -85,7 +85,7 @@ export function CreateThread() {
         break;
       }
 
-      const { base64, size } = await optimizeImage(file, undefined, 0.8);
+      const { base64, size } = await optimizeImage(file, undefined, 1);
 
       optimizedImages.push({ base64, size });
     }

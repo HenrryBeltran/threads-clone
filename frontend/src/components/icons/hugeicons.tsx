@@ -444,3 +444,47 @@ export const Album02Icon = (props: React.SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+
+export const BubbleChatIconModded = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={props.width ?? 24}
+    height={props.height ?? 24}
+    color="currentColor"
+    fill="none"
+    {...props}
+  >
+    <path
+      d="M22 11.5667C22 16.8499 17.5222 21.1334 12 21.1334C11.3507 21.1343 10.7032 21.0742 10.0654 20.9545C9.60633 20.8682 9.37678 20.8251 9.21653 20.8496C9.05627 20.8741 8.82918 20.9948 8.37499 21.2364C7.09014 21.9197 5.59195 22.161 4.15111 21.893C4.69874 21.2194 5.07275 20.4112 5.23778 19.5448C5.33778 19.0148 5.09 18.5 4.71889 18.1231C3.03333 16.4115 2 14.1051 2 11.5667C2 6.28357 6.47778 2 12 2C17.5222 2 22 6.28357 22 11.5667Z"
+      stroke="currentColor"
+      strokeWidth={props.strokeWidth}
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const SentIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={props.width ?? 24}
+    height={props.height ?? 24}
+    color="currentColor"
+    fill="none"
+    {...props}
+  >
+    <path
+      d="M21.0477 3.05293C18.8697 0.707363 2.48648 6.4532 2.50001 8.551C2.51535 10.9299 8.89809 11.6617 10.6672 12.1581C11.7311 12.4565 12.016 12.7625 12.2613 13.8781C13.3723 18.9305 13.9301 21.4435 15.2014 21.4996C17.2278 21.5892 23.1733 5.342 21.0477 3.05293Z"
+      stroke="currentColor"
+      strokeWidth={props.strokeWidth}
+    />
+    <path
+      d="M11.5 12.5L15 9"
+      stroke="currentColor"
+      strokeWidth={props.strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
