@@ -25,8 +25,6 @@ export function ThreadsInfinityScroll() {
   const query = useQuery({ queryKey: ["threads"], queryFn: fetcher });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  console.log("~ query result", query.data);
-
   return (
     <div className="mx-auto flex min-h-svh max-w-[620px] flex-col space-y-2 divide-y divide-muted-foreground/30 px-6 pb-24">
       {query.isLoading && <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto" />}
@@ -53,15 +51,9 @@ export function ThreadsInfinityScroll() {
               </div>
               {thread.resources && (
                 <>
-                  {thread.resources.length === 1 && (
-                    <SinglePhoto images={thread.resources} containerWidth={containerRef.current?.clientWidth!} />
-                  )}
-                  {thread.resources.length === 2 && (
-                    <DoublePhoto images={thread.resources} containerWidth={containerRef.current?.clientWidth!} />
-                  )}
-                  {thread.resources.length >= 3 && (
-                    <AlbumCarousel images={thread.resources} containerWidth={containerRef.current?.clientWidth!} />
-                  )}
+                  {thread.resources.length === 1 && <SinglePhoto images={thread.resources} />}
+                  {thread.resources.length === 2 && <DoublePhoto images={thread.resources} />}
+                  {thread.resources.length >= 3 && <AlbumCarousel images={thread.resources} />}
                 </>
               )}
               <div className="!mt-1.5 flex -translate-x-2 gap-2">
@@ -85,20 +77,16 @@ export function ThreadsInfinityScroll() {
 }
 
 type AlbumProps = {
-  containerWidth: number;
   images: string[];
 };
 
-/// TODO: Refine the display image size
-export function AlbumCarousel({ containerWidth, images }: AlbumProps) {
+export function AlbumCarousel({ images }: AlbumProps) {
   const pointX = useRef<number | null>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div style={{ height: `${carouselRef.current?.clientHeight!}px` }} className="h-56 overflow-hidden">
+    <div className="h-60 w-[calc(100%+56px)] -translate-x-14 overflow-hidden">
       <div
-        style={{ height: `${carouselRef.current?.clientHeight! + 16}px` }}
-        className="relative h-60 overflow-x-scroll"
+        className="relative h-64 overflow-x-scroll"
         onPointerDown={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -122,21 +110,16 @@ export function AlbumCarousel({ containerWidth, images }: AlbumProps) {
         }}
         onPointerLeave={() => (pointX.current = null)}
       >
-        <div ref={carouselRef} className="absolute left-0 top-0 flex w-max gap-4 active:cursor-grabbing">
+        <div className="absolute left-0 top-0 flex w-max gap-4 pl-14 active:cursor-grabbing">
           {images?.map((id, idx) => (
             <figure key={idx}>
               <img
-                src={`https://res.cloudinary.com/dglhgvcep/image/upload/w_256/dpr_2.0/v1716403676/${id}.jpg`}
-                // width={image.}
-                // height={image.size.height * 0.4}
+                src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_240/dpr_2.0/v1716403676/${id}.jpg`}
+                width={192}
+                height={240}
                 alt="Profile picture"
                 draggable="false"
-                style={
-                  {
-                    // width: image.size.width > image.size.height ? `calc(${containerWidth / 2}px - 8px)` : "9rem",
-                  }
-                }
-                className="pointer-events-none h-52 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+                className="pointer-events-none h-60 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
               />
             </figure>
           ))}
@@ -146,53 +129,38 @@ export function AlbumCarousel({ containerWidth, images }: AlbumProps) {
   );
 }
 
-export function DoublePhoto({ containerWidth, images }: AlbumProps) {
+export function DoublePhoto({ images }: AlbumProps) {
   return (
-    <div className="ml-3">
-      <div className="grid w-max grid-cols-2 grid-rows-1 gap-4 active:cursor-grabbing">
-        {images?.map((id, idx) => (
-          <figure key={idx} className="flex">
-            <img
-              src={`https://res.cloudinary.com/dglhgvcep/image/upload/w_256/dpr_2.0/v1716403676/${id}.jpg`}
-              // width={image.size.width * 0.4}
-              // height={image.size.height * 0.4}
-              alt="Profile picture"
-              draggable="false"
-              style={{
-                // -8 is for gap, -22 is for the left profile picture, -6 is for the container padding
-                width: `${containerWidth * 0.5 - 8 - 22 - 6}px`,
-              }}
-              className="pointer-events-none h-full max-h-96 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
-            />
-          </figure>
-        ))}
-      </div>
+    <div className="grid w-full grid-cols-2 grid-rows-1 gap-4 active:cursor-grabbing">
+      {images?.map((id, idx) => (
+        <figure key={idx} className="w-full">
+          <img
+            src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_384/dpr_2.0/v1716403676/${id}.jpg`}
+            width={250}
+            height={384}
+            alt="Profile picture"
+            draggable="false"
+            className="pointer-events-none h-full max-h-96 w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+          />
+        </figure>
+      ))}
     </div>
   );
 }
 
 export function SinglePhoto({ images }: AlbumProps) {
   const image = images[0];
-  // const imageWidth = image.size.width * 0.15;
-  // const imageHeight = image.size.height * 0.15;
-  // const resizeImageWidth =
-  //   (imageWidth > 150 || imageHeight > 260) && imageWidth < imageHeight ? imageWidth : image.size.width * 0.3;
-  // const resizeImageHeight =
-  //   (imageWidth > 150 || imageHeight > 260) && imageWidth < imageHeight ? imageHeight : image.size.height * 0.3;
-  // const width = image.size.width > image.size.height ? "100%" : `${resizeImageWidth}px`;
-  // const height = image.size.width > image.size.height ? "100%" : `${resizeImageHeight}px`;
 
   return (
     <div className="flex">
       <figure>
         <img
-          src={`https://res.cloudinary.com/dglhgvcep/image/upload/w_1024/dpr_2.0/v1716403676/${image}.jpg`}
-          // width={resizeImageWidth}
-          // height={resizeImageHeight}
+          src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_520/dpr_2.0/v1716403676/${image}.jpg`}
+          width={516}
+          height={520}
           alt="Profile picture"
           draggable="false"
-          // style={{ width, height }}
-          className="pointer-events-none max-h-[520px] max-w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+          className="pointer-events-none max-h-[520px] w-fit max-w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
         />
       </figure>
     </div>
