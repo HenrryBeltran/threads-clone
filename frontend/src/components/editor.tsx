@@ -7,16 +7,19 @@ type Props = {
 
 export function Editor(props: Props) {
   const [innerText, setInnerText] = useState(props.value ?? "");
-  const [textContent, setTextContent] = useState<string | null>(innerText);
-  const contentEditableRef = useRef<HTMLDivElement>(null);
+  const [textLength, setTextLength] = useState(0);
+  const contentEditableRef = useRef<HTMLTextAreaElement>(null);
   const highlightContentRef = useRef<HTMLDivElement>(null);
 
-  function handleInput(e: React.FormEvent<HTMLDivElement>) {
-    setInnerText(e.currentTarget.innerText);
-    setTextContent(e.currentTarget.textContent);
+  function handleInput(e: React.FormEvent<HTMLTextAreaElement>) {
+    e.currentTarget.style.height = "5px";
+    e.currentTarget.style.height = e.currentTarget.scrollHeight + "px";
+
+    setInnerText(e.currentTarget.value);
+    setTextLength(e.currentTarget.textLength);
 
     if (props.onChange) {
-      props.onChange(e.currentTarget.innerText);
+      props.onChange(e.currentTarget.value);
     }
   }
 
@@ -53,24 +56,6 @@ export function Editor(props: Props) {
   }
 
   useEffect(() => {
-    const el = contentEditableRef.current;
-
-    if (el) {
-      if (innerText.length > 0) {
-        el.innerHTML = innerText;
-      }
-
-      el.focus();
-      restoreCursorPosition(contentEditableRef.current, { start: innerText.length, end: innerText.length });
-    }
-
-    return () => {
-      setInnerText(props.value ?? "");
-      setTextContent(props.value ?? "");
-    };
-  }, []);
-
-  useEffect(() => {
     if (highlightContentRef.current) {
       const el = highlightContentRef.current;
 
@@ -80,76 +65,22 @@ export function Editor(props: Props) {
 
   return (
     <div className="relative">
-      <div
+      <textarea
         ref={contentEditableRef}
-        contentEditable
-        suppressContentEditableWarning={true}
+        rows={1}
+        autoFocus={true}
+        className="min-h-6 w-full max-w-full resize-none overflow-hidden break-words bg-transparent leading-snug text-transparent caret-foreground outline-none"
         onInput={handleInput}
-        className="break-words leading-snug text-transparent caret-foreground outline-none"
-      >
-        <br />
-      </div>
-      {(textContent === null || textContent.length === 0) && (
+      />
+      {textLength === 0 && (
         <div className="pointer-events-none absolute top-0 text-muted-foreground">Start a thread...</div>
       )}
       <div
         ref={highlightContentRef}
-        className="pointer-events-none absolute top-0 w-full select-none break-words leading-snug outline-none"
+        className="pointer-events-none absolute top-0 w-full select-none whitespace-pre-wrap break-words leading-snug outline-none"
       >
         <br />
       </div>
     </div>
   );
-}
-
-type CursorPosition = {
-  start: number;
-  end: number;
-};
-
-function restoreCursorPosition(el: HTMLElement, positions: CursorPosition | null) {
-  if (!positions) return;
-
-  function createRange(node: Node, chars: { count: number }): { node: Node; offset: number } | null {
-    if (!node || chars.count === 0) return { node, offset: 0 };
-
-    if (node.nodeType === Node.TEXT_NODE) {
-      const length = node.textContent?.length || 0;
-
-      if (chars.count <= length) {
-        return { node, offset: chars.count };
-      } else {
-        chars.count -= length;
-      }
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      for (let i = 0; i < node.childNodes.length; i++) {
-        const result = createRange(node.childNodes[i], chars);
-        if (result) {
-          return result;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  function setCursorPosition(el: HTMLElement, cursorPosition: CursorPosition) {
-    const selection = window.getSelection();
-
-    if (!selection) return;
-
-    const start = createRange(el, { count: cursorPosition.start });
-    const end = createRange(el, { count: cursorPosition.end });
-
-    if (start && end) {
-      const range = document.createRange();
-      range.setStart(start.node, start.offset);
-      range.setEnd(end.node, end.offset);
-
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-  }
-
-  setCursorPosition(el, positions);
 }

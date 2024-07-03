@@ -4,7 +4,8 @@ import { safeTry } from "@server/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
-import { BubbleChatIconModded, FavouriteIcon, Loading03AnimatedIcon, SentIcon } from "./icons/hugeicons";
+import { BubbleChatIconModded, FavouriteIcon, SentIcon } from "./icons/hugeicons";
+import { ThreadsSkeleton } from "./threads-skeleton";
 import { Button } from "./ui/button";
 import { UserImage } from "./user-image";
 
@@ -27,7 +28,7 @@ export function ThreadsInfinityScroll() {
 
   return (
     <div className="mx-auto flex min-h-svh max-w-[620px] flex-col space-y-2 divide-y divide-muted-foreground/30 px-6 pb-24">
-      {query.isLoading && <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto" />}
+      {query.isLoading && <ThreadsSkeleton />}
       {query.data &&
         query.data.map((thread, i) => (
           <div key={i} className="flex gap-3 pt-4">
