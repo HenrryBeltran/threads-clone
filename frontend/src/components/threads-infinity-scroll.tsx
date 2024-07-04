@@ -48,7 +48,7 @@ export function ThreadsInfinityScroll() {
                 <Link to={`/@${thread.author.username}`} className="font-semibold">
                   {thread.author.username}
                 </Link>
-                <p>{thread.text}</p>
+                <p className="whitespace-pre-wrap">{thread.text}</p>
               </div>
               {thread.resources && (
                 <>
