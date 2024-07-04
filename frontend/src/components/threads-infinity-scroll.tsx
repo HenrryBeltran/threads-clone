@@ -48,7 +48,8 @@ export function ThreadsInfinityScroll() {
                 <Link to={`/@${thread.author.username}`} className="font-semibold">
                   {thread.author.username}
                 </Link>
-                <p className="whitespace-pre-wrap">{thread.text}</p>
+                {/* <p className="whitespace-pre-wrap">{thread.text}</p> */}
+                <Paragraph text={thread.text} />
               </div>
               {thread.resources && (
                 <>
@@ -77,11 +78,55 @@ export function ThreadsInfinityScroll() {
   );
 }
 
+function Paragraph({ text }: { text: string }) {
+  function highlightText(text: string) {
+    const mentionPattern = /@(\w+)/g;
+    const hashtagPattern = /#(\w+)/g;
+
+    const mentionLines = text.split(mentionPattern);
+
+    return mentionLines.map((line, idx) => {
+      if (!line.includes(" ") && line.length > 1) {
+        return (
+          <Link key={idx} to={`/@${line}`} className="text-blue-500 dark:text-blue-400" data-lexical-text="true">
+            {line}
+          </Link>
+        );
+      }
+
+      if (line.match(hashtagPattern)) {
+        const hasthagLines = line.split(hashtagPattern);
+
+        return hasthagLines.map((hashtagLine, idx) => {
+          if (!hashtagLine.includes(" ") && hashtagLine.length > 1) {
+            return (
+              <Link
+                key={idx}
+                to={`/search?h=${hashtagLine}`}
+                className="text-blue-500 dark:text-blue-400"
+                data-lexical-text="true"
+              >
+                #{hashtagLine}
+              </Link>
+            );
+          }
+
+          return hashtagLine;
+        });
+      }
+
+      return line;
+    });
+  }
+
+  return <p className="whitespace-pre-wrap leading-snug">{highlightText(text)}</p>;
+}
+
 type AlbumProps = {
   images: string[];
 };
 
-export function AlbumCarousel({ images }: AlbumProps) {
+function AlbumCarousel({ images }: AlbumProps) {
   const pointX = useRef<number | null>(null);
 
   return (
@@ -130,7 +175,7 @@ export function AlbumCarousel({ images }: AlbumProps) {
   );
 }
 
-export function DoublePhoto({ images }: AlbumProps) {
+function DoublePhoto({ images }: AlbumProps) {
   return (
     <div className="grid w-full grid-cols-2 grid-rows-1 gap-4 active:cursor-grabbing">
       {images?.map((id, idx) => (
@@ -149,7 +194,7 @@ export function DoublePhoto({ images }: AlbumProps) {
   );
 }
 
-export function SinglePhoto({ images }: AlbumProps) {
+function SinglePhoto({ images }: AlbumProps) {
   const image = images[0];
 
   return (
