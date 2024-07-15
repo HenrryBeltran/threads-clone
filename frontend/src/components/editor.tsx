@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
+  placeholder?: string;
   value?: string;
   onChange?: (value: string) => void;
 };
@@ -73,7 +74,9 @@ export function Editor(props: Props) {
         onInput={handleInput}
       />
       {textLength === 0 && (
-        <div className="pointer-events-none absolute top-0 text-muted-foreground">Start a thread...</div>
+        <div className="pointer-events-none absolute top-0 text-muted-foreground">
+          {props.placeholder ? props.placeholder : "Start a thread..."}
+        </div>
       )}
       <div
         ref={highlightContentRef}

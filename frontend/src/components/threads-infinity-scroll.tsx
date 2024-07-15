@@ -1,12 +1,16 @@
 import { api } from "@/lib/api";
 import { randomInt } from "@/lib/utils";
+import { DialogClose } from "@radix-ui/react-dialog";
 import { safeTry } from "@server/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
-import { BubbleChatIconModded, FavouriteIcon, SentIcon } from "./icons/hugeicons";
+import { BubbleChatIconModded, Cancel01Icon, FavouriteIcon, SentIcon } from "./icons/hugeicons";
+import { Paragraph } from "./paragraph";
 import { ThreadsSkeleton } from "./threads-skeleton";
 import { Button } from "./ui/button";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { UserImage } from "./user-image";
 
 async function fetcher() {
@@ -24,102 +28,88 @@ async function fetcher() {
 
 export function ThreadsInfinityScroll() {
   const query = useQuery({ queryKey: ["threads"], queryFn: fetcher });
-  const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="mx-auto flex min-h-svh max-w-[620px] flex-col space-y-2 divide-y divide-muted-foreground/30 px-6 pb-24">
       {query.isLoading && <ThreadsSkeleton />}
-      {query.data &&
-        query.data.map((thread, i) => (
-          <div key={i} className="flex gap-3 pt-4">
-            <Link to={`/@${thread.author.username}`} className="min-h-11 min-w-11">
-              <UserImage
-                username={thread.author.username}
-                profilePictureId={thread.author.profilePictureId}
-                width={48}
-                height={48}
-                fetchPriority="high"
-                loading="lazy"
-                className="h-11 w-11"
-              />
-            </Link>
-            <div ref={containerRef} className="flex-grow space-y-3">
-              <div>
-                <Link to={`/@${thread.author.username}`} className="font-semibold">
-                  {thread.author.username}
-                </Link>
-                {/* <p className="whitespace-pre-wrap">{thread.text}</p> */}
-                <Paragraph text={thread.text} />
-              </div>
-              {thread.resources && (
-                <>
-                  {thread.resources.length === 1 && <SinglePhoto images={thread.resources} />}
-                  {thread.resources.length === 2 && <DoublePhoto images={thread.resources} />}
-                  {thread.resources.length >= 3 && <AlbumCarousel images={thread.resources} />}
-                </>
-              )}
-              <div className="!mt-1.5 flex -translate-x-2 gap-2">
-                <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
-                  <FavouriteIcon width={20} height={20} strokeWidth={1.5} />
-                  {Math.random() > 0.25 && <span>{randomInt(1, 50)}</span>}
-                </Button>
-                <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
-                  <BubbleChatIconModded width={20} height={20} strokeWidth={1.5} />
-                  {Math.random() > 0.25 && <span>{randomInt(1, 50)}</span>}
-                </Button>
-                <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
-                  <SentIcon width={20} height={20} strokeWidth={1.5} />
-                </Button>
-              </div>
-            </div>
-          </div>
-        ))}
+      {query.data && query.data.map((thread, i) => <Thread key={i} {...thread} />)}
     </div>
   );
 }
 
-function Paragraph({ text }: { text: string }) {
-  function highlightText(text: string) {
-    const mentionPattern = /@(\w+)/g;
-    const hashtagPattern = /#(\w+)/g;
+type ThreadProps = {
+  postId: string;
+  author: {
+    name: string;
+    username: string;
+    profilePictureId: string | null;
+  };
+  text: string;
+  resources: string[] | null;
+};
 
-    const mentionLines = text.split(mentionPattern);
+function Thread({ postId, author, text, resources }: ThreadProps) {
+  const navigate = useNavigate();
 
-    return mentionLines.map((line, idx) => {
-      if (!line.includes(" ") && line.length > 1) {
-        return (
-          <Link key={idx} to={`/@${line}`} className="text-blue-500 dark:text-blue-400" data-lexical-text="true">
-            {line}
-          </Link>
-        );
-      }
-
-      if (line.match(hashtagPattern)) {
-        const hasthagLines = line.split(hashtagPattern);
-
-        return hasthagLines.map((hashtagLine, idx) => {
-          if (!hashtagLine.includes(" ") && hashtagLine.length > 1) {
-            return (
-              <Link
-                key={idx}
-                to={`/search?h=${hashtagLine}`}
-                className="text-blue-500 dark:text-blue-400"
-                data-lexical-text="true"
-              >
-                #{hashtagLine}
-              </Link>
-            );
-          }
-
-          return hashtagLine;
-        });
-      }
-
-      return line;
-    });
-  }
-
-  return <p className="whitespace-pre-wrap leading-snug">{highlightText(text)}</p>;
+  return (
+    <div className="flex gap-3 pt-4">
+      <div className="flex flex-col">
+        <Link to={`/@${author.username}`} className="min-h-11 min-w-11">
+          <UserImage
+            username={author.username}
+            profilePictureId={author.profilePictureId}
+            width={48}
+            height={48}
+            fetchPriority="high"
+            loading="lazy"
+            className="h-11 w-11"
+          />
+        </Link>
+        <div
+          onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
+          className="flex-grow cursor-pointer"
+        />
+      </div>
+      <div className="flex-grow space-y-3">
+        <div>
+          <div className="flex">
+            <Link to={`/@${author.username}`} className="font-semibold">
+              {author.username}
+            </Link>
+            <div
+              onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
+              className="flex-grow cursor-pointer"
+            />
+          </div>
+          <Paragraph text={text} author={author.username} postId={postId} />
+        </div>
+        {resources && (
+          <>
+            {resources.length === 1 && <SinglePhoto images={resources} />}
+            {resources.length === 2 && <DoublePhoto images={resources} />}
+            {resources.length >= 3 && <AlbumCarousel images={resources} />}
+          </>
+        )}
+        <div className="!mt-1.5 flex -translate-x-2 gap-2">
+          <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
+            <FavouriteIcon width={20} height={20} strokeWidth={1.5} />
+            {Math.random() > 0.25 && <span>{randomInt(1, 50)}</span>}
+          </Button>
+          <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
+            <BubbleChatIconModded width={20} height={20} strokeWidth={1.5} />
+            {Math.random() > 0.25 && <span>{randomInt(1, 50)}</span>}
+          </Button>
+          <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
+            <SentIcon width={20} height={20} strokeWidth={1.5} />
+          </Button>
+          <div
+            onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
+            className="flex-grow cursor-pointer"
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 type AlbumProps = {
@@ -128,6 +118,7 @@ type AlbumProps = {
 
 function AlbumCarousel({ images }: AlbumProps) {
   const pointX = useRef<number | null>(null);
+  const itMoved = useRef(false);
 
   return (
     <div className="h-60 w-[calc(100%+56px)] -translate-x-14 overflow-hidden">
@@ -147,6 +138,7 @@ function AlbumCarousel({ images }: AlbumProps) {
 
             e.currentTarget.scrollLeft += delta;
             pointX.current = x;
+            itMoved.current = true;
           }
         }}
         onPointerUp={() => {
@@ -158,16 +150,30 @@ function AlbumCarousel({ images }: AlbumProps) {
       >
         <div className="absolute left-0 top-0 flex w-max gap-4 pl-14 active:cursor-grabbing">
           {images?.map((id, idx) => (
-            <figure key={idx}>
-              <img
-                src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_240/dpr_2.0/v1716403676/${id}.jpg`}
-                width={192}
-                height={240}
-                alt="Profile picture"
-                draggable="false"
-                className="pointer-events-none h-60 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
-              />
-            </figure>
+            <ImageContainer
+              key={idx}
+              index={idx}
+              images={images}
+              onClickTrigger={(e) => {
+                if (itMoved.current) {
+                  itMoved.current = false;
+                  e.stopPropagation();
+                  e.preventDefault();
+                }
+              }}
+            >
+              <figure>
+                <img
+                  src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_240/dpr_2.0/v1716403676/${id}.jpg`}
+                  width={192}
+                  height={240}
+                  alt="Profile picture"
+                  draggable="false"
+                  loading="lazy"
+                  className="pointer-events-none h-60 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+                />
+              </figure>
+            </ImageContainer>
           ))}
         </div>
       </div>
@@ -179,16 +185,18 @@ function DoublePhoto({ images }: AlbumProps) {
   return (
     <div className="grid w-full grid-cols-2 grid-rows-1 gap-4 active:cursor-grabbing">
       {images?.map((id, idx) => (
-        <figure key={idx} className="w-full">
-          <img
-            src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_384/dpr_2.0/v1716403676/${id}.jpg`}
-            width={250}
-            height={384}
-            alt="Profile picture"
-            draggable="false"
-            className="pointer-events-none h-full max-h-96 w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
-          />
-        </figure>
+        <ImageContainer key={idx} index={idx} images={images}>
+          <figure key={idx} className="h-full w-full">
+            <img
+              src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_384/dpr_2.0/v1716403676/${id}.jpg`}
+              width={250}
+              height={384}
+              alt="Profile picture"
+              draggable="false"
+              className="pointer-events-none h-full max-h-96 w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+            />
+          </figure>
+        </ImageContainer>
       ))}
     </div>
   );
@@ -199,16 +207,101 @@ function SinglePhoto({ images }: AlbumProps) {
 
   return (
     <div className="flex">
-      <figure>
-        <img
-          src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_520/dpr_2.0/v1716403676/${image}.jpg`}
-          width={516}
-          height={520}
-          alt="Profile picture"
-          draggable="false"
-          className="pointer-events-none max-h-[520px] w-fit max-w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+      <ImageContainer index={0} images={[image]}>
+        <figure className="h-full">
+          <img
+            src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_520/dpr_2.0/v1716403676/${image}.jpg`}
+            width={516}
+            height={520}
+            alt="Profile picture"
+            draggable="false"
+            className="pointer-events-none max-h-[520px] w-fit max-w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+          />
+        </figure>
+      </ImageContainer>
+    </div>
+  );
+}
+
+type ContainerProps = {
+  index: number;
+  images: string[];
+  onClickTrigger?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  children: React.ReactNode;
+};
+
+function ImageContainer({ index, images, onClickTrigger, children }: ContainerProps) {
+  return (
+    <Dialog>
+      <DialogTrigger className="flex outline-none transition-transform active:scale-[.98]" onClick={onClickTrigger}>
+        {children}
+        {/* <figure> */}
+        {/*   <img */}
+        {/*     src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_240/dpr_2.0/v1716403676/${imageId}.jpg`} */}
+        {/*     width={192} */}
+        {/*     height={240} */}
+        {/*     alt="Profile picture" */}
+        {/*     draggable="false" */}
+        {/*     loading="lazy" */}
+        {/*     className="pointer-events-none h-60 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25" */}
+        {/*   /> */}
+        {/* </figure> */}
+      </DialogTrigger>
+      <DialogContent className="left-0 right-0 flex min-w-[100vw] translate-x-0 items-center justify-center rounded-none border-none bg-black/60 p-0 outline-none dark:bg-transparent">
+        <DialogClose asChild>
+          <Button
+            variant="secondary"
+            className="absolute left-4 top-4 z-50 h-fit w-fit rounded-full border border-neutral-700 !bg-neutral-800 p-0 text-white ring-offset-muted-foreground hover:!bg-neutral-900"
+          >
+            <Cancel01Icon width={28} height={28} strokeWidth={2} className="h-12 w-12 rounded-none p-3" />
+          </Button>
+        </DialogClose>
+        <div className="flex min-h-svh max-w-[100svh] !rounded-none border-sky-200 p-0 outline-none">
+          <PhotoPreview startIndex={index} images={images} />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+type PreviewProps = {
+  startIndex: number;
+  images: string[];
+};
+
+/// TODO fix the carousel layout
+
+function PhotoPreview({ startIndex, images }: PreviewProps) {
+  return (
+    <div className="flex flex-grow items-center justify-center">
+      <Carousel opts={{ startIndex }}>
+        <CarouselContent>
+          {images.map((image, index) => (
+            <CarouselItem key={index}>
+              <div className="flex aspect-square h-svh items-center justify-center bg-black">
+                <img
+                  src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_520/dpr_2.0/v1716403676/${image}.jpg`}
+                  width={520}
+                  height={520}
+                  alt="Profile picture"
+                  draggable="false"
+                  loading="lazy"
+                  className="max-h-svh"
+                  // className="max-h-[520px] w-fit max-w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+                />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious
+          variant="secondary"
+          className="-left-16 hidden h-12 w-12 border border-neutral-700 bg-neutral-900/80 text-white hover:bg-neutral-800 lg:flex [&>*]:h-6 [&>*]:w-6 [&>*]:stroke-2"
         />
-      </figure>
+        <CarouselNext
+          variant="secondary"
+          className="-right-16 hidden h-12 w-12 border border-neutral-700 bg-neutral-900/80 text-white hover:bg-neutral-800 lg:flex [&>*]:h-6 [&>*]:w-6 [&>*]:stroke-2"
+        />
+      </Carousel>
     </div>
   );
 }

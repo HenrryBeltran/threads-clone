@@ -1,5 +1,6 @@
 import { Cancel01Icon } from "@/components/icons/hugeicons";
 import { Button } from "@/components/ui/button";
+import { useLockScrolling } from "@/hooks/lock-scrolling";
 import { MouseEvent, useEffect, useState } from "react";
 
 type Props = {
@@ -13,19 +14,8 @@ type Props = {
 
 export default function ProfilePicture({ profilePictureId, src, alt }: Props) {
   const [open, setOpen] = useState(false);
-  const body = document.querySelector("body");
 
-  useEffect(() => {
-    if (!body) return;
-
-    if (open) {
-      body.style.height = "100svh";
-      body.style.overflow = "hidden";
-    } else {
-      body.style.height = "auto";
-      body.style.overflow = "visible";
-    }
-  }, [open]);
+  useLockScrolling(open);
 
   useEffect(() => {
     window.onkeydown = (e) => {

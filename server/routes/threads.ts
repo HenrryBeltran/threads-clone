@@ -39,7 +39,8 @@ export const threads = new Hono()
     const { error, result } = await safeTry(
       db.query.threads.findMany({
         with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
-        limit: 6,
+        /// TODO: Only for testing
+        // limit: 6,
         orderBy: desc(threadsTable.createdAt),
       }),
     );
