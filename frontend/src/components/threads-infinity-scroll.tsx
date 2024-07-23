@@ -269,16 +269,16 @@ type PreviewProps = {
   images: string[];
 };
 
-/// TODO fix the carousel layout
+/// TODO fix the carousel layout ✅
 
 function PhotoPreview({ startIndex, images }: PreviewProps) {
   return (
-    <div className="flex flex-grow items-center justify-center">
+    <div className="flex flex-grow items-center justify-center bg-black">
       <Carousel opts={{ startIndex }}>
-        <CarouselContent>
+        <CarouselContent className="w-[100svh]">
           {images.map((image, index) => (
-            <CarouselItem key={index}>
-              <div className="flex aspect-square h-svh items-center justify-center bg-black">
+            <CarouselItem key={index} className="flex min-w-[100svh] max-w-[100svh]">
+              <div className="flex h-svh w-full items-center justify-center bg-black">
                 <img
                   src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_520/dpr_2.0/v1716403676/${image}.jpg`}
                   width={520}
@@ -286,8 +286,7 @@ function PhotoPreview({ startIndex, images }: PreviewProps) {
                   alt="Profile picture"
                   draggable="false"
                   loading="lazy"
-                  className="max-h-svh"
-                  // className="max-h-[520px] w-fit max-w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+                  className="w-fit"
                 />
               </div>
             </CarouselItem>
