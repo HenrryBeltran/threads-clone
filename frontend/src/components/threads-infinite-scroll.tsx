@@ -2,19 +2,20 @@ import { api } from "@/lib/api";
 import { randomInt } from "@/lib/utils";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { safeTry } from "@server/lib/safe-try";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useRef } from "react";
-import { BubbleChatIconModded, Cancel01Icon, FavouriteIcon, SentIcon } from "./icons/hugeicons";
+import { Fragment, useEffect, useRef } from "react";
+import { BubbleChatIconModded, Cancel01Icon, FavouriteIcon, Loading03AnimatedIcon, SentIcon } from "./icons/hugeicons";
 import { Paragraph } from "./paragraph";
 import { ThreadsSkeleton } from "./threads-skeleton";
 import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { UserImage } from "./user-image";
+import { useInView } from "react-intersection-observer";
 
-async function fetcher() {
-  const res = await safeTry(api.threads.posts.$get());
+async function fetcher({ pageParam }: { pageParam: number }) {
+  const res = await safeTry(api.threads.posts.$get({ query: { offset: pageParam.toString() } }));
 
   if (res.error) throw new Error("Something went wrong");
   if (!res.result.ok) throw new Error("Something went wrong");
@@ -26,13 +27,60 @@ async function fetcher() {
   return result;
 }
 
-export function ThreadsInfinityScroll() {
-  const query = useQuery({ queryKey: ["threads"], queryFn: fetcher });
+/// TODO: Adding infinite scrolling
+
+export function ThreadsInfiniteScroll() {
+  const query = useInfiniteQuery({
+    queryKey: ["threads"],
+    queryFn: fetcher,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.length === 0) {
+        return undefined;
+      }
+      return lastPageParam + 6;
+    },
+    getPreviousPageParam: (_lastPage, _allPages, firstPageParam) => {
+      if (firstPageParam <= 1) {
+        return undefined;
+      }
+      return firstPageParam - 6;
+    },
+  });
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    console.log("~ in view state", inView);
+    if (inView) {
+      query.fetchNextPage();
+    }
+  }, [inView]);
 
   return (
-    <div className="mx-auto flex min-h-svh max-w-[620px] flex-col space-y-2 divide-y divide-muted-foreground/30 px-6 pb-24">
-      {query.isLoading && <ThreadsSkeleton />}
-      {query.data && query.data.map((thread, i) => <Thread key={i} {...thread} />)}
+    <div className="mx-auto flex min-h-svh max-w-[620px] flex-col pb-24">
+      <div className="flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 px-6">
+        {query.isLoading && <ThreadsSkeleton />}
+        {query.data &&
+          query.data.pages.map((group, i) => (
+            <Fragment key={i}>
+              {group.map((thread) => (
+                <Thread key={thread.postId} {...thread} />
+              ))}
+            </Fragment>
+          ))}
+        {query.isFetchingNextPage && (
+          <div className="py-3">
+            <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto h-6 w-6" />
+          </div>
+        )}
+        {query.hasNextPage === false && (
+          <div className="flex justify-center py-6">
+            <p className="text-muted-foreground">No more posts for the moment.</p>
+          </div>
+        )}
+      </div>
+      <div ref={ref} className="h-px w-full bg-transparent" />
     </div>
   );
 }
@@ -235,17 +283,6 @@ function ImageContainer({ index, images, onClickTrigger, children }: ContainerPr
     <Dialog>
       <DialogTrigger className="flex outline-none transition-transform active:scale-[.98]" onClick={onClickTrigger}>
         {children}
-        {/* <figure> */}
-        {/*   <img */}
-        {/*     src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_240/dpr_2.0/v1716403676/${imageId}.jpg`} */}
-        {/*     width={192} */}
-        {/*     height={240} */}
-        {/*     alt="Profile picture" */}
-        {/*     draggable="false" */}
-        {/*     loading="lazy" */}
-        {/*     className="pointer-events-none h-60 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25" */}
-        {/*   /> */}
-        {/* </figure> */}
       </DialogTrigger>
       <DialogContent className="left-0 right-0 flex min-w-[100vw] translate-x-0 items-center justify-center rounded-none border-none bg-black/60 p-0 outline-none dark:bg-transparent">
         <DialogClose asChild>
@@ -268,8 +305,6 @@ type PreviewProps = {
   startIndex: number;
   images: string[];
 };
-
-/// TODO fix the carousel layout ✅
 
 function PhotoPreview({ startIndex, images }: PreviewProps) {
   return (

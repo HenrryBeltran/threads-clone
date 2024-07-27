@@ -1,4 +1,4 @@
-import { ThreadsInfinityScroll } from "@/components/threads-infinity-scroll";
+import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { Button } from "@/components/ui/button";
 import { UserImage } from "@/components/user-image";
 import { UserAccount } from "@/lib/api";
@@ -50,7 +50,7 @@ function Index() {
           </div>
         </div>
       )}
-      <ThreadsInfinityScroll />
+      <ThreadsInfiniteScroll />
     </>
   );
 }

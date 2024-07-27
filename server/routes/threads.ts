@@ -10,6 +10,7 @@ import { db } from "../db";
 import { threads as threadsTable } from "../db/schemas/threads";
 import { safeTry } from "../lib/safe-try";
 import { getUser } from "../middleware/getUser";
+import { z } from "zod";
 
 dayjs.extend(utc);
 
@@ -35,12 +36,15 @@ function filterHashtagAndMentions(text: string, char: "#" | "@") {
 }
 
 export const threads = new Hono()
-  .get("/posts", async (ctx) => {
+  .get("/posts", zValidator("query", z.object({ offset: z.string() })), async (ctx) => {
+    const rawOffset = ctx.req.query("offset");
+    const offset = rawOffset ? Number(rawOffset) : 0;
+
     const { error, result } = await safeTry(
       db.query.threads.findMany({
         with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
-        /// TODO: Only for testing
-        // limit: 6,
+        limit: 6,
+        offset,
         orderBy: desc(threadsTable.createdAt),
       }),
     );
