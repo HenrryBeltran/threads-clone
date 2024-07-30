@@ -3,9 +3,11 @@ import { ProfileBio } from "@/components/profile-bio";
 import { ProfileFollowersCount } from "@/components/profile-followers-count";
 import { ProfileHeader } from "@/components/profile-header";
 import { ProfileLink } from "@/components/profile-link";
+import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { Button } from "@/components/ui/button";
-import { type UserAccount } from "@/lib/api";
+import { api, type UserAccount } from "@/lib/api";
 import { useCreateThreadStore } from "@/store";
+import { safeTry } from "@server/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { createLazyFileRoute, useLocation, useRouteContext } from "@tanstack/react-router";
 
@@ -38,9 +40,27 @@ function Profile() {
     throw new Error("Something went wrong");
   }
 
+  async function profilePostsFetcher({ pageParam }: { pageParam: number }) {
+    const res = await safeTry(
+      api.threads.posts[":userId"].$get({
+        param: { userId: profile?.id! },
+        query: { offset: pageParam.toString() },
+      }),
+    );
+
+    if (res.error) throw new Error("Something went wrong");
+    if (!res.result.ok) throw new Error("Something went wrong");
+
+    const { error, result } = await safeTry(res.result.json());
+
+    if (error) throw new Error("Something went wrong");
+
+    return result;
+  }
+
   return (
     <div className="flex min-h-svh w-full flex-col">
-      <div className="mx-auto w-full max-w-screen-sm px-6 pt-20 sm:pt-24">
+      <div className="mx-auto w-full max-w-[620px] px-6 pt-20 sm:pt-24">
         <ProfileHeader username={profile.username} name={profile.name} profilePictureId={profile.profilePictureId} />
         <ProfileBio text={profile.bio} />
         <div className="flex min-h-8 items-center gap-1.5">
@@ -73,6 +93,7 @@ function Profile() {
           </div>
         )}
       </div>
+      <ThreadsInfiniteScroll queryKey={[profile.username, "threads"]} queryFn={profilePostsFetcher} />
     </div>
   );
 }

@@ -1,14 +1,28 @@
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { Button } from "@/components/ui/button";
 import { UserImage } from "@/components/user-image";
-import { UserAccount } from "@/lib/api";
+import { UserAccount, api } from "@/lib/api";
 import { useCreateThreadStore } from "@/store";
+import { safeTry } from "@server/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_main-layout/")({
   component: Index,
 });
+
+async function postsFetcher({ pageParam }: { pageParam: number }) {
+  const res = await safeTry(api.threads.posts.$get({ query: { offset: pageParam.toString() } }));
+
+  if (res.error) throw new Error("Something went wrong");
+  if (!res.result.ok) throw new Error("Something went wrong");
+
+  const { error, result } = await safeTry(res.result.json());
+
+  if (error) throw new Error("Something went wrong");
+
+  return result;
+}
 
 function Index() {
   const showCreateThread = useCreateThreadStore((state) => state.show);
@@ -50,7 +64,11 @@ function Index() {
           </div>
         </div>
       )}
-      <ThreadsInfiniteScroll />
+      <ThreadsInfiniteScroll
+        queryKey={["main", "threads"]}
+        queryFn={postsFetcher}
+        noMorePostsMessage="No more posts for the moment."
+      />
     </>
   );
 }

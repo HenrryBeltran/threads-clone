@@ -5,12 +5,12 @@ import utc from "dayjs/plugin/utc";
 import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
+import { z } from "zod";
 import { postThreadSchema, replyThreadSchema } from "../common/schemas/thread";
 import { db } from "../db";
 import { threads as threadsTable } from "../db/schemas/threads";
 import { safeTry } from "../lib/safe-try";
 import { getUser } from "../middleware/getUser";
-import { z } from "zod";
 
 dayjs.extend(utc);
 
@@ -46,6 +46,35 @@ export const threads = new Hono()
         limit: 6,
         offset,
         orderBy: desc(threadsTable.createdAt),
+      }),
+    );
+
+    if (error) {
+      return ctx.json(error, 500);
+    }
+
+    return ctx.json(result);
+  })
+  .get("/posts/:userId", zValidator("query", z.object({ offset: z.string() })), async (ctx) => {
+    const userId = ctx.req.param("userId");
+    const rawOffset = ctx.req.query("offset");
+    const offset = rawOffset ? Number(rawOffset) : 0;
+
+    if (!userId) {
+      return ctx.json({ message: "Username not provided." }, 400);
+    }
+
+    const { error, result } = await safeTry(
+      db.query.threads.findMany({
+        with: {
+          author: {
+            columns: { username: true, name: true, profilePictureId: true },
+          },
+        },
+        limit: 6,
+        offset,
+        orderBy: desc(threadsTable.createdAt),
+        where: eq(threadsTable.authorId, userId),
       }),
     );
 

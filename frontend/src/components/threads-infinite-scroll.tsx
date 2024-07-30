@@ -1,10 +1,11 @@
 import { api } from "@/lib/api";
 import { randomInt } from "@/lib/utils";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { safeTry } from "@server/lib/safe-try";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { QueryFunction, useInfiniteQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { InferResponseType } from "hono/client";
 import { Fragment, useEffect, useRef } from "react";
+import { useInView } from "react-intersection-observer";
 import { BubbleChatIconModded, Cancel01Icon, FavouriteIcon, Loading03AnimatedIcon, SentIcon } from "./icons/hugeicons";
 import { Paragraph } from "./paragraph";
 import { ThreadsSkeleton } from "./threads-skeleton";
@@ -12,27 +13,19 @@ import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { UserImage } from "./user-image";
-import { useInView } from "react-intersection-observer";
 
-async function fetcher({ pageParam }: { pageParam: number }) {
-  const res = await safeTry(api.threads.posts.$get({ query: { offset: pageParam.toString() } }));
+export type Posts = InferResponseType<typeof api.threads.posts.$get>;
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
+type Props = {
+  queryKey: string[];
+  queryFn: QueryFunction<Posts, string[], number> | undefined;
+  noMorePostsMessage?: string;
+};
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
-}
-
-/// TODO: Adding infinite scrolling
-
-export function ThreadsInfiniteScroll() {
+export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage }: Props) {
   const query = useInfiniteQuery({
-    queryKey: ["threads"],
-    queryFn: fetcher,
+    queryKey,
+    queryFn,
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       if (lastPage.length === 0) {
@@ -46,22 +39,25 @@ export function ThreadsInfiniteScroll() {
       }
       return firstPageParam - 6;
     },
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 
   const { ref, inView } = useInView();
 
   useEffect(() => {
-    console.log("~ in view state", inView);
     if (inView) {
       query.fetchNextPage();
     }
   }, [inView]);
 
   return (
-    <div className="mx-auto flex min-h-svh max-w-[620px] flex-col pb-24">
+    <div className="mx-auto w-full flex min-h-svh max-w-[620px] flex-col pb-24">
       <div className="flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 px-6">
         {query.isLoading && <ThreadsSkeleton />}
-        {query.data &&
+        {query.isRefetching === false &&
+          query.data &&
           query.data.pages.map((group, i) => (
             <Fragment key={i}>
               {group.map((thread) => (
@@ -69,14 +65,14 @@ export function ThreadsInfiniteScroll() {
               ))}
             </Fragment>
           ))}
-        {query.isFetchingNextPage && (
+        {(query.isFetchingNextPage || query.isRefetching) && (
           <div className="py-3">
             <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto h-6 w-6" />
           </div>
         )}
-        {query.hasNextPage === false && (
+        {query.hasNextPage === false && noMorePostsMessage && query.isFetching === false && (
           <div className="flex justify-center py-6">
-            <p className="text-muted-foreground">No more posts for the moment.</p>
+            <p className="text-muted-foreground">{noMorePostsMessage}</p>
           </div>
         )}
       </div>

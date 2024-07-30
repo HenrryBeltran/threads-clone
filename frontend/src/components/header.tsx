@@ -1,6 +1,7 @@
 import { ThreadsCloneLogo } from "@/components/icons/custom-icons";
 import useScreenSize from "@/hooks/screen-size";
 import { UserAccount } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import Menu from "./menu";
 import Navbar from "./navbar";
@@ -13,6 +14,7 @@ type Props = {
 export default function Header({ user }: Props) {
   const screen = useScreenSize();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return (
     <header className="fixed left-0 right-0 top-0 z-10 mx-auto grid h-16 w-full grid-cols-3 grid-rows-1 items-center bg-background/85 backdrop-blur-3xl sm:h-[74px] sm:grid-cols-[1fr_max-content_1fr] md:max-w-screen-xl">
@@ -24,8 +26,7 @@ export default function Header({ user }: Props) {
           e.stopPropagation();
 
           if (window.scrollY < 100) {
-            /// TODO: This should be a revalidation for the posts.
-            window.location.href = "/";
+            queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
           } else {
             window.scrollTo({ top: 0, behavior: "instant" });
           }

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 
 export function NavbarItem({ children, href, pathname, username, handleOnClick }: Props) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return (
     <div className="relative h-full transition-transform active:scale-95 sm:h-auto">
@@ -23,8 +25,7 @@ export function NavbarItem({ children, href, pathname, username, handleOnClick }
               e.stopPropagation();
 
               if (window.scrollY < 100) {
-                /// TODO: This should be a revalidation for the posts.
-                window.location.href = "/";
+                queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
               } else {
                 window.scrollTo({ top: 0, behavior: "instant" });
               }
