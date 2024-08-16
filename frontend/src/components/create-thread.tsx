@@ -35,6 +35,9 @@ async function postThread({ text, resources }: { text: string; resources?: strin
   return result;
 }
 
+/// TODO: When you create a new thread you should view your post on top of everything.
+//  Normally in this kind of apps beacause the posting trafic you should see your post with a simple invalidate so
+//  the solution is putting zustand and show a separate component
 export function CreateThread() {
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
@@ -49,7 +52,13 @@ export function CreateThread() {
   const mutation = useMutation({
     mutationKey: ["threads"],
     mutationFn: postThread,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["threads"] }),
+    // onSettled: (data) => {
+    // queryClient.invalidateQueries({ queryKey: ["main", "threads"],  });
+    // const currentData = queryClient.getQueryData(["main", "threads"]) as [];
+    // currentData.pop();
+    // console.log("~ success", data, currentData);
+    // queryClient.setQueryData(["main", "threads"], [data, ...currentData]);
+    // },
   });
 
   useEffect(() => {

@@ -16,6 +16,11 @@ import { UserImage } from "./user-image";
 
 export type Posts = InferResponseType<typeof api.threads.posts.$get>;
 
+export type PostsPages = {
+  pages: Posts[];
+  pageParams: number[];
+};
+
 type Props = {
   queryKey: string[];
   queryFn: QueryFunction<Posts, string[], number> | undefined;
@@ -31,16 +36,11 @@ export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage }:
       if (lastPage.length === 0) {
         return undefined;
       }
-      return lastPageParam + 6;
+      return lastPageParam + 1;
     },
-    getPreviousPageParam: (_lastPage, _allPages, firstPageParam) => {
-      if (firstPageParam <= 1) {
-        return undefined;
-      }
-      return firstPageParam - 6;
-    },
-    refetchOnWindowFocus: false,
+    refetchOnMount: true,
     refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     staleTime: Infinity,
   });
 
@@ -53,7 +53,7 @@ export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage }:
   }, [inView]);
 
   return (
-    <div className="mx-auto w-full flex min-h-svh max-w-[620px] flex-col pb-24">
+    <div className="mx-auto flex min-h-svh w-full max-w-[620px] flex-col pb-24">
       <div className="flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 px-6">
         {query.isLoading && <ThreadsSkeleton />}
         {query.isRefetching === false &&
@@ -98,7 +98,11 @@ function Thread({ postId, author, text, resources }: ThreadProps) {
   return (
     <div className="flex gap-3 pt-4">
       <div className="flex flex-col">
-        <Link to={`/@${author.username}`} className="min-h-11 min-w-11">
+        <Link
+          to={`/@${author.username}`}
+          onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
+          className="min-h-11 min-w-11"
+        >
           <UserImage
             username={author.username}
             profilePictureId={author.profilePictureId}
@@ -110,14 +114,20 @@ function Thread({ postId, author, text, resources }: ThreadProps) {
           />
         </Link>
         <div
-          onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
+          onClick={() => {
+            navigate({ to: `/@${author.username}/post/${postId}` });
+          }}
           className="flex-grow cursor-pointer"
         />
       </div>
       <div className="flex-grow space-y-3">
         <div>
           <div className="flex">
-            <Link to={`/@${author.username}`} className="font-semibold">
+            <Link
+              to={`/@${author.username}`}
+              onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
+              className="font-semibold"
+            >
               {author.username}
             </Link>
             <div

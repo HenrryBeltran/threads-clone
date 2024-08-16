@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { PostsPages } from "./threads-infinite-scroll";
 
 type Props = {
   children: React.ReactNode;
@@ -13,6 +14,16 @@ export function NavbarItem({ children, href, pathname, username, handleOnClick }
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  function resetInfiniteQueryPagination(queryKey: string[]) {
+    queryClient.setQueryData<PostsPages>(queryKey, (oldData) => {
+      if (!oldData) return undefined;
+      return {
+        pages: [],
+        pageParams: oldData.pageParams.slice(0, 1),
+      };
+    });
+  }
+
   return (
     <div className="relative h-full transition-transform active:scale-95 sm:h-auto">
       <div className="relative h-full sm:h-auto">
@@ -25,11 +36,17 @@ export function NavbarItem({ children, href, pathname, username, handleOnClick }
               e.stopPropagation();
 
               if (window.scrollY < 100) {
+                resetInfiniteQueryPagination(["main", "threads"]);
                 queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
               } else {
                 window.scrollTo({ top: 0, behavior: "instant" });
               }
               return;
+            }
+
+            if (username && href && href.startsWith("/@")) {
+              resetInfiniteQueryPagination([username, "threads"]);
+              queryClient.invalidateQueries({ queryKey: [username, "threads"] });
             }
 
             if (!username && href !== "/") {
@@ -47,6 +64,8 @@ export function NavbarItem({ children, href, pathname, username, handleOnClick }
               handleOnClick();
               return;
             }
+
+            window.scrollTo({ top: 0, behavior: "instant" });
           }}
         >
           <div

@@ -44,7 +44,7 @@ export const threads = new Hono()
       db.query.threads.findMany({
         with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
         limit: 6,
-        offset,
+        offset: offset * 6,
         orderBy: desc(threadsTable.createdAt),
       }),
     );
@@ -132,21 +132,24 @@ export const threads = new Hono()
     }
 
     const { error, result } = await safeTry(
-      db.insert(threadsTable).values({
-        id: nanoid(),
-        postId: shortNanoId(),
-        authorId: user.id,
-        rootId: user.id,
-        parentId: null,
-        text: body.text,
-        resources: resources.length > 0 ? resources : null,
-        hashtags,
-        mentions,
-        likesCount: 0,
-        repliesCount: 0,
-        createdAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
-        updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
-      }),
+      db
+        .insert(threadsTable)
+        .values({
+          id: nanoid(),
+          postId: shortNanoId(),
+          authorId: user.id,
+          rootId: user.id,
+          parentId: null,
+          text: body.text,
+          resources: resources.length > 0 ? resources : null,
+          hashtags,
+          mentions,
+          likesCount: 0,
+          repliesCount: 0,
+          createdAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
+          updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
+        })
+        .returning(),
     );
 
     if (error) {
