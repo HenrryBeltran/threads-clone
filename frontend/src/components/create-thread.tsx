@@ -11,6 +11,8 @@ import { UploadAlbumButton } from "./upload-album-button";
 import { Resource, UploadedAlbumCarousel, UploadedAlbumDouble, UploadedSingleView } from "./upload-album-view";
 import { UserImage } from "./user-image";
 import { safeTry } from "@server/lib/safe-try";
+import { useLockScrolling } from "@/hooks/lock-scrolling";
+import { Posts } from "./threads-infinite-scroll";
 
 const upTo10AttachmentsMessage = () =>
   toast("You can have up to 10 attachments.", {
@@ -42,7 +44,6 @@ export function CreateThread() {
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
   const createThread = useCreateThreadStore();
-  const body = document.querySelector("body");
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
   const [thread, setThread] = useState("");
@@ -50,8 +51,14 @@ export function CreateThread() {
   const [openDiscard, setOpenDiscard] = useState(false);
 
   const mutation = useMutation({
-    mutationKey: ["threads"],
+    mutationKey: ["posting", "threads"],
     mutationFn: postThread,
+    onSuccess: (currentData) => {
+      queryClient.invalidateQueries({queryKey: ["postring", "threads"]})
+      console.log("~ on success data from parameter", currentData);
+      const oldData = queryClient.getQueryData<Posts>(["posting", "threads"]) ?? [];
+      queryClient.setQueryData(["posting", "threads"], [currentData, ...oldData]);
+    },
     // onSettled: (data) => {
     // queryClient.invalidateQueries({ queryKey: ["main", "threads"],  });
     // const currentData = queryClient.getQueryData(["main", "threads"]) as [];
@@ -61,17 +68,7 @@ export function CreateThread() {
     // },
   });
 
-  useEffect(() => {
-    if (!body) return;
-
-    if (createThread.data.open) {
-      body.style.height = "100svh";
-      body.style.overflow = "hidden";
-    } else {
-      body.style.height = "auto";
-      body.style.overflow = "visible";
-    }
-  }, [createThread.data.open]);
+  useLockScrolling(createThread.data.open);
 
   useEffect(() => {
     setThread("");

@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { FollowersCard } from "./followers-card";
 import { UserImage } from "./user-image";
+import { useLockScrolling } from "@/hooks/lock-scrolling";
 
 type Props = {
   username: string;
@@ -49,6 +50,8 @@ export function ProfileFollowersCount({
 
     return () => dialog?.removeEventListener("toggle", handleToggle);
   });
+
+  useLockScrolling(open);
 
   return (
     <>

@@ -1,3 +1,4 @@
+import { NewPostThread } from "@/components/new-post-thread";
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { Button } from "@/components/ui/button";
 import { UserImage } from "@/components/user-image";
@@ -64,6 +65,7 @@ function Index() {
           </div>
         </div>
       )}
+      <NewPostThread />
       <ThreadsInfiniteScroll
         queryKey={["main", "threads"]}
         queryFn={postsFetcher}

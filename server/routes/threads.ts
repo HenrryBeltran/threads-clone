@@ -2,7 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { v2 as cloudinary } from "cloudinary";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
 import { z } from "zod";
@@ -11,6 +11,7 @@ import { db } from "../db";
 import { threads as threadsTable } from "../db/schemas/threads";
 import { safeTry } from "../lib/safe-try";
 import { getUser } from "../middleware/getUser";
+import { users } from "../db/schemas/users";
 
 dayjs.extend(utc);
 
@@ -72,7 +73,7 @@ export const threads = new Hono()
           },
         },
         limit: 6,
-        offset,
+        offset: offset * 6,
         orderBy: desc(threadsTable.createdAt),
         where: eq(threadsTable.authorId, userId),
       }),
@@ -84,13 +85,29 @@ export const threads = new Hono()
 
     return ctx.json(result);
   })
-  .get("/post/:postId", async (ctx) => {
+  .get("/post/:username/:postId", async (ctx) => {
+    const username = ctx.req.param("username");
     const postId = ctx.req.param("postId");
+
+    const author = await safeTry(
+      db.query.threads.findFirst({
+        columns: { id: true },
+        where: eq(users.username, username),
+      }),
+    );
+
+    if (author.error) {
+      return ctx.json(author.error, 500);
+    }
+
+    if (author.result === undefined) {
+      return ctx.json({ message: "Thread author not found." }, 404);
+    }
 
     const { error, result } = await safeTry(
       db.query.threads.findFirst({
         with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
-        where: eq(threadsTable.postId, postId),
+        where: and(eq(threadsTable.authorId, author.result.id), eq(threadsTable.postId, postId)),
       }),
     );
 
@@ -156,7 +173,22 @@ export const threads = new Hono()
       return ctx.json(error, 500);
     }
 
-    return ctx.json(result, 200);
+    const fullThread = await safeTry(
+      db.query.threads.findFirst({
+        with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
+        where: eq(threadsTable.id, result[0].id),
+      }),
+    );
+
+    if (fullThread.error) {
+      return ctx.json(error, 500);
+    }
+
+    if (fullThread.result === undefined) {
+      return ctx.json({ message: "Thread not found." }, 404);
+    }
+
+    return ctx.json(fullThread.result);
   })
   .post("/reply", getUser, zValidator("json", replyThreadSchema), async (ctx) => {
     const user = ctx.get("user");

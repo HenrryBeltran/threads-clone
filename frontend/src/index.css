@@ -69,14 +69,75 @@
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
   }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .cool-border {
+    position: relative;
+  }
+
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  .light .cool-border::after,
+  .light .cool-border::before {
+    content: "";
+    position: absolute;
+    height: calc(100% + 2px);
+    width: calc(100% + 2px);
+    background-image: conic-gradient(from var(--angle), #fb923c, #9333ea, #db2777, #ef4444, #fb923c);
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: -1;
+    border-radius: 0.55rem;
+    opacity: 0.4;
+
+    animation: increase-angle 3s linear infinite;
+  }
+
+  .light .cool-border::before {
+    filter: blur(0.75rem);
+    opacity: 0.2;
+  }
+
+  .dark .cool-border::after,
+  .dark .cool-border::before {
+    content: "";
+    position: absolute;
+    height: calc(100% + 2px);
+    width: calc(100% + 2px);
+    background-image: conic-gradient(from var(--angle), #fb923c, #9333ea, #db2777, #ef4444, #fb923c);
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: -1;
+    border-radius: 0.55rem;
+
+    animation: increase-angle 3s linear infinite;
+  }
+
+  .dark .cool-border::before {
+    filter: blur(0.75rem);
+    opacity: 0.3;
+  }
+
+  @keyframes increase-angle {
+    from {
+      --angle: 0deg;
+    }
+    to {
+      --angle: 360deg;
+    }
   }
 }
 

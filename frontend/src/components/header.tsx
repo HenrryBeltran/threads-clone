@@ -45,6 +45,7 @@ export default function Header({ user }: Props) {
           if (window.scrollY < 100) {
             resetInfiniteQueryPagination();
             queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
+            queryClient.setQueryData(["posting", "threads"], []);
           } else {
             window.scrollTo({ top: 0, behavior: "instant" });
           }

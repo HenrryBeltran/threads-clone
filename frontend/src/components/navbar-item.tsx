@@ -38,6 +38,7 @@ export function NavbarItem({ children, href, pathname, username, handleOnClick }
               if (window.scrollY < 100) {
                 resetInfiniteQueryPagination(["main", "threads"]);
                 queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
+                queryClient.setQueryData(["posting", "threads"], []);
               } else {
                 window.scrollTo({ top: 0, behavior: "instant" });
               }
