@@ -37,6 +37,9 @@ const MainLayoutActivityLazyImport = createFileRoute('/_main-layout/activity')()
 const MainLayoutProfileLayoutUsernameLazyImport = createFileRoute(
   '/_main-layout/_profile-layout/$username',
 )()
+const MainLayoutUsernamePostPostIdLazyImport = createFileRoute(
+  '/_main-layout/$username/post/$postId',
+)()
 
 // Create/Update Routes
 
@@ -139,6 +142,16 @@ const MainLayoutProfileLayoutUsernameLazyRoute =
     getParentRoute: () => MainLayoutProfileLayoutRoute,
   } as any).lazy(() =>
     import('./routes/_main-layout/_profile-layout/$username.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const MainLayoutUsernamePostPostIdLazyRoute =
+  MainLayoutUsernamePostPostIdLazyImport.update({
+    path: '/$username/post/$postId',
+    getParentRoute: () => MainLayoutRoute,
+  } as any).lazy(() =>
+    import('./routes/_main-layout/$username/post/$postId.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutProfileLayoutUsernameLazyImport
       parentRoute: typeof MainLayoutProfileLayoutImport
     }
+    '/_main-layout/$username/post/$postId': {
+      id: '/_main-layout/$username/post/$postId'
+      path: '/$username/post/$postId'
+      fullPath: '/$username/post/$postId'
+      preLoaderRoute: typeof MainLayoutUsernamePostPostIdLazyImport
+      parentRoute: typeof MainLayoutImport
+    }
   }
 }
 
@@ -268,6 +288,7 @@ export const routeTree = rootRoute.addChildren({
     MainLayoutSavedLazyRoute,
     MainLayoutSearchLazyRoute,
     MainLayoutIndexLazyRoute,
+    MainLayoutUsernamePostPostIdLazyRoute,
   }),
   ForgottenPasswordLazyRoute,
   LoginLazyRoute,

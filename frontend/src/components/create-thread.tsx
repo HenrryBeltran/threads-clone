@@ -37,9 +37,6 @@ async function postThread({ text, resources }: { text: string; resources?: strin
   return result;
 }
 
-/// TODO: When you create a new thread you should view your post on top of everything.
-//  Normally in this kind of apps beacause the posting trafic you should see your post with a simple invalidate so
-//  the solution is putting zustand and show a separate component
 export function CreateThread() {
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
@@ -54,18 +51,10 @@ export function CreateThread() {
     mutationKey: ["posting", "threads"],
     mutationFn: postThread,
     onSuccess: (currentData) => {
-      queryClient.invalidateQueries({queryKey: ["postring", "threads"]})
-      console.log("~ on success data from parameter", currentData);
+      queryClient.invalidateQueries({ queryKey: ["postring", "threads"] });
       const oldData = queryClient.getQueryData<Posts>(["posting", "threads"]) ?? [];
       queryClient.setQueryData(["posting", "threads"], [currentData, ...oldData]);
     },
-    // onSettled: (data) => {
-    // queryClient.invalidateQueries({ queryKey: ["main", "threads"],  });
-    // const currentData = queryClient.getQueryData(["main", "threads"]) as [];
-    // currentData.pop();
-    // console.log("~ success", data, currentData);
-    // queryClient.setQueryData(["main", "threads"], [data, ...currentData]);
-    // },
   });
 
   useLockScrolling(createThread.data.open);

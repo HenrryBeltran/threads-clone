@@ -90,7 +90,7 @@ export const threads = new Hono()
     const postId = ctx.req.param("postId");
 
     const author = await safeTry(
-      db.query.threads.findFirst({
+      db.query.users.findFirst({
         columns: { id: true },
         where: eq(users.username, username),
       }),
@@ -264,3 +264,9 @@ export const threads = new Hono()
 
     return ctx.json(result, 200);
   });
+
+/// TODO: get all the replies from a post. To know what post is wee use the id of the thread NOT THE SHORT ONE.
+//  To get the correct root post you need to use the normal id NOT THE SHORT ONE.
+//  The same to get the parent post. Use the url to get username an short postId.
+//  This way you can make the thread
+//

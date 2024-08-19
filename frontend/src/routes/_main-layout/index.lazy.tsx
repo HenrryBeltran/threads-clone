@@ -31,8 +31,7 @@ function Index() {
   const user = queryClient.getQueryData<UserAccount | null>(["user", "account"]);
 
   return (
-    <>
-      <div className="h-[74px] w-full"></div>
+    <div className="pt-[74px]">
       {user && (
         <div className="mx-auto max-w-[620px] px-6">
           <div className="flex items-center justify-between border-b border-muted-foreground/20 py-4">
@@ -71,6 +70,6 @@ function Index() {
         queryFn={postsFetcher}
         noMorePostsMessage="No more posts for the moment."
       />
-    </>
+    </div>
   );
 }

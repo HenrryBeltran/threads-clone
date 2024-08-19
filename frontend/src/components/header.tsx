@@ -7,6 +7,7 @@ import Menu from "./menu";
 import Navbar from "./navbar";
 import { PostsPages } from "./threads-infinite-scroll";
 import { Button } from "./ui/button";
+import { ArrowLeft02Icon } from "./icons/hugeicons";
 
 type Props = {
   user: UserAccount | null;
@@ -30,9 +31,18 @@ export default function Header({ user }: Props) {
 
   return (
     <header className="fixed left-0 right-0 top-0 z-10 mx-auto grid h-16 w-full grid-cols-3 grid-rows-1 items-center bg-background/85 backdrop-blur-3xl sm:h-[74px] sm:grid-cols-[1fr_max-content_1fr] md:max-w-screen-xl">
+      {pathname.split("/").length > 2 && (
+        <button
+          className="group ml-3 flex h-12 w-12 items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95 sm:hidden"
+          onClick={() => window.history.back()}
+        >
+          <ArrowLeft02Icon width={26} height={26} strokeWidth={2} className="fill-none text-foreground" />
+        </button>
+      )}
+
       <Link
         to="/"
-        className="group col-start-2 ml-4 flex h-12 w-12 items-center justify-center justify-self-center sm:col-start-1 sm:justify-self-start"
+        className="group col-start-2 flex h-12 w-12 items-center justify-center justify-self-center sm:col-start-1 sm:ml-4 sm:justify-self-start"
         onClick={(e) => {
           if (pathname !== "/") {
             window.scrollTo({ top: 0, behavior: "instant" });
