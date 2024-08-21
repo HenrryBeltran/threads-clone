@@ -1,15 +1,20 @@
 import { randomInt } from "@/lib/utils";
+import { useCreateThreadStore } from "@/store";
 import { DialogClose } from "@radix-ui/react-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BubbleChatIconModded, Cancel01Icon, FavouriteIcon, SentIcon } from "./icons/hugeicons";
 import { Paragraph } from "./paragraph";
+import { PostsPages } from "./threads-infinite-scroll";
 import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { UserImage } from "./user-image";
 
 type ThreadProps = {
+  id: string;
+  rootId: string | null;
   postId: string;
   author: {
     name: string;
@@ -20,8 +25,9 @@ type ThreadProps = {
   resources: string[] | null;
 };
 
-export function Thread({ postId, author, text, resources }: ThreadProps) {
+export function Thread({ id, rootId, postId, author, text, resources }: ThreadProps) {
   const navigate = useNavigate();
+  const { show } = useCreateThreadStore();
 
   return (
     <div className="flex gap-3 pt-4">
@@ -77,7 +83,11 @@ export function Thread({ postId, author, text, resources }: ThreadProps) {
             <FavouriteIcon width={20} height={20} strokeWidth={1.5} />
             {Math.random() > 0.25 && <span>{randomInt(1, 50)}</span>}
           </Button>
-          <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
+          <Button
+            variant="ghost"
+            className="h-9 space-x-1 rounded-full px-2 text-foreground/60"
+            onClick={() => show(undefined, id, rootId)}
+          >
             <BubbleChatIconModded width={20} height={20} strokeWidth={1.5} />
             {Math.random() > 0.25 && <span>{randomInt(1, 50)}</span>}
           </Button>
@@ -89,6 +99,68 @@ export function Thread({ postId, author, text, resources }: ThreadProps) {
             className="flex-grow cursor-pointer"
           />
         </div>
+      </div>
+    </div>
+  );
+}
+
+type ThreadSmallViewProps = {
+  id: string;
+};
+
+export function ThreadSmallView({ id }: ThreadSmallViewProps) {
+  const queryClient = useQueryClient();
+  // const navigate = useNavigate();
+  // const { show } = useCreateThreadStore();
+  const { pages } = queryClient.getQueryData<PostsPages>(["main", "threads"])!;
+  const [post, setPost] = useState<ThreadProps>();
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    for (let j = 0; pages.length > j; j++) {
+      for (let k = 0; pages[j].length > k; k++) {
+        console.log("~ page", pages[j][k]);
+        if (pages[j][k].id == id) {
+          setPost(pages[j][k]);
+          break;
+        }
+      }
+    }
+  }, []);
+
+  if (post === undefined) {
+    return <></>
+  }
+
+  return (
+    <div ref={imageContainerRef} className="flex h-[calc(100%-64px)]">
+      <UserImage
+        profilePictureId={post.author.profilePictureId ?? null}
+        username={post.author.username!}
+        width={44}
+        height={44}
+        fetchPriority="high"
+        className="h-11 w-11"
+      />
+      <div
+        style={{ width: `${imageContainerRef.current?.clientWidth! - 44}px` }}
+        className="flex max-h-[520px] flex-col"
+      >
+        <div className="px-3">
+          <span className="font-semibold leading-snug">{post.author.username!}</span>
+          <Paragraph
+            text={post.text!}
+            author={post.author.username!}
+            postId={post.postId!}
+          />
+        </div>
+        {post.resources && (
+          <>
+            {post.resources.length === 1 && <div className="max-w-xs"><SinglePhoto images={post.resources} /></div>}
+            {post.resources.length === 2 && <DoublePhoto images={post.resources} />}
+            {post.resources.length >= 3 && <AlbumCarousel images={post.resources} />}
+          </>
+        )}
       </div>
     </div>
   );
@@ -273,4 +345,3 @@ function PhotoPreview({ startIndex, images }: PreviewProps) {
     </div>
   );
 }
-

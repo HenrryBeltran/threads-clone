@@ -13,7 +13,7 @@ export const Route = createLazyFileRoute("/_main-layout/")({
 });
 
 async function postsFetcher({ pageParam }: { pageParam: number }) {
-  const res = await safeTry(api.threads.posts.$get({ query: { offset: pageParam.toString() } }));
+  const res = await safeTry(api.threads.posts.$get({ query: { page: pageParam.toString() } }));
 
   if (res.error) throw new Error("Something went wrong");
   if (!res.result.ok) throw new Error("Something went wrong");

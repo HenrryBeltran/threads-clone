@@ -15,15 +15,16 @@ export const useBackdropStore = create<BackdropState>()((set) => ({
 }));
 
 type CreateThreadState = {
-  data: { open: boolean; content?: string };
+  data: { open: boolean; content?: string; id?: string; rootId: string | null };
   toggle: () => void;
-  show: (content?: string) => void;
+  show: (content?: string, id?: string, rootId?: string | null) => void;
   hide: () => void;
 };
 
 export const useCreateThreadStore = create<CreateThreadState>()((set) => ({
-  data: { open: false },
-  toggle: () => set((state) => ({ data: { open: !state.data.open } })),
-  show: (content?: string) => set({ data: { open: true, content } }),
-  hide: () => set({ data: { open: false } }),
+  data: { open: false, rootId: null },
+  toggle: () => set((state) => ({ data: { open: !state.data.open, rootId: state.data.rootId } })),
+  show: (content?: string, id?: string, rootId?: string | null) =>
+    set((state) => ({ data: { open: true, content, id, rootId: rootId === undefined ? state.data.rootId : rootId } })),
+  hide: () => set({ data: { open: false, rootId: null } }),
 }));

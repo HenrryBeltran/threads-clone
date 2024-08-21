@@ -8,10 +8,10 @@
 export type Either<T> =
   | Promise<{
       error: Error;
-      result: undefined;
+      result: null;
     }>
   | Promise<{
-      error: undefined;
+      error: null;
       result: T;
     }>;
 
@@ -25,14 +25,14 @@ export type Either<T> =
  * @return {Either<T>} A Promise that resolves with an Either.
  */
 export async function safeTry<T>(promise: Promise<T>): Promise<Either<T>> {
-  let result: T | undefined;
+  let result: T | null;
 
   try {
     result = await promise;
 
-    return { error: undefined, result };
+    return { error: null, result };
   } catch (error) {
-    result = undefined;
+    result = null;
 
     if (error instanceof Error) {
       return { error, result };

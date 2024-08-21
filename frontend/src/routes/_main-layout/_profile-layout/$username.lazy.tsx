@@ -44,7 +44,7 @@ function Profile() {
     const res = await safeTry(
       api.threads.posts[":userId"].$get({
         param: { userId: profile?.id! },
-        query: { offset: pageParam.toString() },
+        query: { page: pageParam.toString() },
       }),
     );
 

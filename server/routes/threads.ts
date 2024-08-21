@@ -9,9 +9,9 @@ import { z } from "zod";
 import { postThreadSchema, replyThreadSchema } from "../common/schemas/thread";
 import { db } from "../db";
 import { threads as threadsTable } from "../db/schemas/threads";
+import { users } from "../db/schemas/users";
 import { safeTry } from "../lib/safe-try";
 import { getUser } from "../middleware/getUser";
-import { users } from "../db/schemas/users";
 
 dayjs.extend(utc);
 
@@ -37,33 +37,29 @@ function filterHashtagAndMentions(text: string, char: "#" | "@") {
 }
 
 export const threads = new Hono()
-  .get("/posts", zValidator("query", z.object({ offset: z.string() })), async (ctx) => {
-    const rawOffset = ctx.req.query("offset");
-    const offset = rawOffset ? Number(rawOffset) : 0;
+  .get("/posts", zValidator("query", z.object({ page: z.string() })), async (ctx) => {
+    const rawPage = ctx.req.query("page");
+    const page = rawPage ? Number(rawPage) : 0;
 
     const { error, result } = await safeTry(
       db.query.threads.findMany({
         with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
         limit: 6,
-        offset: offset * 6,
+        offset: page * 6,
         orderBy: desc(threadsTable.createdAt),
       }),
     );
 
-    if (error) {
+    if (error !== null) {
       return ctx.json(error, 500);
     }
 
     return ctx.json(result);
   })
-  .get("/posts/:userId", zValidator("query", z.object({ offset: z.string() })), async (ctx) => {
+  .get("/posts/:userId", zValidator("query", z.object({ page: z.string() })), async (ctx) => {
     const userId = ctx.req.param("userId");
-    const rawOffset = ctx.req.query("offset");
-    const offset = rawOffset ? Number(rawOffset) : 0;
-
-    if (!userId) {
-      return ctx.json({ message: "Username not provided." }, 400);
-    }
+    const rawPage = ctx.req.query("page");
+    const page = rawPage ? Number(rawPage) : 0;
 
     const { error, result } = await safeTry(
       db.query.threads.findMany({
@@ -73,13 +69,13 @@ export const threads = new Hono()
           },
         },
         limit: 6,
-        offset: offset * 6,
+        offset: page * 6,
         orderBy: desc(threadsTable.createdAt),
         where: eq(threadsTable.authorId, userId),
       }),
     );
 
-    if (error) {
+    if (error !== null) {
       return ctx.json(error, 500);
     }
 
@@ -96,7 +92,7 @@ export const threads = new Hono()
       }),
     );
 
-    if (author.error) {
+    if (author.error !== null) {
       return ctx.json(author.error, 500);
     }
 
@@ -111,7 +107,7 @@ export const threads = new Hono()
       }),
     );
 
-    if (error) {
+    if (error !== null) {
       return ctx.json(error, 500);
     }
 
@@ -135,7 +131,7 @@ export const threads = new Hono()
         const resourceList = body.resources;
         for (const resource of resourceList) {
           const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
-            if (error) {
+            if (error !== undefined) {
               console.error(error);
               return ctx.json(error, 500);
             }
@@ -169,7 +165,7 @@ export const threads = new Hono()
         .returning(),
     );
 
-    if (error) {
+    if (error !== null) {
       return ctx.json(error, 500);
     }
 
@@ -180,7 +176,7 @@ export const threads = new Hono()
       }),
     );
 
-    if (fullThread.error) {
+    if (fullThread.error !== null) {
       return ctx.json(error, 500);
     }
 
@@ -190,6 +186,31 @@ export const threads = new Hono()
 
     return ctx.json(fullThread.result);
   })
+  .get("/replies/:parentId", zValidator("query", z.object({ offset: z.string() })), async (ctx) => {
+    const parentId = ctx.req.param("parentId");
+    const rawPage = ctx.req.query("offset");
+    const page = rawPage ? Number(rawPage) : 0;
+
+    const { error, result } = await safeTry(
+      db.query.threads.findMany({
+        with: {
+          author: {
+            columns: { username: true, name: true, profilePictureId: true },
+          },
+        },
+        limit: 6,
+        offset: page * 6,
+        orderBy: desc(threadsTable.createdAt),
+        where: eq(threadsTable.parentId, parentId),
+      }),
+    );
+
+    if (error !== null) {
+      return ctx.json(error, 500);
+    }
+
+    return ctx.json(result);
+  })
   .post("/reply", getUser, zValidator("json", replyThreadSchema), async (ctx) => {
     const user = ctx.get("user");
     const body = ctx.req.valid("json");
@@ -198,7 +219,7 @@ export const threads = new Hono()
       db.query.threads.findFirst({ columns: { id: true }, where: eq(threadsTable.id, body.rootId) }),
     );
 
-    if (findRootThread.error) {
+    if (findRootThread.error !== null) {
       return ctx.json(findRootThread.error, 500);
     }
 
@@ -207,10 +228,13 @@ export const threads = new Hono()
     }
 
     const findParentThread = await safeTry(
-      db.query.threads.findFirst({ columns: { id: true }, where: eq(threadsTable.id, body.parentId) }),
+      db.query.threads.findFirst({
+        columns: { id: true, repliesCount: true },
+        where: eq(threadsTable.id, body.parentId),
+      }),
     );
 
-    if (findParentThread.error) {
+    if (findParentThread.error !== null) {
       return ctx.json(findParentThread.error, 500);
     }
 
@@ -227,7 +251,7 @@ export const threads = new Hono()
       if (body.resources[0].includes("data:image/jpeg;base64,")) {
         for (const resource in body.resources) {
           const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
-            if (error) {
+            if (error !== undefined) {
               console.error(error);
               return ctx.json(error, 500);
             }
@@ -258,8 +282,19 @@ export const threads = new Hono()
       }),
     );
 
-    if (error) {
+    if (error !== null) {
       return ctx.json(error, 500);
+    }
+
+    const increaseReplyCount = await safeTry(
+      db
+        .update(threadsTable)
+        .set({ repliesCount: findParentThread.result.repliesCount + 1 })
+        .where(eq(threadsTable.id, findParentThread.result.id)),
+    );
+
+    if (increaseReplyCount.error !== null) {
+      return ctx.json(increaseReplyCount.error, 500);
     }
 
     return ctx.json(result, 200);
