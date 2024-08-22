@@ -8,7 +8,6 @@ type Props = {
 
 export function Editor(props: Props) {
   const [innerText, setInnerText] = useState(props.value ?? "");
-  const [textLength, setTextLength] = useState(0);
   const contentEditableRef = useRef<HTMLTextAreaElement>(null);
   const highlightContentRef = useRef<HTMLDivElement>(null);
 
@@ -17,7 +16,6 @@ export function Editor(props: Props) {
     e.currentTarget.style.height = e.currentTarget.scrollHeight + "px";
 
     setInnerText(e.currentTarget.value);
-    setTextLength(e.currentTarget.textLength);
 
     if (props.onChange) {
       props.onChange(e.currentTarget.value);
@@ -57,6 +55,15 @@ export function Editor(props: Props) {
   }
 
   useEffect(() => {
+    if (innerText.length > 0) {
+      contentEditableRef.current?.setSelectionRange(
+        contentEditableRef.current.value.length,
+        contentEditableRef.current.value.length,
+      );
+    }
+  }, []);
+
+  useEffect(() => {
     if (highlightContentRef.current) {
       const el = highlightContentRef.current;
 
@@ -70,10 +77,11 @@ export function Editor(props: Props) {
         ref={contentEditableRef}
         rows={1}
         autoFocus={true}
+        value={innerText}
         className="min-h-6 w-full max-w-full resize-none overflow-hidden break-words bg-transparent leading-snug text-transparent caret-foreground outline-none"
         onInput={handleInput}
       />
-      {textLength === 0 && (
+      {innerText.length === 0 && (
         <div className="pointer-events-none absolute top-0 text-muted-foreground">
           {props.placeholder ? props.placeholder : "Start a thread..."}
         </div>

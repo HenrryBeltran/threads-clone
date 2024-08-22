@@ -116,6 +116,7 @@ export function ThreadSmallView({ id }: ThreadSmallViewProps) {
   const [post, setPost] = useState<ThreadProps>();
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
+  // save the post in the cache to used in other places of the code
   useEffect(() => {
     for (let j = 0; pages.length > j; j++) {
       for (let k = 0; pages[j].length > k; k++) {

@@ -159,6 +159,7 @@ export function CreateThread() {
                         setThread={setThread}
                         images={images}
                         setImages={setImages}
+                        placeholder={`Reply to ...`}
                       />
                     </>
                   )}
@@ -209,9 +210,10 @@ type ThreadEditorProps = {
   setThread: React.Dispatch<React.SetStateAction<string>>;
   images: Resource[];
   setImages: React.Dispatch<React.SetStateAction<Resource[]>>;
+  placeholder?: string;
 };
 
-function ThreadEditor({ user, thread, setThread, images, setImages }: ThreadEditorProps) {
+function ThreadEditor({ user, thread, setThread, images, setImages, placeholder }: ThreadEditorProps) {
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const createThread = useCreateThreadStore();
 
@@ -281,7 +283,7 @@ function ThreadEditor({ user, thread, setThread, images, setImages }: ThreadEdit
       >
         <div className="px-3">
           <span className="font-semibold leading-snug">{user.username}</span>
-          <Editor value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
+          <Editor placeholder={placeholder} value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
         </div>
         <div className="flex px-1 pb-3 pt-1">
           <UploadAlbumButton imagesLength={images.length} handleUploadFile={handleUploadFile} />
