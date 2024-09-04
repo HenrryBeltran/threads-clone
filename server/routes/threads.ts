@@ -2,7 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { v2 as cloudinary } from "cloudinary";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
 import { z } from "zod";
@@ -47,6 +47,7 @@ export const threads = new Hono()
         limit: 6,
         offset: page * 6,
         orderBy: desc(threadsTable.createdAt),
+        where: isNull(threadsTable.parentId),
       }),
     );
 
@@ -117,74 +118,148 @@ export const threads = new Hono()
 
     return ctx.json(result);
   })
+  /// TODO test if this is working correctly
   .post("/post", getUser, zValidator("json", postThreadSchema), async (ctx) => {
     const user = ctx.get("user");
     const body = ctx.req.valid("json");
 
-    const hashtags = filterHashtagAndMentions(body.text, "#");
-    const mentions = filterHashtagAndMentions(body.text, "@");
+    const newId = nanoid();
+    const rootId = body.rootId !== null ? body.rootId : newId;
 
-    let resources: string[] = [];
+    let previusId = "";
+    let allThreads: {
+      text: string;
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      postId: string;
+      authorId: string;
+      rootId: string;
+      parentId: string | null;
+      resources: string[] | null;
+      hashtags: string[] | null;
+      mentions: string[] | null;
+      likesCount: number;
+      repliesCount: number;
+      author: {
+        username: string;
+        name: string;
+        profilePictureId: string | null;
+      };
+    }[] = [];
 
-    if (body.resources) {
-      if (body.resources[0].includes("data:image/jpeg;base64,")) {
-        const resourceList = body.resources;
-        for (const resource of resourceList) {
-          const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
-            if (error !== undefined) {
-              console.error(error);
-              return ctx.json(error, 500);
-            }
-          });
+    for (let i = 0; i < body.body.length; i++) {
+      const post = body.body[i];
 
-          resources.push(uploadResult.public_id);
+      const hashtags = filterHashtagAndMentions(post.text, "#");
+      const mentions = filterHashtagAndMentions(post.text, "@");
+
+      let resources: string[] | null = null;
+
+      if (post.resources !== null && post.resources.length > 0) {
+        if (post.resources[0].includes("data:image/jpeg;base64,")) {
+          const resourceList = post.resources;
+          for (const resource of resourceList) {
+            const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
+              if (error !== undefined) {
+                console.error(error);
+                return ctx.json(error, 500);
+              }
+            });
+            resources = [];
+            resources.push(uploadResult.public_id);
+          }
+        } else {
+          resources = post.resources;
         }
-      } else {
-        resources = body.resources;
       }
+
+      const id = i === 0 ? newId : nanoid();
+
+      let parentId: string | null = null;
+      if (i === 0 && body.parentId !== null) {
+        parentId = body.parentId;
+      }
+      if (i > 0) {
+        parentId = previusId;
+      }
+
+      const { error, result } = await safeTry(
+        db
+          .insert(threadsTable)
+          .values({
+            id,
+            postId: shortNanoId(),
+            authorId: user.id,
+            rootId: rootId,
+            parentId: parentId,
+            text: post.text,
+            resources: resources,
+            hashtags,
+            mentions,
+            likesCount: 0,
+            repliesCount: 0,
+            createdAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
+            updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
+          })
+          .returning(),
+      );
+
+      if (error !== null) {
+        return ctx.json(error, 500);
+      }
+
+      const fullThread = await safeTry(
+        db.query.threads.findFirst({
+          with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
+          where: eq(threadsTable.id, result[0].id),
+        }),
+      );
+
+      if (fullThread.error !== null) {
+        return ctx.json(error, 500);
+      }
+
+      if (fullThread.result === undefined) {
+        return ctx.json({ message: "Thread not found." }, 404);
+      }
+
+      allThreads.push(fullThread.result);
+
+      if (body.parentId !== null && i === 0) {
+        const increaseReplyCount = await safeTry(
+          db.run(sql`
+            UPDATE threads
+            SET replies_count = replies_count + 1
+            WHERE id = ${body.parentId}
+          `),
+        );
+
+        if (increaseReplyCount.error !== null) {
+          return ctx.json(increaseReplyCount.error, 500);
+        }
+      }
+
+      if (i > 0) {
+        const increaseReplyCount = await safeTry(
+          db.run(sql`
+            UPDATE threads
+            SET replies_count = replies_count + 1
+            WHERE id = ${previusId}
+          `),
+        );
+
+        if (increaseReplyCount.error !== null) {
+          return ctx.json(increaseReplyCount.error, 500);
+        }
+      }
+
+      previusId = result[i].id;
+
+      return ctx.json(result, 200);
     }
 
-    const { error, result } = await safeTry(
-      db
-        .insert(threadsTable)
-        .values({
-          id: nanoid(),
-          postId: shortNanoId(),
-          authorId: user.id,
-          rootId: user.id,
-          parentId: null,
-          text: body.text,
-          resources: resources.length > 0 ? resources : null,
-          hashtags,
-          mentions,
-          likesCount: 0,
-          repliesCount: 0,
-          createdAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
-          updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
-        })
-        .returning(),
-    );
-
-    if (error !== null) {
-      return ctx.json(error, 500);
-    }
-
-    const fullThread = await safeTry(
-      db.query.threads.findFirst({
-        with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
-        where: eq(threadsTable.id, result[0].id),
-      }),
-    );
-
-    if (fullThread.error !== null) {
-      return ctx.json(error, 500);
-    }
-
-    if (fullThread.result === undefined) {
-      return ctx.json({ message: "Thread not found." }, 404);
-    }
-
-    return ctx.json(fullThread.result);
+    return ctx.json(allThreads);
   })
   .get("/replies/:parentId", zValidator("query", z.object({ offset: z.string() })), async (ctx) => {
     const parentId = ctx.req.param("parentId");

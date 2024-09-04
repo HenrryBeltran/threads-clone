@@ -7,13 +7,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Editor } from "./editor";
-import { ThreadSmallView } from "./thread";
 import { Posts } from "./threads-infinite-scroll";
 import { Button } from "./ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { UploadAlbumButton } from "./upload-album-button";
 import { Resource, UploadedAlbumCarousel, UploadedAlbumDouble, UploadedSingleView } from "./upload-album-view";
 import { UserImage } from "./user-image";
+import { ThreadSmallView } from "./thread";
+
+export type Thread = {
+  text: string;
+  images: Resource[];
+};
 
 const upTo10AttachmentsMessage = () =>
   toast("You can have up to 10 attachments.", {
@@ -25,8 +30,17 @@ const upTo10AttachmentsMessage = () =>
     },
   });
 
-async function postThread({ text, resources }: { text: string; resources?: string[] }) {
-  const res = await safeTry(api.threads.post.$post({ json: { text, resources } }));
+type JSONPost = {
+  rootId: string | null;
+  parentId: string | null;
+  body: {
+    text: string;
+    resources: string[] | null;
+  }[];
+};
+
+async function postThread(json: JSONPost) {
+  const res = await safeTry(api.threads.post.$post({ json }));
 
   if (res.error) throw new Error("Something went wrong");
   if (!res.result.ok) throw new Error("Something went wrong");
@@ -43,8 +57,7 @@ export function CreateThread() {
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
   const createThread = useCreateThreadStore();
 
-  const [thread, setThread] = useState("");
-  const [images, setImages] = useState<Resource[]>([]);
+  const [thread, setThread] = useState<Thread[]>([{ text: "", images: [] }]);
   const [openDiscard, setOpenDiscard] = useState(false);
 
   const mutation = useMutation({
@@ -56,6 +69,10 @@ export function CreateThread() {
       queryClient.setQueryData(["posting", "threads"], [currentData, ...oldData]);
     },
   });
+
+  useEffect(() => {
+    setThread([{ text: "", images: [] }]);
+  }, [createThread.data.open]);
 
   useLockScrolling(createThread.data.open);
 
@@ -92,13 +109,13 @@ export function CreateThread() {
             </DialogContent>
           </Dialog>
           <section
-            className="absolute left-0 top-0 z-50 flex h-svh w-svw border border-muted-foreground/20 bg-background dark:bg-neutral-900 sm:items-center sm:justify-center sm:border-none sm:bg-neutral-700/50 sm:dark:bg-black/80"
+            className="fixed left-0 top-0 z-50 flex h-svh w-svw border border-muted-foreground/20 bg-background dark:bg-neutral-900 sm:items-center sm:justify-center sm:border-none sm:bg-neutral-700/50 sm:dark:bg-black/80"
             onClick={(e) => {
               if (e.currentTarget.clientWidth < 640) {
                 return;
               }
 
-              if (thread.length > 0 || images.length > 0) {
+              if (thread[0].text.length > 0 || thread[0].images.length > 0) {
                 setOpenDiscard(true);
               } else {
                 createThread.hide();
@@ -106,7 +123,7 @@ export function CreateThread() {
             }}
             onKeyDown={(e) => {
               if (e.key === "Escape") {
-                if (thread.length > 0 || images.length > 0) {
+                if (thread[0].text.length > 0 || thread[0].images.length > 0) {
                   setOpenDiscard(true);
                 } else {
                   createThread.hide();
@@ -125,7 +142,7 @@ export function CreateThread() {
                   variant="link"
                   className="px-0 text-base sm:hidden"
                   onClick={() => {
-                    if (thread.length > 0 || images.length > 0) {
+                    if (thread[0].text.length > 0 || thread[0].images.length > 0) {
                       setOpenDiscard(true);
                     } else {
                       createThread.hide();
@@ -142,27 +159,30 @@ export function CreateThread() {
               <div className="flex w-full flex-grow flex-col bg-background dark:bg-neutral-900 sm:max-w-xl sm:rounded-2xl sm:border sm:border-muted-foreground/20">
                 <div className="w-full flex-grow overflow-y-scroll p-3 sm:max-w-xl sm:p-6">
                   {createThread.data.rootId === null && (
-                    <ThreadEditor
-                      user={user}
-                      thread={thread}
-                      setThread={setThread}
-                      images={images}
-                      setImages={setImages}
-                    />
+                    <>
+                      {thread.map((_, i) => (
+                        <ThreadEditor key={i} user={user} index={i} thread={thread} setThread={setThread} />
+                      ))}
+                      {/* <div data-enable={thread.length > 0} className="opacity-50 data-[enable=true]:opacity-100"> */}
+                      {/*   <ThreadEditor */}
+                      {/*     user={user} */}
+                      {/*     thread={thread} */}
+                      {/*     setThread={setThread} */}
+                      {/*     images={images} */}
+                      {/*     setImages={setImages} */}
+                      {/*     placeholder="" */}
+                      {/*   /> */}
+                      {/* </div> */}
+                    </>
                   )}
                   {createThread.data.rootId !== null && createThread.data.id && (
                     <>
-                      <ThreadSmallView id={createThread.data.id} />
-                      <ThreadEditor
-                        user={user}
-                        thread={thread}
-                        setThread={setThread}
-                        images={images}
-                        setImages={setImages}
-                        placeholder={`Reply to ...`}
-                      />
+                      <ThreadSmallView id={createThread.data.id} user={user} thread={thread} setThread={setThread} />
                     </>
                   )}
+                  <button onClick={() => setThread((prev) => [...prev, { text: "", images: [] }])}>
+                    Add new thread
+                  </button>
                 </div>
                 <div className="flex items-center justify-end gap-4 p-3 sm:p-6 sm:pt-3">
                   {thread.length >= 450 && (
@@ -176,7 +196,9 @@ export function CreateThread() {
                   <Button
                     variant="outline"
                     aria-disabled={
-                      (images.length === 0 && thread.split("\n").join("").length === 0) || thread.length > 500
+                      (thread.every((t) => t.images.length === 0) &&
+                        thread.every((t) => t.text.split("\n").join("").length === 0)) ||
+                      thread.every((t) => t.text.length > 500)
                     }
                     className="rounded-xl border-muted-foreground/30 aria-disabled:cursor-not-allowed aria-disabled:opacity-60 aria-disabled:hover:!bg-transparent"
                     onClick={(e) => {
@@ -184,8 +206,29 @@ export function CreateThread() {
                         return;
                       }
 
-                      const resources = images.length === 0 ? undefined : images.map((img) => img.base64);
-                      mutation.mutate({ text: thread, resources });
+                      // TODO: Mutate the data
+                      console.log("~ POST", {
+                        rootId: createThread.data.rootId,
+                        parentId: createThread.data.id,
+                        body: thread,
+                      });
+                      const postData = thread.map((t) => {
+                        if (t.images.length > 0) {
+                          return {
+                            text: t.text,
+                            resources: [] as string[],
+                          };
+                        }
+                        return {
+                          text: t.text,
+                          resources: t.images.map((image) => image.base64),
+                        };
+                      });
+                      mutation.mutate({
+                        rootId: createThread.data.rootId,
+                        parentId: createThread.data.id === undefined ? null : createThread.data.id,
+                        body: postData,
+                      });
                       createThread.hide();
                     }}
                   >
@@ -206,21 +249,15 @@ type ThreadEditorProps = {
     profilePictureId: string | null;
     username: string;
   };
-  thread: string;
-  setThread: React.Dispatch<React.SetStateAction<string>>;
-  images: Resource[];
-  setImages: React.Dispatch<React.SetStateAction<Resource[]>>;
+  index: number;
+  thread: Thread[];
+  setThread: React.Dispatch<React.SetStateAction<Thread[]>>;
   placeholder?: string;
 };
 
-function ThreadEditor({ user, thread, setThread, images, setImages, placeholder }: ThreadEditorProps) {
+export function ThreadEditor({ user, index, thread, setThread, placeholder }: ThreadEditorProps) {
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const createThread = useCreateThreadStore();
-
-  useEffect(() => {
-    setThread("");
-    setImages([]);
-  }, [createThread.data.open]);
 
   async function handleUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) {
@@ -243,8 +280,9 @@ function ThreadEditor({ user, thread, setThread, images, setImages, placeholder 
       optimizedImages.push({ base64, size });
     }
 
-    setImages((prev) => {
-      const totalLength = prev.length + optimizedImages.length;
+    setThread((p) => {
+      const prev = p[index];
+      const totalLength = prev.images.length + optimizedImages.length;
 
       if (totalLength >= 10) {
         upTo10AttachmentsMessage();
@@ -252,18 +290,45 @@ function ThreadEditor({ user, thread, setThread, images, setImages, placeholder 
         const upTo10List: Resource[] = [];
 
         for (let i = 0; i < 10; i++) {
-          const newItem = prev[i] !== undefined ? prev[i] : optimizedImages[i - prev.length];
+          const newItem = prev.images[i] !== undefined ? prev.images[i] : optimizedImages[i - prev.images.length];
           upTo10List.push(newItem);
         }
 
-        return upTo10List;
+        return p.map((prevThread, i) => {
+          if (i === index) {
+            return {
+              text: prevThread.text,
+              images: upTo10List,
+            };
+          }
+          return prevThread;
+        });
       }
 
-      if (prev) {
-        return [...prev, ...optimizedImages];
-      }
+      return p.map((prevThread, i) => {
+        if (i === index) {
+          return {
+            text: prevThread.text,
+            images: [...prevThread.images, ...optimizedImages],
+          };
+        }
+        return prevThread;
+      });
+    });
+  }
 
-      return optimizedImages;
+  function deleteImage(imageIndexToDelete: number) {
+    setThread((prev) => {
+      return prev.map((prevThread, idx) => {
+        if (idx === index) {
+          return {
+            text: prevThread.text,
+            images: prevThread.images.filter((_, i) => i !== imageIndexToDelete),
+          };
+        }
+
+        return prevThread;
+      });
     });
   }
 
@@ -283,30 +348,46 @@ function ThreadEditor({ user, thread, setThread, images, setImages, placeholder 
       >
         <div className="px-3">
           <span className="font-semibold leading-snug">{user.username}</span>
-          <Editor placeholder={placeholder} value={createThread.data.content ?? thread} onChange={(value) => setThread(value)} />
+          <Editor
+            placeholder={placeholder}
+            value={createThread.data.content ?? thread[index].text}
+            onChange={(value) =>
+              setThread((prev) => {
+                return prev.map((prevThread, i) => {
+                  if (i === index) {
+                    return {
+                      text: value,
+                      images: prevThread.images,
+                    };
+                  }
+                  return prevThread;
+                });
+              })
+            }
+          />
         </div>
         <div className="flex px-1 pb-3 pt-1">
-          <UploadAlbumButton imagesLength={images.length} handleUploadFile={handleUploadFile} />
+          <UploadAlbumButton imagesLength={thread[index].images.length} handleUploadFile={handleUploadFile} />
         </div>
-        {images.length === 1 && (
+        {thread[index].images.length === 1 && (
           <UploadedSingleView
             containerWidth={imageContainerRef.current?.clientWidth!}
-            images={images}
-            setImages={setImages}
+            images={thread[index].images}
+            deleteImage={deleteImage}
           />
         )}
-        {images.length === 2 && (
+        {thread[index].images.length === 2 && (
           <UploadedAlbumDouble
             containerWidth={imageContainerRef.current?.clientWidth!}
-            images={images}
-            setImages={setImages}
+            images={thread[index].images}
+            deleteImage={deleteImage}
           />
         )}
-        {images.length >= 3 && (
+        {thread[index].images.length >= 3 && (
           <UploadedAlbumCarousel
             containerWidth={imageContainerRef.current?.clientWidth!}
-            images={images}
-            setImages={setImages}
+            images={thread[index].images}
+            deleteImage={deleteImage}
           />
         )}
       </div>

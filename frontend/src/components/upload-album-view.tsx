@@ -10,10 +10,10 @@ export type Resource = {
 type Props = {
   containerWidth: number;
   images: Resource[];
-  setImages: React.Dispatch<React.SetStateAction<Resource[]>>;
+  deleteImage: (index: number) => void;
 };
 
-export function UploadedAlbumCarousel({ containerWidth, images, setImages }: Props) {
+export function UploadedAlbumCarousel({ containerWidth, images, deleteImage }: Props) {
   const pointX = useRef<number | null>(null);
 
   return (
@@ -46,7 +46,7 @@ export function UploadedAlbumCarousel({ containerWidth, images, setImages }: Pro
         <div className="absolute left-0 top-0 flex w-max gap-4 active:cursor-grabbing">
           {images?.map((image, idx) => (
             <div key={idx} className="relative">
-              <DeleteButton index={idx} image={image} setImages={setImages} />
+              <DeleteButton index={idx} image={image} deleteImage={deleteImage} />
               <figure>
                 <img
                   src={image.base64}
@@ -68,13 +68,13 @@ export function UploadedAlbumCarousel({ containerWidth, images, setImages }: Pro
   );
 }
 
-export function UploadedAlbumDouble({ containerWidth, images, setImages }: Props) {
+export function UploadedAlbumDouble({ containerWidth, images, deleteImage }: Props) {
   return (
     <div className="ml-3">
       <div className="grid w-max grid-cols-2 grid-rows-1 gap-4 active:cursor-grabbing">
         {images?.map((image, idx) => (
           <div key={idx} className="relative flex">
-            <DeleteButton index={idx} image={image} setImages={setImages} />
+            <DeleteButton index={idx} image={image} deleteImage={deleteImage} />
             <figure>
               <img
                 src={image.base64}
@@ -96,7 +96,7 @@ export function UploadedAlbumDouble({ containerWidth, images, setImages }: Props
   );
 }
 
-export function UploadedSingleView({ images, setImages }: Props) {
+export function UploadedSingleView({ images, deleteImage }: Props) {
   const image = images[0];
   const imageWidth = image.size.width * 0.15;
   const imageHeight = image.size.height * 0.15;
@@ -111,7 +111,7 @@ export function UploadedSingleView({ images, setImages }: Props) {
     <div className="ml-3">
       <div className="flex">
         <figure className="relative">
-          <DeleteButton index={0} image={image} setImages={setImages} />
+          <DeleteButton index={0} image={image} deleteImage={deleteImage} />
           <img
             src={image.base64}
             width={resizeImageWidth}
@@ -130,10 +130,10 @@ export function UploadedSingleView({ images, setImages }: Props) {
 type ButtonProps = {
   index: number;
   image: Resource;
-  setImages: React.Dispatch<React.SetStateAction<Resource[]>>;
+  deleteImage: (index: number) => void;
 };
 
-function DeleteButton({ index, image, setImages }: ButtonProps) {
+function DeleteButton({ index, image, deleteImage }: ButtonProps) {
   return (
     <Button
       variant="secondary"
@@ -141,7 +141,7 @@ function DeleteButton({ index, image, setImages }: ButtonProps) {
       size="icon"
       disabled={image == undefined}
       className="absolute right-2 top-2 h-7 w-7 rounded-full border border-neutral-700/50 bg-neutral-950/55 text-white transition-all hover:bg-neutral-950/70 active:scale-90"
-      onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== index))}
+      onClick={() => deleteImage(index)}
     >
       <Cancel01Icon width={16} height={16} strokeWidth={2.5} className="h-4 w-4" />
     </Button>

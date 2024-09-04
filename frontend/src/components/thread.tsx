@@ -2,8 +2,9 @@ import { randomInt } from "@/lib/utils";
 import { useCreateThreadStore } from "@/store";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { ThreadEditor, type Thread } from "./create-thread";
 import { BubbleChatIconModded, Cancel01Icon, FavouriteIcon, SentIcon } from "./icons/hugeicons";
 import { Paragraph } from "./paragraph";
 import { PostsPages } from "./threads-infinite-scroll";
@@ -15,6 +16,7 @@ import { UserImage } from "./user-image";
 type ThreadProps = {
   id: string;
   rootId: string | null;
+  parentId: string | null;
   postId: string;
   author: {
     name: string;
@@ -23,9 +25,11 @@ type ThreadProps = {
   };
   text: string;
   resources: string[] | null;
+  likesCount: number;
+  repliesCount: number;
 };
 
-export function Thread({ id, rootId, postId, author, text, resources }: ThreadProps) {
+export function Thread({ id, rootId, parentId, postId, author, text, resources, likesCount, repliesCount }: ThreadProps) {
   const navigate = useNavigate();
   const { show } = useCreateThreadStore();
 
@@ -81,15 +85,15 @@ export function Thread({ id, rootId, postId, author, text, resources }: ThreadPr
         <div className="!mt-1.5 flex -translate-x-2 gap-2">
           <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
             <FavouriteIcon width={20} height={20} strokeWidth={1.5} />
-            {Math.random() > 0.25 && <span>{randomInt(1, 50)}</span>}
+            {likesCount > 0 && <span>{likesCount}</span>}
           </Button>
           <Button
             variant="ghost"
             className="h-9 space-x-1 rounded-full px-2 text-foreground/60"
-            onClick={() => show(undefined, id, rootId)}
+            onClick={() => show(undefined, id, rootId, parentId)}
           >
             <BubbleChatIconModded width={20} height={20} strokeWidth={1.5} />
-            {Math.random() > 0.25 && <span>{randomInt(1, 50)}</span>}
+            {repliesCount > 0 && <span>{repliesCount}</span>}
           </Button>
           <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
             <SentIcon width={20} height={20} strokeWidth={1.5} />
@@ -106,21 +110,28 @@ export function Thread({ id, rootId, postId, author, text, resources }: ThreadPr
 
 type ThreadSmallViewProps = {
   id: string;
+  user: {
+    profilePictureId: string | null;
+    username: string;
+  };
+  thread: Thread[];
+  setThread: React.Dispatch<React.SetStateAction<Thread[]>>;
 };
 
-export function ThreadSmallView({ id }: ThreadSmallViewProps) {
+export function ThreadSmallView({ id, user, thread, setThread }: ThreadSmallViewProps) {
+  const location = useLocation();
   const queryClient = useQueryClient();
-  // const navigate = useNavigate();
-  // const { show } = useCreateThreadStore();
-  const { pages } = queryClient.getQueryData<PostsPages>(["main", "threads"])!;
+
+  const pathnameSlices = location.pathname.split("/");
+  const source = pathnameSlices[1].startsWith("@") ? pathnameSlices[1].slice(1) : "main";
+
+  const { pages } = queryClient.getQueryData<PostsPages>([source, "threads"])!;
   const [post, setPost] = useState<ThreadProps>();
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  // save the post in the cache to used in other places of the code
   useEffect(() => {
     for (let j = 0; pages.length > j; j++) {
       for (let k = 0; pages[j].length > k; k++) {
-        console.log("~ page", pages[j][k]);
         if (pages[j][k].id == id) {
           setPost(pages[j][k]);
           break;
@@ -130,40 +141,52 @@ export function ThreadSmallView({ id }: ThreadSmallViewProps) {
   }, []);
 
   if (post === undefined) {
-    return <></>
+    return <></>;
   }
 
   return (
-    <div ref={imageContainerRef} className="flex h-[calc(100%-64px)]">
-      <UserImage
-        profilePictureId={post.author.profilePictureId ?? null}
-        username={post.author.username!}
-        width={44}
-        height={44}
-        fetchPriority="high"
-        className="h-11 w-11"
-      />
-      <div
-        style={{ width: `${imageContainerRef.current?.clientWidth! - 44}px` }}
-        className="flex max-h-[520px] flex-col"
-      >
-        <div className="px-3">
-          <span className="font-semibold leading-snug">{post.author.username!}</span>
-          <Paragraph
-            text={post.text!}
-            author={post.author.username!}
-            postId={post.postId!}
-          />
+    <>
+      <div ref={imageContainerRef} className="flex h-[calc(100%-64px)]">
+        <UserImage
+          profilePictureId={post.author.profilePictureId ?? null}
+          username={post.author.username!}
+          width={44}
+          height={44}
+          fetchPriority="high"
+          className="h-11 w-11"
+        />
+        <div
+          style={{ width: `${imageContainerRef.current?.clientWidth! - 44}px` }}
+          className="flex max-h-[520px] flex-col"
+        >
+          <div className="px-3">
+            <span className="font-semibold leading-snug">{post.author.username!}</span>
+            <Paragraph text={post.text!} author={post.author.username!} postId={post.postId!} />
+          </div>
+          {post.resources && (
+            <>
+              {post.resources.length === 1 && (
+                <div className="max-w-xs">
+                  <SinglePhoto images={post.resources} />
+                </div>
+              )}
+              {post.resources.length === 2 && <DoublePhoto images={post.resources} />}
+              {post.resources.length >= 3 && <AlbumCarousel images={post.resources} />}
+            </>
+          )}
         </div>
-        {post.resources && (
-          <>
-            {post.resources.length === 1 && <div className="max-w-xs"><SinglePhoto images={post.resources} /></div>}
-            {post.resources.length === 2 && <DoublePhoto images={post.resources} />}
-            {post.resources.length >= 3 && <AlbumCarousel images={post.resources} />}
-          </>
-        )}
       </div>
-    </div>
+      {thread.map((_, i) => (
+        <ThreadEditor
+          key={i}
+          index={0}
+          user={user}
+          thread={thread}
+          setThread={setThread}
+          placeholder={i === 0 ? `Reply to ${post.author.username}...` : undefined}
+        />
+      ))}
+    </>
   );
 }
 

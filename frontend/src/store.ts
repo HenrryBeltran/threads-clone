@@ -15,16 +15,25 @@ export const useBackdropStore = create<BackdropState>()((set) => ({
 }));
 
 type CreateThreadState = {
-  data: { open: boolean; content?: string; id?: string; rootId: string | null };
+  data: { open: boolean; content?: string; id?: string; rootId: string | null; parentId: string | null };
   toggle: () => void;
-  show: (content?: string, id?: string, rootId?: string | null) => void;
+  show: (content?: string, id?: string, rootId?: string | null, parentId?: string | null) => void;
   hide: () => void;
 };
 
 export const useCreateThreadStore = create<CreateThreadState>()((set) => ({
-  data: { open: false, rootId: null },
-  toggle: () => set((state) => ({ data: { open: !state.data.open, rootId: state.data.rootId } })),
-  show: (content?: string, id?: string, rootId?: string | null) =>
-    set((state) => ({ data: { open: true, content, id, rootId: rootId === undefined ? state.data.rootId : rootId } })),
-  hide: () => set({ data: { open: false, rootId: null } }),
+  data: { open: false, rootId: null, parentId: null },
+  toggle: () =>
+    set((state) => ({ data: { open: !state.data.open, rootId: state.data.rootId, parentId: state.data.parentId } })),
+  show: (content?: string, id?: string, rootId?: string | null, parentId?: string | null) =>
+    set((state) => ({
+      data: {
+        open: true,
+        content,
+        id,
+        rootId: rootId === undefined ? state.data.rootId : rootId,
+        parentId: parentId === undefined ? state.data.parentId : parentId,
+      },
+    })),
+  hide: () => set({ data: { open: false, rootId: null, parentId: null } }),
 }));
