@@ -6,7 +6,7 @@ import {
   Search01Icon,
   UserIcon,
 } from "@/components/icons/hugeicons";
-import { useCreateThreadStore } from "@/store";
+import { useThreadModalStore } from "@/store";
 import { useLocation } from "@tanstack/react-router";
 import { NavbarItem } from "./navbar-item";
 
@@ -23,7 +23,7 @@ type Props = {
 
 export default function Navbar({ username }: Props) {
   const { pathname } = useLocation();
-  const showCreateThread = useCreateThreadStore((state) => state.show);
+  const showThreadModal = useThreadModalStore((state) => state.show);
 
   return (
     <nav
@@ -37,7 +37,7 @@ export default function Navbar({ username }: Props) {
       <NavbarItem href="/search" pathname={pathname} username={username}>
         <Search01Icon {...menuIconsProps} className="relative z-10 !fill-none" />
       </NavbarItem>
-      <NavbarItem username={username} handleOnClick={() => showCreateThread()}>
+      <NavbarItem username={username} handleOnClick={() => showThreadModal()}>
         <PencilEdit02Icon {...menuIconsProps} />
       </NavbarItem>
       <NavbarItem href="/activity" pathname={pathname} username={username}>

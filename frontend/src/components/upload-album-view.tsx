@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Cancel01Icon } from "./icons/hugeicons";
 import { Button } from "./ui/button";
+import { useThreadStore } from "@/store";
 
 export type Resource = {
   base64: string;
@@ -8,12 +9,14 @@ export type Resource = {
 };
 
 type Props = {
+  threadIndex: number;
   containerWidth: number;
   images: Resource[];
-  deleteImage: (index: number) => void;
+  /// TODO: to remove
+  // deleteImage: (index: number) => void;
 };
 
-export function UploadedAlbumCarousel({ containerWidth, images, deleteImage }: Props) {
+export function UploadedAlbumCarousel({ threadIndex, containerWidth, images }: Props) {
   const pointX = useRef<number | null>(null);
 
   return (
@@ -46,7 +49,7 @@ export function UploadedAlbumCarousel({ containerWidth, images, deleteImage }: P
         <div className="absolute left-0 top-0 flex w-max gap-4 active:cursor-grabbing">
           {images?.map((image, idx) => (
             <div key={idx} className="relative">
-              <DeleteButton index={idx} image={image} deleteImage={deleteImage} />
+              <DeleteButton threadIndex={threadIndex} imageIndex={idx} image={image} />
               <figure>
                 <img
                   src={image.base64}
@@ -68,13 +71,13 @@ export function UploadedAlbumCarousel({ containerWidth, images, deleteImage }: P
   );
 }
 
-export function UploadedAlbumDouble({ containerWidth, images, deleteImage }: Props) {
+export function UploadedAlbumDouble({ threadIndex, containerWidth, images }: Props) {
   return (
     <div className="ml-3">
       <div className="grid w-max grid-cols-2 grid-rows-1 gap-4 active:cursor-grabbing">
         {images?.map((image, idx) => (
           <div key={idx} className="relative flex">
-            <DeleteButton index={idx} image={image} deleteImage={deleteImage} />
+            <DeleteButton threadIndex={threadIndex} imageIndex={idx} image={image} />
             <figure>
               <img
                 src={image.base64}
@@ -96,7 +99,7 @@ export function UploadedAlbumDouble({ containerWidth, images, deleteImage }: Pro
   );
 }
 
-export function UploadedSingleView({ images, deleteImage }: Props) {
+export function UploadedSingleView({ threadIndex, images }: Props) {
   const image = images[0];
   const imageWidth = image.size.width * 0.15;
   const imageHeight = image.size.height * 0.15;
@@ -111,7 +114,7 @@ export function UploadedSingleView({ images, deleteImage }: Props) {
     <div className="ml-3">
       <div className="flex">
         <figure className="relative">
-          <DeleteButton index={0} image={image} deleteImage={deleteImage} />
+          <DeleteButton threadIndex={threadIndex} imageIndex={0} image={image} />
           <img
             src={image.base64}
             width={resizeImageWidth}
@@ -128,12 +131,14 @@ export function UploadedSingleView({ images, deleteImage }: Props) {
 }
 
 type ButtonProps = {
-  index: number;
+  threadIndex: number;
+  imageIndex: number;
   image: Resource;
-  deleteImage: (index: number) => void;
 };
 
-function DeleteButton({ index, image, deleteImage }: ButtonProps) {
+function DeleteButton({ threadIndex, imageIndex, image }: ButtonProps) {
+  const deleteImage = useThreadStore((state) => state.removeImageToThread);
+
   return (
     <Button
       variant="secondary"
@@ -141,7 +146,7 @@ function DeleteButton({ index, image, deleteImage }: ButtonProps) {
       size="icon"
       disabled={image == undefined}
       className="absolute right-2 top-2 h-7 w-7 rounded-full border border-neutral-700/50 bg-neutral-950/55 text-white transition-all hover:bg-neutral-950/70 active:scale-90"
-      onClick={() => deleteImage(index)}
+      onClick={() => deleteImage(threadIndex, imageIndex)}
     >
       <Cancel01Icon width={16} height={16} strokeWidth={2.5} className="h-4 w-4" />
     </Button>

@@ -6,7 +6,7 @@ import { ProfileLink } from "@/components/profile-link";
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { Button } from "@/components/ui/button";
 import { api, type UserAccount } from "@/lib/api";
-import { useCreateThreadStore } from "@/store";
+import { useThreadModalStore } from "@/store";
 import { safeTry } from "@server/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { createLazyFileRoute, useLocation, useRouteContext } from "@tanstack/react-router";
@@ -24,7 +24,7 @@ function Profile() {
   const followData = queryClient.getQueryData<{ follow: boolean } | null>(["follow", username]);
   const ctx = useRouteContext({ from: "/_main-layout/_profile-layout" });
 
-  const showCreateThread = useCreateThreadStore((state) => state.show);
+  const showThreadModal = useThreadModalStore((state) => state.show);
 
   if (typeof ctx.profile === "number") {
     return (
@@ -86,7 +86,7 @@ function Profile() {
             <Button
               variant="outline"
               className="my-4 w-full rounded-xl border-muted-foreground/40"
-              onClick={() => showCreateThread(`@${profile.username}`)}
+              onClick={() => showThreadModal(`@${profile.username}`)}
             >
               Mention
             </Button>

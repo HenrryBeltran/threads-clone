@@ -1,10 +1,9 @@
-import { randomInt } from "@/lib/utils";
-import { useCreateThreadStore } from "@/store";
+import { useThreadModalStore, useThreadStore } from "@/store";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ThreadEditor, type Thread } from "./create-thread";
+import { ThreadEditor } from "./create-thread";
 import { BubbleChatIconModded, Cancel01Icon, FavouriteIcon, SentIcon } from "./icons/hugeicons";
 import { Paragraph } from "./paragraph";
 import { PostsPages } from "./threads-infinite-scroll";
@@ -29,9 +28,19 @@ type ThreadProps = {
   repliesCount: number;
 };
 
-export function Thread({ id, rootId, parentId, postId, author, text, resources, likesCount, repliesCount }: ThreadProps) {
+export function Thread({
+  id,
+  rootId,
+  parentId,
+  postId,
+  author,
+  text,
+  resources,
+  likesCount,
+  repliesCount,
+}: ThreadProps) {
   const navigate = useNavigate();
-  const { show } = useCreateThreadStore();
+  const { show } = useThreadModalStore();
 
   return (
     <div className="flex gap-3 pt-4">
@@ -90,7 +99,7 @@ export function Thread({ id, rootId, parentId, postId, author, text, resources, 
           <Button
             variant="ghost"
             className="h-9 space-x-1 rounded-full px-2 text-foreground/60"
-            onClick={() => show(undefined, id, rootId, parentId)}
+            onClick={() => show(id, rootId, parentId)}
           >
             <BubbleChatIconModded width={20} height={20} strokeWidth={1.5} />
             {repliesCount > 0 && <span>{repliesCount}</span>}
@@ -114,11 +123,9 @@ type ThreadSmallViewProps = {
     profilePictureId: string | null;
     username: string;
   };
-  thread: Thread[];
-  setThread: React.Dispatch<React.SetStateAction<Thread[]>>;
 };
 
-export function ThreadSmallView({ id, user, thread, setThread }: ThreadSmallViewProps) {
+export function ThreadSmallView({ id, user }: ThreadSmallViewProps) {
   const location = useLocation();
   const queryClient = useQueryClient();
 
@@ -127,6 +134,7 @@ export function ThreadSmallView({ id, user, thread, setThread }: ThreadSmallView
 
   const { pages } = queryClient.getQueryData<PostsPages>([source, "threads"])!;
   const [post, setPost] = useState<ThreadProps>();
+  const threadStore = useThreadStore();
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -176,13 +184,11 @@ export function ThreadSmallView({ id, user, thread, setThread }: ThreadSmallView
           )}
         </div>
       </div>
-      {thread.map((_, i) => (
+      {threadStore.thread.map((_, i) => (
         <ThreadEditor
           key={i}
           index={0}
           user={user}
-          thread={thread}
-          setThread={setThread}
           placeholder={i === 0 ? `Reply to ${post.author.username}...` : undefined}
         />
       ))}

@@ -3,7 +3,7 @@ import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { Button } from "@/components/ui/button";
 import { UserImage } from "@/components/user-image";
 import { UserAccount, api } from "@/lib/api";
-import { useCreateThreadStore } from "@/store";
+import { useThreadModalStore } from "@/store";
 import { safeTry } from "@server/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
@@ -26,7 +26,7 @@ async function postsFetcher({ pageParam }: { pageParam: number }) {
 }
 
 function Index() {
-  const showCreateThread = useCreateThreadStore((state) => state.show);
+  const showThreadModal = useThreadModalStore((state) => state.show);
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount | null>(["user", "account"]);
 
@@ -48,7 +48,7 @@ function Index() {
             </Link>
             <button
               className="flex-grow cursor-text self-stretch px-3 text-start text-muted-foreground/90"
-              onClick={() => showCreateThread()}
+              onClick={() => showThreadModal()}
             >
               Start a thread...
             </button>
@@ -56,7 +56,7 @@ function Index() {
               <Button
                 variant="outline"
                 className="rounded-xl border-muted-foreground/30 font-semibold transition-transform duration-200 active:scale-95"
-                onClick={() => showCreateThread()}
+                onClick={() => showThreadModal()}
               >
                 Post
               </Button>

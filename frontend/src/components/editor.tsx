@@ -1,13 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useThreadStore } from "@/store";
+import { useEffect, useRef } from "react";
 
 type Props = {
+  index: number;
   placeholder?: string;
-  value?: string;
-  onChange?: (value: string) => void;
 };
 
 export function Editor(props: Props) {
-  const [innerText, setInnerText] = useState(props.value ?? "");
+  const thread = useThreadStore((state) => state.thread);
+  const editTextFromThread = useThreadStore((state) => state.editTextFromThread);
+  const changeCurrentIndexTo = useThreadStore((state) => state.changeCurrentIndexTo);
+
   const contentEditableRef = useRef<HTMLTextAreaElement>(null);
   const highlightContentRef = useRef<HTMLDivElement>(null);
 
@@ -15,11 +18,7 @@ export function Editor(props: Props) {
     e.currentTarget.style.height = "5px";
     e.currentTarget.style.height = e.currentTarget.scrollHeight + "px";
 
-    setInnerText(e.currentTarget.value);
-
-    if (props.onChange) {
-      props.onChange(e.currentTarget.value);
-    }
+    editTextFromThread(props.index, e.currentTarget.value);
   }
 
   function highlightText(text: string) {
@@ -55,7 +54,7 @@ export function Editor(props: Props) {
   }
 
   useEffect(() => {
-    if (innerText.length > 0) {
+    if (thread[props.index].text.length > 0) {
       contentEditableRef.current?.setSelectionRange(
         contentEditableRef.current.value.length,
         contentEditableRef.current.value.length,
@@ -67,9 +66,9 @@ export function Editor(props: Props) {
     if (highlightContentRef.current) {
       const el = highlightContentRef.current;
 
-      el.innerHTML = highlightText(innerText);
+      el.innerHTML = highlightText(thread[props.index].text);
     }
-  }, [innerText]);
+  }, [thread[props.index].text]);
 
   return (
     <div className="relative">
@@ -77,11 +76,12 @@ export function Editor(props: Props) {
         ref={contentEditableRef}
         rows={1}
         autoFocus={true}
-        value={innerText}
+        value={thread[props.index].text}
         className="min-h-6 w-full max-w-full resize-none overflow-hidden break-words bg-transparent leading-snug text-transparent caret-foreground outline-none"
         onInput={handleInput}
+        onFocus={() => changeCurrentIndexTo(props.index)}
       />
-      {innerText.length === 0 && (
+      {thread[props.index].text.length === 0 && (
         <div className="pointer-events-none absolute top-0 text-muted-foreground">
           {props.placeholder ? props.placeholder : "Start a thread..."}
         </div>

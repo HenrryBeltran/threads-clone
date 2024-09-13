@@ -29,9 +29,6 @@ const AccountCompleteProfileLazyImport = createFileRoute(
 )()
 const MainLayoutSearchLazyImport = createFileRoute('/_main-layout/search')()
 const MainLayoutSavedLazyImport = createFileRoute('/_main-layout/saved')()
-const MainLayoutOptimizeImageTestLazyImport = createFileRoute(
-  '/_main-layout/optimize-image-test',
-)()
 const MainLayoutLikedLazyImport = createFileRoute('/_main-layout/liked')()
 const MainLayoutActivityLazyImport = createFileRoute('/_main-layout/activity')()
 const MainLayoutProfileLayoutUsernameLazyImport = createFileRoute(
@@ -101,16 +98,6 @@ const MainLayoutSavedLazyRoute = MainLayoutSavedLazyImport.update({
 } as any).lazy(() =>
   import('./routes/_main-layout/saved.lazy').then((d) => d.Route),
 )
-
-const MainLayoutOptimizeImageTestLazyRoute =
-  MainLayoutOptimizeImageTestLazyImport.update({
-    path: '/optimize-image-test',
-    getParentRoute: () => MainLayoutRoute,
-  } as any).lazy(() =>
-    import('./routes/_main-layout/optimize-image-test.lazy').then(
-      (d) => d.Route,
-    ),
-  )
 
 const MainLayoutLikedLazyRoute = MainLayoutLikedLazyImport.update({
   path: '/liked',
@@ -216,13 +203,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutLikedLazyImport
       parentRoute: typeof MainLayoutImport
     }
-    '/_main-layout/optimize-image-test': {
-      id: '/_main-layout/optimize-image-test'
-      path: '/optimize-image-test'
-      fullPath: '/optimize-image-test'
-      preLoaderRoute: typeof MainLayoutOptimizeImageTestLazyImport
-      parentRoute: typeof MainLayoutImport
-    }
     '/_main-layout/saved': {
       id: '/_main-layout/saved'
       path: '/saved'
@@ -284,7 +264,6 @@ export const routeTree = rootRoute.addChildren({
     }),
     MainLayoutActivityLazyRoute,
     MainLayoutLikedLazyRoute,
-    MainLayoutOptimizeImageTestLazyRoute,
     MainLayoutSavedLazyRoute,
     MainLayoutSearchLazyRoute,
     MainLayoutIndexLazyRoute,

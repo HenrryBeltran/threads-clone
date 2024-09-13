@@ -1,24 +1,66 @@
+import { optimizeImage } from "@/lib/optimize-image";
+import { useThreadStore } from "@/store";
+import { toast } from "sonner";
 import { Album02Icon } from "./icons/hugeicons";
+import { Resource } from "./upload-album-view";
 
 type UploadProps = {
-  imagesLength: number;
-  handleUploadFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  index: number;
 };
 
-export const UploadAlbumButton = ({ imagesLength, handleUploadFile }: UploadProps) => {
+const upTo10AttachmentsMessage = () =>
+  toast("You can have up to 10 attachments.", {
+    position: "bottom-center",
+    classNames: {
+      title:
+        "text-base text-center text-secondary font-medium shadow-xl py-3.5 px-6 border border-muted-foreground/10 dark:bg-white bg-neutral-900 rounded-xl",
+      toast: "!bg-transparent pointer-events-none p-0 flex justify-center border-none !shadow-none",
+    },
+  });
+
+export const UploadAlbumButton = ({ index }: UploadProps) => {
+  const thread = useThreadStore((state) => state.thread);
+  const addImageToThread = useThreadStore((state) => state.addImageToThread);
+  const changeCurrentIndexTo = useThreadStore((state) => state.changeCurrentIndexTo);
+
+  async function handleUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files) {
+      return;
+    }
+
+    const files = Array.from<File>(e.target.files);
+    const optimizedImages: Resource[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (i > 9) {
+        upTo10AttachmentsMessage();
+        break;
+      }
+
+      const { base64, size } = await optimizeImage(file, undefined, 1);
+      optimizedImages.push({ base64, size });
+    }
+
+    addImageToThread(index, optimizedImages, upTo10AttachmentsMessage);
+  }
+
   return (
     <>
       <label
         htmlFor="upload-images"
-        aria-disabled={imagesLength >= 10}
+        aria-disabled={thread[index].images.length >= 10}
         className="group flex h-9 w-9 cursor-pointer items-center justify-center aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+        data-index={index}
+        onPointerDown={(e) => changeCurrentIndexTo(Number(e.currentTarget.dataset.index))}
         onClick={(e) => {
-          if (imagesLength >= 10) {
+          if (thread[index].images.length >= 10) {
             e.preventDefault();
             e.stopPropagation();
           }
         }}
       >
+        {index}
         <Album02Icon
           width={20}
           height={20}
