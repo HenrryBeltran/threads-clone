@@ -156,19 +156,37 @@ export const threads = new Hono()
 
       let resources: string[] | null = null;
 
+      console.log("~ resources", post.resources?.length);
+
       if (post.resources !== null && post.resources.length > 0) {
         if (post.resources[0].includes("data:image/jpeg;base64,")) {
           const resourceList = post.resources;
-          for (const resource of resourceList) {
-            const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
+
+          const imagesToUpload = resourceList.map(async (image) => {
+            const result = await cloudinary.uploader.upload(image, { folder: "/threads" }, (error) => {
               if (error !== undefined) {
                 console.error(error);
                 return ctx.json(error, 500);
               }
             });
-            resources = [];
-            resources.push(uploadResult.public_id);
-          }
+            return result;
+          });
+
+          const uploads = await Promise.all(imagesToUpload);
+          const uploadsPublicIds = uploads.map((upload) => upload.public_id);
+          console.log(uploadsPublicIds);
+          resources = uploadsPublicIds;
+
+          // for (const resource of resourceList) {
+          //   const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
+          //     if (error !== undefined) {
+          //       console.error(error);
+          //       return ctx.json(error, 500);
+          //     }
+          //   });
+          //   resources = [];
+          //   resources.push(uploadResult.public_id);
+          // }
         } else {
           resources = post.resources;
         }
@@ -255,8 +273,18 @@ export const threads = new Hono()
       }
 
       previusId = result[i].id;
+      // THIS: Was causing a bug that when you post something you didn't recive the correct result of the post
+      // return ctx.json(result, 200);
 
-      return ctx.json(result, 200);
+      // TODO: Now when I tried to post 3 threads join together I got a server error:
+      //
+      //  270 |         if (increaseReplyCount.error !== null) {
+      //  271 |           return ctx.json(increaseReplyCount.error, 500);
+      //  272 |         }
+      //  273 |       }
+      //  274 |
+      //  275 |       previusId = result[i].id;
+      //
     }
 
     return ctx.json(allThreads);

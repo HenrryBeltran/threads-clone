@@ -83,7 +83,7 @@ export function Editor(props: Props) {
       />
       {thread[props.index].text.length === 0 && (
         <div className="pointer-events-none absolute top-0 text-muted-foreground">
-          {props.placeholder ? props.placeholder : "Start a thread..."}
+          {props.placeholder ? props.placeholder : "What's new?"}
         </div>
       )}
       <div

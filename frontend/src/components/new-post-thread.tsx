@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loading03AnimatedIcon } from "./icons/hugeicons";
 import { Thread } from "./thread";
 import { Posts } from "./threads-infinite-scroll";
+import { useEffect } from "react";
 
 export function NewPostThread() {
   const query = useQuery<Posts>({
@@ -12,6 +13,10 @@ export function NewPostThread() {
     refetchOnWindowFocus: false,
     staleTime: Infinity,
   });
+
+  useEffect(() => {
+    console.log("~ query data", query.data);
+  }, [query.data]);
 
   if (query.data.length === 0) {
     return <></>;
@@ -25,8 +30,8 @@ export function NewPostThread() {
         </div>
       )}
       <div className="cool-border mt-4 flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 rounded-lg bg-background px-6 py-3">
-        {query.data.map((thread) => (
-          <Thread key={thread.postId} {...thread} />
+        {query.data.map((thread, i) => (
+          <Thread key={i} {...thread} />
         ))}
       </div>
     </div>

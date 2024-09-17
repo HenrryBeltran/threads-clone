@@ -60,7 +60,8 @@ export function CreateThread() {
     onSuccess: (currentData) => {
       queryClient.invalidateQueries({ queryKey: ["postring", "threads"] });
       const oldData = queryClient.getQueryData<Posts>(["posting", "threads"]) ?? [];
-      queryClient.setQueryData(["posting", "threads"], [currentData, ...oldData]);
+      queryClient.setQueryData(["posting", "threads"], [...currentData, ...oldData]);
+      console.log("~ from success mutation", queryClient.getQueryData(["posting", "threads"]));
     },
   });
 
@@ -197,12 +198,13 @@ export function CreateThread() {
                         body: thread,
                       });
                       const postData = thread.map((t) => {
-                        if (t.images.length > 0) {
+                        if (t.images.length === 0) {
                           return {
                             text: t.text,
-                            resources: [] as string[],
+                            resources: null,
                           };
                         }
+
                         return {
                           text: t.text,
                           resources: t.images.map((image) => image.base64),
@@ -257,7 +259,7 @@ export function ThreadEditor({ user, index, placeholder }: ThreadEditorProps) {
       >
         <div className="px-3">
           <span className="font-semibold leading-snug">
-            {user.username} threads index:{index}
+            {user.username}
           </span>
           <Editor index={index} placeholder={placeholder} />
         </div>

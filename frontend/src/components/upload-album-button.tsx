@@ -60,7 +60,6 @@ export const UploadAlbumButton = ({ index }: UploadProps) => {
           }
         }}
       >
-        {index}
         <Album02Icon
           width={20}
           height={20}

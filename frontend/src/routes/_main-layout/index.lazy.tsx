@@ -50,7 +50,7 @@ function Index() {
               className="flex-grow cursor-text self-stretch px-3 text-start text-muted-foreground/90"
               onClick={() => showThreadModal()}
             >
-              Start a thread...
+              What's new?
             </button>
             <span className="block cursor-not-allowed">
               <Button
