@@ -62,7 +62,6 @@ function Post() {
   );
 }
 
-/// TODO: posting multiple threads are broken and also the carusel preview in the create-threads are also broken
 function Replies({ id }: { id: string }) {
   const queryClient = useQueryClient();
   const repliesQuery = useQuery({
@@ -75,6 +74,8 @@ function Replies({ id }: { id: string }) {
     queryClient.invalidateQueries({ queryKey: ["thread", "replies"] });
     queryClient.setQueryData(["thread", "replies"], null);
   }, []);
+
+  // TODO: the replies are not refreshing correctly
   // useEffect(() => {
   //   queryClient.invalidateQueries({queryKey: ["thread", "replies"]})
   // }, [])

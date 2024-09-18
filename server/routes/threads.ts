@@ -72,7 +72,7 @@ export const threads = new Hono()
         limit: 6,
         offset: page * 6,
         orderBy: desc(threadsTable.createdAt),
-        where: eq(threadsTable.authorId, userId),
+        where: and(eq(threadsTable.authorId, userId), eq(threadsTable.id, threadsTable.rootId)),
       }),
     );
 
@@ -272,7 +272,10 @@ export const threads = new Hono()
         }
       }
 
-      previusId = result[i].id;
+      console.log("~ previusId before", previusId);
+      previusId = fullThread.result.id;
+      console.log("~ previusId after", previusId);
+      console.log("~ allThreads array", allThreads);
       // THIS: Was causing a bug that when you post something you didn't recive the correct result of the post
       // return ctx.json(result, 200);
 

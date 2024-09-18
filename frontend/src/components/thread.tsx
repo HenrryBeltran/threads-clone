@@ -43,12 +43,12 @@ export function Thread({
   const { show } = useThreadModalStore();
 
   return (
-    <div className="flex gap-3 pt-4">
+    <div className="flex pt-4">
       <div className="flex flex-col">
         <Link
           to={`/@${author.username}`}
           onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
-          className="min-h-11 min-w-11"
+          className="min-h-11 min-w-11 mr-3"
         >
           <UserImage
             username={author.username}
@@ -67,7 +67,7 @@ export function Thread({
           className="flex-grow cursor-pointer"
         />
       </div>
-      <div className="flex-grow space-y-3">
+      <div className="flex-grow">
         <div>
           <div className="flex">
             <Link
@@ -79,7 +79,7 @@ export function Thread({
             </Link>
             <div
               onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
-              className="flex-grow cursor-pointer"
+              className="flex-grow cursor-pointer pb-8"
             />
           </div>
           <Paragraph text={text} author={author.username} postId={postId} />
