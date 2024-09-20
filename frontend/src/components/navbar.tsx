@@ -28,7 +28,7 @@ export default function Navbar({ username }: Props) {
   return (
     <nav
       data-extra-button={pathname.split("/").length > 2}
-      className="fixed bottom-0 left-0 z-10 grid h-[68px] w-full grid-cols-5 grid-rows-1 items-center bg-background/85 backdrop-blur-3xl sm:static sm:z-auto sm:h-full sm:bg-transparent sm:backdrop-blur-0 data-[extra-button=true]:sm:grid-cols-6"
+      className="fixed bottom-0 left-0 z-10 grid h-[68px] w-full grid-cols-5 grid-rows-1 items-center max-sm:bg-background/85 max-sm:backdrop-blur-3xl sm:static sm:z-auto sm:h-full data-[extra-button=true]:sm:grid-cols-6"
     >
       {pathname.split("/").length > 2 && <BackButton />}
       <NavbarItem href="/" pathname={pathname} username={username}>

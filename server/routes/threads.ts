@@ -118,6 +118,26 @@ export const threads = new Hono()
 
     return ctx.json(result);
   })
+  .get("/post/:id", async (ctx) => {
+    const id = ctx.req.param("id");
+
+    const { error, result } = await safeTry(
+      db.query.threads.findFirst({
+        with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
+        where: eq(threadsTable.id, id),
+      }),
+    );
+
+    if (error !== null) {
+      return ctx.json(error, 500);
+    }
+
+    if (result === undefined) {
+      return ctx.json({ message: "Thread not found." }, 404);
+    }
+
+    return ctx.json(result);
+  })
   /// TODO test if this is working correctly
   .post("/post", getUser, zValidator("json", postThreadSchema), async (ctx) => {
     const user = ctx.get("user");

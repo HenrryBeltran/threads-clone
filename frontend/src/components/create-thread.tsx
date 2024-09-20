@@ -158,7 +158,10 @@ export function CreateThread() {
                   {threadModalData.rootId === null && (
                     <>
                       {thread.map((_, i) => (
-                        <ThreadEditor key={i} user={user} index={i} />
+                        <div key={i} className="relative">
+                          <ThreadEditor user={user} index={i} placeholder={i > 0 ? "Say more..." : undefined} />
+                          <div className="absolute left-[1.375rem] top-14 h-[calc(100%-66px)] w-0.5 bg-muted-foreground/60" />
+                        </div>
                       ))}
                     </>
                   )}
@@ -167,7 +170,28 @@ export function CreateThread() {
                       <ThreadSmallView id={threadModalData.id} user={user} />
                     </>
                   )}
-                  <button onClick={() => addThread()}>Add new thread</button>
+                  <button
+                    data-fill={thread.every((t) => t.text.length > 0) || thread.every((t) => t.images.length > 0)}
+                    className="flex items-center gap-[1.375rem] opacity-50 data-[fill=false]:cursor-not-allowed data-[fill=true]:opacity-100"
+                    onClick={() => {
+                      const hasText = thread.every((t) => t.text.length > 0);
+                      const hasImages = thread.every((t) => t.images.length > 0);
+
+                      if (hasText || hasImages) {
+                        addThread();
+                      }
+                    }}
+                  >
+                    <UserImage
+                      profilePictureId={user.profilePictureId ?? null}
+                      username={user.username}
+                      width={24}
+                      height={24}
+                      fetchPriority="high"
+                      className="ml-2.5 h-6 w-6"
+                    />
+                    <span>Add to thread</span>
+                  </button>
                 </div>
                 <div className="flex items-center justify-end gap-4 p-3 sm:p-6 sm:pt-3">
                   {thread[currentIndex].text.length >= 450 && (
@@ -244,7 +268,7 @@ export function ThreadEditor({ user, index, placeholder }: ThreadEditorProps) {
   const threadStore = useThreadStore();
 
   return (
-    <div ref={imageContainerRef} className="flex h-[calc(100%-64px)]">
+    <div ref={imageContainerRef} className="flex h-fit">
       <UserImage
         profilePictureId={user.profilePictureId ?? null}
         username={user.username}
@@ -258,49 +282,53 @@ export function ThreadEditor({ user, index, placeholder }: ThreadEditorProps) {
         className="relative flex max-h-[520px] flex-col"
       >
         <div className="px-3">
-          <span className="font-semibold leading-snug">
-            {user.username}
-          </span>
+          <span className="font-semibold leading-snug">{user.username}</span>
           <Editor index={index} placeholder={placeholder} />
         </div>
         <div className="flex px-1 pb-3 pt-1">
           <UploadAlbumButton index={index} />
         </div>
         {threadStore.thread[index].images.length === 1 && (
-          <UploadedSingleView
-            threadIndex={index}
-            containerWidth={imageContainerRef.current?.clientWidth!}
-            images={threadStore.thread[index].images}
-          />
+          <div className="mb-3">
+            <UploadedSingleView
+              threadIndex={index}
+              containerWidth={imageContainerRef.current?.clientWidth!}
+              images={threadStore.thread[index].images}
+            />
+          </div>
         )}
         {threadStore.thread[index].images.length === 2 && (
-          <UploadedAlbumDouble
-            threadIndex={index}
-            containerWidth={imageContainerRef.current?.clientWidth!}
-            images={threadStore.thread[index].images}
-          />
+          <div className="mb-3">
+            <UploadedAlbumDouble
+              threadIndex={index}
+              containerWidth={imageContainerRef.current?.clientWidth!}
+              images={threadStore.thread[index].images}
+            />
+          </div>
         )}
         {threadStore.thread[index].images.length >= 3 && (
-          <UploadedAlbumCarousel
-            threadIndex={index}
-            containerWidth={imageContainerRef.current?.clientWidth!}
-            images={threadStore.thread[index].images}
-          />
-        )}
-        {threadStore.thread.length > 1 && (
-          <button
-            className="absolute right-0 top-5 flex h-8 w-8 items-center justify-center rounded-full border border-muted-foreground/30 transition-transform hover:bg-muted-foreground/20 active:scale-95"
-            onClick={() => threadStore.removeThread(index)}
-          >
-            <Cancel01Icon
-              strokeWidth={2}
-              width={24}
-              height={24}
-              className="h-[1.125rem] w-[1.125rem] text-muted-foreground transition-colors hover:text-foreground"
+          <div className="mb-3">
+            <UploadedAlbumCarousel
+              threadIndex={index}
+              containerWidth={imageContainerRef.current?.clientWidth!}
+              images={threadStore.thread[index].images}
             />
-          </button>
+          </div>
         )}
       </div>
+      {threadStore.thread.length > 1 && index !== 0 && (
+        <button
+          className="mt-5 flex h-7 w-7 items-center justify-center rounded-full transition-transform active:scale-95"
+          onClick={() => threadStore.removeThread(index)}
+        >
+          <Cancel01Icon
+            strokeWidth={2}
+            width={24}
+            height={24}
+            className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground"
+          />
+        </button>
+      )}
     </div>
   );
 }

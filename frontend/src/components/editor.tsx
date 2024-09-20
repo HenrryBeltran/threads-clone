@@ -6,7 +6,7 @@ type Props = {
   placeholder?: string;
 };
 
-export function Editor(props: Props) {
+export function Editor({ index, placeholder = "What's new?" }: Props) {
   const thread = useThreadStore((state) => state.thread);
   const editTextFromThread = useThreadStore((state) => state.editTextFromThread);
   const changeCurrentIndexTo = useThreadStore((state) => state.changeCurrentIndexTo);
@@ -18,7 +18,7 @@ export function Editor(props: Props) {
     e.currentTarget.style.height = "5px";
     e.currentTarget.style.height = e.currentTarget.scrollHeight + "px";
 
-    editTextFromThread(props.index, e.currentTarget.value);
+    editTextFromThread(index, e.currentTarget.value);
   }
 
   function highlightText(text: string) {
@@ -54,7 +54,7 @@ export function Editor(props: Props) {
   }
 
   useEffect(() => {
-    if (thread[props.index].text.length > 0) {
+    if (thread[index].text.length > 0) {
       contentEditableRef.current?.setSelectionRange(
         contentEditableRef.current.value.length,
         contentEditableRef.current.value.length,
@@ -66,25 +66,23 @@ export function Editor(props: Props) {
     if (highlightContentRef.current) {
       const el = highlightContentRef.current;
 
-      el.innerHTML = highlightText(thread[props.index].text);
+      el.innerHTML = highlightText(thread[index].text);
     }
-  }, [thread[props.index].text]);
+  }, [thread[index].text]);
 
   return (
-    <div className="relative">
+    <div className="relative" style={{ height: `${contentEditableRef.current?.clientHeight}px` }}>
       <textarea
         ref={contentEditableRef}
         rows={1}
         autoFocus={true}
-        value={thread[props.index].text}
+        value={thread[index].text}
         className="min-h-6 w-full max-w-full resize-none overflow-hidden break-words bg-transparent leading-snug text-transparent caret-foreground outline-none"
         onInput={handleInput}
-        onFocus={() => changeCurrentIndexTo(props.index)}
+        onFocus={() => changeCurrentIndexTo(index)}
       />
-      {thread[props.index].text.length === 0 && (
-        <div className="pointer-events-none absolute top-0 text-muted-foreground">
-          {props.placeholder ? props.placeholder : "What's new?"}
-        </div>
+      {thread[index].text.length === 0 && (
+        <div className="pointer-events-none absolute top-0 text-muted-foreground">{placeholder}</div>
       )}
       <div
         ref={highlightContentRef}

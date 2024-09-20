@@ -4,7 +4,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ThreadEditor } from "./create-thread";
-import { BubbleChatIconModded, Cancel01Icon, FavouriteIcon, SentIcon } from "./icons/hugeicons";
+import { BubbleChatIconModded, Cancel01Icon, SentIcon } from "./icons/hugeicons";
+import { LikeButton } from "./like-button";
 import { Paragraph } from "./paragraph";
 import { PostsPages } from "./threads-infinite-scroll";
 import { Button } from "./ui/button";
@@ -26,6 +27,7 @@ type ThreadProps = {
   resources: string[] | null;
   likesCount: number;
   repliesCount: number;
+  style?: "normal" | "main";
 };
 
 export function Thread({
@@ -38,17 +40,18 @@ export function Thread({
   resources,
   likesCount,
   repliesCount,
+  style = "normal",
 }: ThreadProps) {
   const navigate = useNavigate();
   const { show } = useThreadModalStore();
 
   return (
-    <div className="flex pt-4">
-      <div className="flex flex-col">
+    <div data-style={style} className="group flex pt-4 data-[style=main]:flex-col">
+      <div className="flex group-data-[style=normal]:flex-col group-data-[style=main]:pb-3">
         <Link
           to={`/@${author.username}`}
           onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
-          className="min-h-11 min-w-11 mr-3"
+          className="mr-3 min-h-11 min-w-11"
         >
           <UserImage
             username={author.username}
@@ -60,16 +63,8 @@ export function Thread({
             className="h-11 w-11"
           />
         </Link>
-        <div
-          onClick={() => {
-            navigate({ to: `/@${author.username}/post/${postId}` });
-          }}
-          className="flex-grow cursor-pointer"
-        />
-      </div>
-      <div className="flex-grow">
-        <div>
-          <div className="flex">
+        {style === "main" && (
+          <div className="flex flex-grow items-center">
             <Link
               to={`/@${author.username}`}
               onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
@@ -82,20 +77,45 @@ export function Thread({
               className="flex-grow cursor-pointer pb-8"
             />
           </div>
+        )}
+        {style === "normal" && (
+          <div
+            onClick={() => {
+              navigate({ to: `/@${author.username}/post/${postId}` });
+            }}
+            className="flex-grow cursor-pointer"
+          />
+        )}
+      </div>
+      <div className="flex-grow">
+        <div>
+          {style === "normal" && (
+            <div className="flex">
+              <Link
+                to={`/@${author.username}`}
+                onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
+                className="font-semibold"
+              >
+                {author.username}
+              </Link>
+              <div
+                onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
+                className="flex-grow cursor-pointer pb-8"
+              />
+            </div>
+          )}
           <Paragraph text={text} author={author.username} postId={postId} />
         </div>
         {resources && (
           <>
+            {text.length > 0 && <div className="h-1.5 w-full" />}
             {resources.length === 1 && <SinglePhoto images={resources} />}
             {resources.length === 2 && <DoublePhoto images={resources} />}
             {resources.length >= 3 && <AlbumCarousel images={resources} />}
           </>
         )}
         <div className="!mt-1.5 flex -translate-x-2 gap-2">
-          <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
-            <FavouriteIcon width={20} height={20} strokeWidth={1.5} />
-            {likesCount > 0 && <span>{likesCount}</span>}
-          </Button>
+          <LikeButton threadId={id} likesCount={likesCount} />
           <Button
             variant="ghost"
             className="h-9 space-x-1 rounded-full px-2 text-foreground/60"
@@ -205,7 +225,7 @@ function AlbumCarousel({ images }: AlbumProps) {
   const itMoved = useRef(false);
 
   return (
-    <div className="h-60 w-[calc(100%+56px)] -translate-x-14 overflow-hidden">
+    <div className="h-60 w-full overflow-hidden">
       <div
         className="relative h-64 overflow-x-scroll"
         onPointerDown={(e) => {
@@ -232,7 +252,7 @@ function AlbumCarousel({ images }: AlbumProps) {
         }}
         onPointerLeave={() => (pointX.current = null)}
       >
-        <div className="absolute left-0 top-0 flex w-max gap-4 pl-14 active:cursor-grabbing">
+        <div className="absolute left-0 top-0 flex w-max gap-4 active:cursor-grabbing">
           {images?.map((id, idx) => (
             <ImageContainer
               key={idx}
@@ -329,7 +349,7 @@ function ImageContainer({ index, images, onClickTrigger, children }: ContainerPr
             <Cancel01Icon width={28} height={28} strokeWidth={2} className="h-12 w-12 rounded-none p-3" />
           </Button>
         </DialogClose>
-        <div className="flex min-h-svh max-w-[100svh] !rounded-none border-sky-200 p-0 outline-none">
+        <div className="flex min-h-svh max-w-[100svh] !rounded-none p-0 outline-none">
           <PhotoPreview startIndex={index} images={images} />
         </div>
       </DialogContent>
