@@ -10,11 +10,3 @@ export const postThreadSchema = z.object({
     })
     .array(),
 });
-
-/// TODO: Remove this when I eliminate the reply end point.
-export const replyThreadSchema = z.object({
-  rootId: z.string().length(21),
-  parentId: z.string().length(21),
-  text: z.string().max(500),
-  resources: z.array(z.string()).optional(),
-});

@@ -11,8 +11,6 @@ type Props = {
   likesCount: number;
 };
 
-/// TODO: Add padding for mobile view to the posting view after posting (the glowy thing)
-
 export function LikeButton({ threadId, likesCount }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();

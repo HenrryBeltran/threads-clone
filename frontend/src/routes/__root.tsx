@@ -8,7 +8,6 @@ import { accountVerificationQueryOptions } from "@/lib/api/get-account-verificat
 import { safeTry } from "@server/lib/safe-try";
 import { QueryClient } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
-// import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 
 const authRoutes = ["/login", "/sign-up", "/forgotten-password", "/account/reset-password"];
 
@@ -73,7 +72,6 @@ function RootLayout() {
       <Toaster />
       <CreateThread />
       <Backdrop />
-      {/* <TanStackRouterDevtools initialIsOpen={false} /> */}
     </>
   );
 }

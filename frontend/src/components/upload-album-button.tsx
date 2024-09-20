@@ -42,7 +42,7 @@ export const UploadAlbumButton = ({ index }: UploadProps) => {
       optimizedImages.push({ base64, size });
     }
 
-    addImageToThread(index, optimizedImages, upTo10AttachmentsMessage);
+    addImageToThread(optimizedImages, upTo10AttachmentsMessage);
   }
 
   return (

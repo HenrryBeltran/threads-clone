@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Resource } from "./components/upload-album-view";
+import { ThreadProps } from "./components/thread";
 
 type BackdropStore = {
   open: boolean;
@@ -16,23 +17,21 @@ export const useBackdropStore = create<BackdropStore>()((set) => ({
 }));
 
 type ThreadModalStore = {
-  data: { open: boolean; id?: string; rootId: string | null; parentId: string | null };
-  toggle: () => void;
-  show: (id?: string, rootId?: string | null, parentId?: string | null) => void;
+  data: { open: boolean; id?: string; rootId: string | null; parentId: string | null; thread?: ThreadProps };
+  show: (id?: string, rootId?: string | null, parentId?: string | null, thread?: ThreadProps) => void;
   hide: () => void;
 };
 
 export const useThreadModalStore = create<ThreadModalStore>()((set) => ({
   data: { open: false, rootId: null, parentId: null },
-  toggle: () =>
-    set((state) => ({ data: { open: !state.data.open, rootId: state.data.rootId, parentId: state.data.parentId } })),
-  show: (id?: string, rootId?: string | null, parentId?: string | null) =>
+  show: (id?: string, rootId?: string | null, parentId?: string | null, thread?: ThreadProps) =>
     set((state) => ({
       data: {
         open: true,
         id,
         rootId: rootId === undefined ? state.data.rootId : rootId,
         parentId: parentId === undefined ? state.data.parentId : parentId,
+        thread,
       },
     })),
   hide: () => set({ data: { open: false, rootId: null, parentId: null } }),
@@ -47,10 +46,10 @@ type ThreadStore = {
   thread: Thread[];
   currentIndex: number;
   changeCurrentIndexTo: (index: number) => void;
-  editTextFromThread: (index: number, text: string, mention?: string) => void;
-  addImageToThread: (index: number, images: Resource[], imageLimitCallback?: () => void) => void;
+  editTextFromThread: (index: number, text: string) => void;
+  addImageToThread: (images: Resource[], imageLimitCallback?: () => void) => void;
   removeImageToThread: (threadIndex: number, imageIndex: number) => void;
-  addThread: (mention?: string) => void;
+  addThread: () => void;
   removeThread: (index: number) => void;
   resetThread: () => void;
 };
@@ -59,7 +58,7 @@ export const useThreadStore = create<ThreadStore>()((set) => ({
   thread: [{ text: "", images: [] }],
   currentIndex: 0,
   changeCurrentIndexTo: (index: number) => set((state) => ({ thread: state.thread, currentIndex: index })),
-  editTextFromThread: (index: number, text: string, mention?: string) =>
+  editTextFromThread: (index: number, text: string) =>
     set((state) => {
       const newThread = state.thread.map((t, i) => {
         if (i === index) {
@@ -73,7 +72,7 @@ export const useThreadStore = create<ThreadStore>()((set) => ({
 
       return { thread: newThread, currentIndex: state.currentIndex };
     }),
-  addImageToThread: (index: number, newImages: Resource[], imageLimitCallback?: () => void) =>
+  addImageToThread: (newImages: Resource[], imageLimitCallback?: () => void) =>
     set((state) => {
       const thread = state.thread[state.currentIndex];
       const totalLength = thread.images.length + newImages.length;
@@ -132,7 +131,7 @@ export const useThreadStore = create<ThreadStore>()((set) => ({
 
       return { thread: newThread, currentIndex: state.currentIndex };
     }),
-  addThread: (mention?: string) =>
+  addThread: () =>
     set((state) => {
       const newThread = { text: "", images: [] };
       const newThreadList = [...state.thread, newThread];

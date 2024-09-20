@@ -1,19 +1,17 @@
 import { useThreadModalStore, useThreadStore } from "@/store";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { useQueryClient } from "@tanstack/react-query";
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useRef } from "react";
 import { ThreadEditor } from "./create-thread";
 import { BubbleChatIconModded, Cancel01Icon, SentIcon } from "./icons/hugeicons";
 import { LikeButton } from "./like-button";
 import { Paragraph } from "./paragraph";
-import { PostsPages } from "./threads-infinite-scroll";
 import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { UserImage } from "./user-image";
 
-type ThreadProps = {
+export type ThreadProps = {
   id: string;
   rootId: string | null;
   parentId: string | null;
@@ -119,7 +117,19 @@ export function Thread({
           <Button
             variant="ghost"
             className="h-9 space-x-1 rounded-full px-2 text-foreground/60"
-            onClick={() => show(id, rootId, parentId)}
+            onClick={() =>
+              show(id, rootId, parentId, {
+                id,
+                rootId,
+                parentId,
+                postId,
+                author,
+                text,
+                resources,
+                likesCount,
+                repliesCount,
+              })
+            }
           >
             <BubbleChatIconModded width={20} height={20} strokeWidth={1.5} />
             {repliesCount > 0 && <span>{repliesCount}</span>}
@@ -138,46 +148,23 @@ export function Thread({
 }
 
 type ThreadSmallViewProps = {
-  id: string;
   user: {
     profilePictureId: string | null;
     username: string;
   };
+  thread: ThreadProps;
 };
 
-export function ThreadSmallView({ id, user }: ThreadSmallViewProps) {
-  const location = useLocation();
-  const queryClient = useQueryClient();
-
-  const pathnameSlices = location.pathname.split("/");
-  const source = pathnameSlices[1].startsWith("@") ? pathnameSlices[1].slice(1) : "main";
-
-  const { pages } = queryClient.getQueryData<PostsPages>([source, "threads"])!;
-  const [post, setPost] = useState<ThreadProps>();
-  const threadStore = useThreadStore();
+export function ThreadSmallView({ user,thread }: ThreadSmallViewProps) {
+  const threadStore = useThreadStore((state) => state.thread);
   const imageContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    for (let j = 0; pages.length > j; j++) {
-      for (let k = 0; pages[j].length > k; k++) {
-        if (pages[j][k].id == id) {
-          setPost(pages[j][k]);
-          break;
-        }
-      }
-    }
-  }, []);
-
-  if (post === undefined) {
-    return <></>;
-  }
 
   return (
     <>
-      <div ref={imageContainerRef} className="flex h-[calc(100%-64px)]">
+      <div ref={imageContainerRef} className="relative flex h-[calc(100%-64px)] pb-8">
         <UserImage
-          profilePictureId={post.author.profilePictureId ?? null}
-          username={post.author.username!}
+          profilePictureId={thread.author.profilePictureId ?? null}
+          username={thread.author.username!}
           width={44}
           height={44}
           fetchPriority="high"
@@ -188,29 +175,32 @@ export function ThreadSmallView({ id, user }: ThreadSmallViewProps) {
           className="flex max-h-[520px] flex-col"
         >
           <div className="px-3">
-            <span className="font-semibold leading-snug">{post.author.username!}</span>
-            <Paragraph text={post.text!} author={post.author.username!} postId={post.postId!} />
+            <span className="font-semibold leading-snug">{thread.author.username!}</span>
+            <Paragraph text={thread.text!} author={thread.author.username!} postId={thread.postId!} />
           </div>
-          {post.resources && (
+          {thread.resources && (
             <>
-              {post.resources.length === 1 && (
+              {thread.resources.length === 1 && (
                 <div className="max-w-xs">
-                  <SinglePhoto images={post.resources} />
+                  <SinglePhoto images={thread.resources} />
                 </div>
               )}
-              {post.resources.length === 2 && <DoublePhoto images={post.resources} />}
-              {post.resources.length >= 3 && <AlbumCarousel images={post.resources} />}
+              {thread.resources.length === 2 && <DoublePhoto images={thread.resources} />}
+              {thread.resources.length >= 3 && <AlbumCarousel images={thread.resources} />}
             </>
           )}
         </div>
+        <div className="absolute bottom-2.5 left-[1.375rem] h-[calc(100%-64px)] w-0.5 bg-muted-foreground/60" />
       </div>
-      {threadStore.thread.map((_, i) => (
-        <ThreadEditor
-          key={i}
-          index={0}
-          user={user}
-          placeholder={i === 0 ? `Reply to ${post.author.username}...` : undefined}
-        />
+      {threadStore.map((_, i) => (
+        <div className="relative" key={i}>
+          <ThreadEditor
+            index={i}
+            user={user}
+            placeholder={i === 0 ? `Reply to ${thread.author.username}...` : "Say more..."}
+          />
+          <div className="absolute left-[1.375rem] top-14 h-[calc(100%-66px)] w-0.5 bg-muted-foreground/60" />
+        </div>
       ))}
     </>
   );

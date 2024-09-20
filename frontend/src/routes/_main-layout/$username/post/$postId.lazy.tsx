@@ -1,4 +1,5 @@
 import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
+import { Replies } from "@/components/replies";
 import { Thread } from "@/components/thread";
 import { api } from "@/lib/api";
 import { safeTry } from "@server/lib/safe-try";
@@ -24,19 +25,6 @@ async function getPost(username: string, postId: string) {
 
 async function getPostById(id: string) {
   const res = await safeTry(api.threads.post[":id"].$get({ param: { id } }));
-
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
-
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
-}
-
-async function getReplies(parentId: string) {
-  const res = await safeTry(api.threads.replies[":parentId"].$get({ query: { offset: "0" }, param: { parentId } }));
 
   if (res.error) throw new Error("Something went wrong");
   if (!res.result.ok) throw new Error("Something went wrong");
@@ -106,22 +94,5 @@ function Post() {
         </div>
       </div>
     </>
-  );
-}
-
-function Replies({ id }: { id: string }) {
-  const repliesQuery = useQuery({
-    queryKey: ["thread", "replies", id],
-    queryFn: () => getReplies(id),
-    staleTime: Infinity,
-  });
-
-  return (
-    <div className="divide-y divide-muted-foreground/30 pb-6">
-      <span className="inline-block py-3 font-bold">Replies</span>
-      <div className="flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30">
-        {repliesQuery.data && repliesQuery.data.map((thread, i) => <Thread key={i} {...thread} />)}
-      </div>
-    </div>
   );
 }

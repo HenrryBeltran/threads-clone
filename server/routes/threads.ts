@@ -6,7 +6,7 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
 import { z } from "zod";
-import { postThreadSchema, replyThreadSchema } from "../common/schemas/thread";
+import { postThreadSchema } from "../common/schemas/thread";
 import { db } from "../db";
 import { threads as threadsTable } from "../db/schemas/threads";
 import { users } from "../db/schemas/users";
@@ -23,6 +23,8 @@ cloudinary.config({
 });
 
 const shortNanoId = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 11);
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function filterHashtagAndMentions(text: string, char: "#" | "@") {
   const splitSpaces = text.split(/[\s]/).filter((s) => s.startsWith(char));
@@ -138,13 +140,14 @@ export const threads = new Hono()
 
     return ctx.json(result);
   })
-  /// TODO test if this is working correctly
   .post("/post", getUser, zValidator("json", postThreadSchema), async (ctx) => {
     const user = ctx.get("user");
     const body = ctx.req.valid("json");
 
     const newId = nanoid();
     const rootId = body.rootId !== null ? body.rootId : newId;
+
+    await wait(5000);
 
     let previusId = "";
     let allThreads: {
@@ -176,8 +179,6 @@ export const threads = new Hono()
 
       let resources: string[] | null = null;
 
-      console.log("~ resources", post.resources?.length);
-
       if (post.resources !== null && post.resources.length > 0) {
         if (post.resources[0].includes("data:image/jpeg;base64,")) {
           const resourceList = post.resources;
@@ -194,19 +195,7 @@ export const threads = new Hono()
 
           const uploads = await Promise.all(imagesToUpload);
           const uploadsPublicIds = uploads.map((upload) => upload.public_id);
-          console.log(uploadsPublicIds);
           resources = uploadsPublicIds;
-
-          // for (const resource of resourceList) {
-          //   const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
-          //     if (error !== undefined) {
-          //       console.error(error);
-          //       return ctx.json(error, 500);
-          //     }
-          //   });
-          //   resources = [];
-          //   resources.push(uploadResult.public_id);
-          // }
         } else {
           resources = post.resources;
         }
@@ -292,22 +281,7 @@ export const threads = new Hono()
         }
       }
 
-      console.log("~ previusId before", previusId);
       previusId = fullThread.result.id;
-      console.log("~ previusId after", previusId);
-      console.log("~ allThreads array", allThreads);
-      // THIS: Was causing a bug that when you post something you didn't recive the correct result of the post
-      // return ctx.json(result, 200);
-
-      // TODO: Now when I tried to post 3 threads join together I got a server error:
-      //
-      //  270 |         if (increaseReplyCount.error !== null) {
-      //  271 |           return ctx.json(increaseReplyCount.error, 500);
-      //  272 |         }
-      //  273 |       }
-      //  274 |
-      //  275 |       previusId = result[i].id;
-      //
     }
 
     return ctx.json(allThreads);
@@ -336,93 +310,4 @@ export const threads = new Hono()
     }
 
     return ctx.json(result);
-  })
-  /// TODO: When I finish the post feature delete this endpoint
-  .post("/reply", getUser, zValidator("json", replyThreadSchema), async (ctx) => {
-    const user = ctx.get("user");
-    const body = ctx.req.valid("json");
-
-    const findRootThread = await safeTry(
-      db.query.threads.findFirst({ columns: { id: true }, where: eq(threadsTable.id, body.rootId) }),
-    );
-
-    if (findRootThread.error !== null) {
-      return ctx.json(findRootThread.error, 500);
-    }
-
-    if (findRootThread.result === undefined) {
-      return ctx.json({ message: "Wrong root id" }, 404);
-    }
-
-    const findParentThread = await safeTry(
-      db.query.threads.findFirst({
-        columns: { id: true, repliesCount: true },
-        where: eq(threadsTable.id, body.parentId),
-      }),
-    );
-
-    if (findParentThread.error !== null) {
-      return ctx.json(findParentThread.error, 500);
-    }
-
-    if (findParentThread.result === undefined) {
-      return ctx.json({ message: "Wrong parent id" }, 404);
-    }
-
-    const hashtags = filterHashtagAndMentions(body.text, "#");
-    const mentions = filterHashtagAndMentions(body.text, "@");
-
-    let resources: string[] = [];
-
-    if (body.resources) {
-      if (body.resources[0].includes("data:image/jpeg;base64,")) {
-        for (const resource in body.resources) {
-          const uploadResult = await cloudinary.uploader.upload(resource, { folder: "/threads" }, (error) => {
-            if (error !== undefined) {
-              console.error(error);
-              return ctx.json(error, 500);
-            }
-          });
-
-          resources.push(uploadResult.public_id);
-        }
-      } else {
-        resources = body.resources;
-      }
-    }
-
-    const { error, result } = await safeTry(
-      db.insert(threadsTable).values({
-        id: nanoid(),
-        postId: shortNanoId(),
-        authorId: user.id,
-        rootId: body.rootId,
-        parentId: body.parentId,
-        text: body.text,
-        resources: resources.length > 0 ? resources : null,
-        hashtags,
-        mentions,
-        likesCount: 0,
-        repliesCount: 0,
-        createdAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
-        updatedAt: dayjs.utc().format("YYYY-MM-DD HH:mm:ss"),
-      }),
-    );
-
-    if (error !== null) {
-      return ctx.json(error, 500);
-    }
-
-    const increaseReplyCount = await safeTry(
-      db
-        .update(threadsTable)
-        .set({ repliesCount: findParentThread.result.repliesCount + 1 })
-        .where(eq(threadsTable.id, findParentThread.result.id)),
-    );
-
-    if (increaseReplyCount.error !== null) {
-      return ctx.json(increaseReplyCount.error, 500);
-    }
-
-    return ctx.json(result, 200);
   });

@@ -3,7 +3,9 @@ import { UserAccount, api } from "@/lib/api";
 import { useThreadModalStore, useThreadStore } from "@/store";
 import { safeTry } from "@server/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Editor } from "./editor";
 import { Cancel01Icon } from "./icons/hugeicons";
 import { ThreadSmallView } from "./thread";
@@ -44,6 +46,7 @@ async function postThread(json: JSONPost) {
 export function CreateThread() {
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
+  const location = useLocation();
 
   const threadModalData = useThreadModalStore((state) => state.data);
   const hideThreadModal = useThreadModalStore((state) => state.hide);
@@ -51,23 +54,40 @@ export function CreateThread() {
   const currentIndex = useThreadStore((state) => state.currentIndex);
   const addThread = useThreadStore((state) => state.addThread);
   const resetThread = useThreadStore((state) => state.resetThread);
+  const editTextFromThread = useThreadStore((state) => state.editTextFromThread);
 
   const [openDiscard, setOpenDiscard] = useState(false);
 
   const mutation = useMutation({
     mutationKey: ["posting", "threads"],
     mutationFn: postThread,
+    onMutate: () => {
+      queryClient.isMutating({ mutationKey: ["posting", "threads"], status: "pending" });
+    },
     onSuccess: (currentData) => {
       queryClient.invalidateQueries({ queryKey: ["postring", "threads"] });
       const oldData = queryClient.getQueryData<Posts>(["posting", "threads"]) ?? [];
       queryClient.setQueryData(["posting", "threads"], [...currentData, ...oldData]);
-      console.log("~ from success mutation", queryClient.getQueryData(["posting", "threads"]));
+
+      if (location.pathname !== "/") {
+        toast("Thread posted!", {
+          position: "bottom-center",
+          classNames: {
+            title:
+              "text-base text-center text-secondary font-medium shadow-xl py-3.5 px-6 border border-muted-foreground/10 dark:bg-white bg-neutral-900 rounded-xl",
+            toast: "!bg-transparent pointer-events-none p-0 flex justify-center border-none !shadow-none",
+          },
+        });
+      }
     },
   });
 
   useEffect(() => {
     if (threadModalData.open === false) {
       resetThread();
+    } else {
+      const mention = location.pathname.slice(1);
+      editTextFromThread(0, mention);
     }
   }, [threadModalData.open]);
 
@@ -167,7 +187,7 @@ export function CreateThread() {
                   )}
                   {threadModalData.rootId !== null && threadModalData.id && (
                     <>
-                      <ThreadSmallView id={threadModalData.id} user={user} />
+                      <ThreadSmallView user={user} thread={threadModalData.thread!} />
                     </>
                   )}
                   <button
@@ -215,12 +235,6 @@ export function CreateThread() {
                         return;
                       }
 
-                      // TODO: Mutate the data
-                      console.log("~ POST", {
-                        rootId: threadModalData.rootId,
-                        parentId: threadModalData.id,
-                        body: thread,
-                      });
                       const postData = thread.map((t) => {
                         if (t.images.length === 0) {
                           return {
@@ -228,7 +242,6 @@ export function CreateThread() {
                             resources: null,
                           };
                         }
-
                         return {
                           text: t.text,
                           resources: t.images.map((image) => image.base64),
@@ -242,7 +255,7 @@ export function CreateThread() {
                       hideThreadModal();
                     }}
                   >
-                    Post{threadModalData.rootId !== null && " is a reply"}
+                    Post
                   </Button>
                 </div>
               </div>

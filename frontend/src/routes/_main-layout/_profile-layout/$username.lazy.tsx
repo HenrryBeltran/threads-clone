@@ -86,7 +86,7 @@ function Profile() {
             <Button
               variant="outline"
               className="my-4 w-full rounded-xl border-muted-foreground/40"
-              onClick={() => showThreadModal(`@${profile.username}`)}
+              onClick={() => showThreadModal()}
             >
               Mention
             </Button>

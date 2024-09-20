@@ -1,7 +1,7 @@
+import { useThreadStore } from "@/store";
 import { useRef } from "react";
 import { Cancel01Icon } from "./icons/hugeicons";
 import { Button } from "./ui/button";
-import { useThreadStore } from "@/store";
 
 export type Resource = {
   base64: string;
@@ -12,8 +12,6 @@ type Props = {
   threadIndex: number;
   containerWidth: number;
   images: Resource[];
-  /// TODO: to remove
-  // deleteImage: (index: number) => void;
 };
 
 export function UploadedAlbumCarousel({ threadIndex, containerWidth, images }: Props) {
