@@ -31,8 +31,11 @@ const MainLayoutSearchLazyImport = createFileRoute('/_main-layout/search')()
 const MainLayoutSavedLazyImport = createFileRoute('/_main-layout/saved')()
 const MainLayoutLikedLazyImport = createFileRoute('/_main-layout/liked')()
 const MainLayoutActivityLazyImport = createFileRoute('/_main-layout/activity')()
-const MainLayoutProfileLayoutUsernameLazyImport = createFileRoute(
-  '/_main-layout/_profile-layout/$username',
+const MainLayoutProfileLayoutUsernameIndexLazyImport = createFileRoute(
+  '/_main-layout/_profile-layout/$username/',
+)()
+const MainLayoutProfileLayoutUsernameRepliesLazyImport = createFileRoute(
+  '/_main-layout/_profile-layout/$username/replies',
 )()
 const MainLayoutUsernamePostPostIdLazyImport = createFileRoute(
   '/_main-layout/$username/post/$postId',
@@ -123,12 +126,22 @@ const MainLayoutProfileLayoutRoute = MainLayoutProfileLayoutImport.update({
   getParentRoute: () => MainLayoutRoute,
 } as any)
 
-const MainLayoutProfileLayoutUsernameLazyRoute =
-  MainLayoutProfileLayoutUsernameLazyImport.update({
-    path: '/$username',
+const MainLayoutProfileLayoutUsernameIndexLazyRoute =
+  MainLayoutProfileLayoutUsernameIndexLazyImport.update({
+    path: '/$username/',
     getParentRoute: () => MainLayoutProfileLayoutRoute,
   } as any).lazy(() =>
-    import('./routes/_main-layout/_profile-layout/$username.lazy').then(
+    import('./routes/_main-layout/_profile-layout/$username/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const MainLayoutProfileLayoutUsernameRepliesLazyRoute =
+  MainLayoutProfileLayoutUsernameRepliesLazyImport.update({
+    path: '/$username/replies',
+    getParentRoute: () => MainLayoutProfileLayoutRoute,
+  } as any).lazy(() =>
+    import('./routes/_main-layout/_profile-layout/$username/replies.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -238,19 +251,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutIndexLazyImport
       parentRoute: typeof MainLayoutImport
     }
-    '/_main-layout/_profile-layout/$username': {
-      id: '/_main-layout/_profile-layout/$username'
-      path: '/$username'
-      fullPath: '/$username'
-      preLoaderRoute: typeof MainLayoutProfileLayoutUsernameLazyImport
-      parentRoute: typeof MainLayoutProfileLayoutImport
-    }
     '/_main-layout/$username/post/$postId': {
       id: '/_main-layout/$username/post/$postId'
       path: '/$username/post/$postId'
       fullPath: '/$username/post/$postId'
       preLoaderRoute: typeof MainLayoutUsernamePostPostIdLazyImport
       parentRoute: typeof MainLayoutImport
+    }
+    '/_main-layout/_profile-layout/$username/replies': {
+      id: '/_main-layout/_profile-layout/$username/replies'
+      path: '/$username/replies'
+      fullPath: '/$username/replies'
+      preLoaderRoute: typeof MainLayoutProfileLayoutUsernameRepliesLazyImport
+      parentRoute: typeof MainLayoutProfileLayoutImport
+    }
+    '/_main-layout/_profile-layout/$username/': {
+      id: '/_main-layout/_profile-layout/$username/'
+      path: '/$username'
+      fullPath: '/$username'
+      preLoaderRoute: typeof MainLayoutProfileLayoutUsernameIndexLazyImport
+      parentRoute: typeof MainLayoutProfileLayoutImport
     }
   }
 }
@@ -260,7 +280,8 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren({
   MainLayoutRoute: MainLayoutRoute.addChildren({
     MainLayoutProfileLayoutRoute: MainLayoutProfileLayoutRoute.addChildren({
-      MainLayoutProfileLayoutUsernameLazyRoute,
+      MainLayoutProfileLayoutUsernameRepliesLazyRoute,
+      MainLayoutProfileLayoutUsernameIndexLazyRoute,
     }),
     MainLayoutActivityLazyRoute,
     MainLayoutLikedLazyRoute,

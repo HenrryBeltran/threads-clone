@@ -1,8 +1,15 @@
+import { FollowButton } from "@/components/follow-button";
 import { NotFound } from "@/components/not-found";
+import { ProfileBio } from "@/components/profile-bio";
+import { ProfileFollowersCount } from "@/components/profile-followers-count";
+import { ProfileHeader } from "@/components/profile-header";
+import { ProfileLink } from "@/components/profile-link";
+import { Button } from "@/components/ui/button";
 import { UserAccount, api } from "@/lib/api";
+import { useThreadModalStore } from "@/store";
 import { safeTry } from "@server/lib/safe-try";
-import { queryOptions } from "@tanstack/react-query";
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { queryOptions, useQueryClient } from "@tanstack/react-query";
+import { Outlet, createFileRoute, redirect, useRouteContext } from "@tanstack/react-router";
 
 async function getProfile(username: string) {
   const res = await safeTry(api.user.profile[":username"].$get({ param: { username } }));
@@ -77,7 +84,8 @@ export const Route = createFileRoute("/_main-layout/_profile-layout")({
 
     const queryClient = context.queryClient;
     const user = queryClient.getQueryData(["user", "account"]) as UserAccount;
-    const username = location.pathname.slice(2);
+    const paths = location.pathname.split("/");
+    const username = paths[1].slice(1);
 
     if (user && location.pathname.slice(2) === user.username) {
       return { user, profile: null, follow: null };
@@ -97,9 +105,66 @@ export const Route = createFileRoute("/_main-layout/_profile-layout")({
 });
 
 function ProfileLayout() {
+  const queryClient = useQueryClient();
+  const { username }: { username: string } = Route.useParams();
+  const profileUsername = username.slice(1);
+
+  const userData = queryClient.getQueryData<UserAccount>(["user", "account"]);
+  const followData = queryClient.getQueryData<{ follow: boolean } | null>(["follow", profileUsername]);
+  const ctx = useRouteContext({ from: "/_main-layout/_profile-layout" });
+
+  const showThreadModal = useThreadModalStore((state) => state.show);
+
+  if (typeof ctx.profile === "number") {
+    return (
+      <div className="flex min-h-svh flex-col items-center justify-center">
+        <h1>Profile acccount not found.</h1>
+      </div>
+    );
+  }
+
+  const profile = (ctx.user as UserAccount | null) ?? ctx.profile;
+
+  if (!profile) {
+    throw new Error("Something went wrong");
+  }
+
   return (
-    <>
+    <div className="flex min-h-svh w-full flex-col">
+      <div className="mx-auto w-full max-w-[620px] px-6 pt-20 sm:pt-24">
+        <ProfileHeader username={profile.username} name={profile.name} profilePictureId={profile.profilePictureId} />
+        <ProfileBio text={profile.bio} />
+        <div className="flex min-h-8 items-center gap-1.5">
+          <ProfileFollowersCount
+            username={profile.username}
+            followersCount={profile.followersCount}
+            followingsCount={profile.followingsCount}
+            profilePictureIdOne={profile.targetId[0] ? profile.targetId[0].userId.profilePictureId : null}
+            profilePictureIdTwo={profile.targetId[1] ? profile.targetId[1].userId.profilePictureId : null}
+            userId={profile?.id}
+            targetId={profile.id}
+          />
+          <ProfileLink link={profile.link} />
+        </div>
+        {userData && userData.username === profileUsername && (
+          <Button variant="outline" className="my-4 w-full rounded-xl border-muted-foreground/40">
+            Edit profile
+          </Button>
+        )}
+        {followData && userData && userData.username !== profileUsername && (
+          <div className="flex gap-4">
+            <FollowButton targetUsername={profile.username} />
+            <Button
+              variant="outline"
+              className="my-4 w-full rounded-xl border-muted-foreground/40"
+              onClick={() => showThreadModal()}
+            >
+              Mention
+            </Button>
+          </div>
+        )}
+      </div>
       <Outlet />
-    </>
+    </div>
   );
 }
