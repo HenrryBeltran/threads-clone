@@ -2,7 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { v2 as cloudinary } from "cloudinary";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
 import { z } from "zod";
@@ -23,8 +23,6 @@ cloudinary.config({
 });
 
 const shortNanoId = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 11);
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function filterHashtagAndMentions(text: string, char: "#" | "@") {
   const splitSpaces = text.split(/[\s]/).filter((s) => s.startsWith(char));
@@ -146,8 +144,6 @@ export const threads = new Hono()
 
     const newId = nanoid();
     const rootId = body.rootId !== null ? body.rootId : newId;
-
-    await wait(5000);
 
     let previusId = "";
     let allThreads: {
@@ -286,6 +282,34 @@ export const threads = new Hono()
 
     return ctx.json(allThreads);
   })
+  .delete("/post/:threadId", getUser, async (ctx) => {
+    const threadId = ctx.req.param("threadId");
+    const user = ctx.get("user");
+
+    const thread = await safeTry(
+      db.query.threads.findFirst({ columns: { id: true, authorId: true }, where: eq(threadsTable.id, threadId) }),
+    );
+
+    if (thread.error !== null) {
+      return ctx.json(thread.error, 500);
+    }
+
+    if (thread.result === undefined) {
+      return ctx.json({ message: "Thread not found." }, 404);
+    }
+
+    if (user.id !== thread.result.authorId) {
+      return ctx.json({ message: "Action not allowed." }, 403);
+    }
+
+    const { error } = await safeTry(db.delete(threadsTable).where(eq(threadsTable.id, thread.result.id)));
+
+    if (error !== null) {
+      return ctx.json(error, 500);
+    }
+
+    return ctx.json({ message: "Thread delete successfully" }, 200);
+  })
   .get("/replies/:parentId", zValidator("query", z.object({ offset: z.string() })), async (ctx) => {
     const parentId = ctx.req.param("parentId");
     const rawPage = ctx.req.query("offset");
@@ -302,6 +326,31 @@ export const threads = new Hono()
         offset: page * 6,
         orderBy: desc(threadsTable.createdAt),
         where: eq(threadsTable.parentId, parentId),
+      }),
+    );
+
+    if (error !== null) {
+      return ctx.json(error, 500);
+    }
+
+    return ctx.json(result);
+  })
+  .get("/replies/posts/:userId", zValidator("query", z.object({ page: z.string() })), async (ctx) => {
+    const userId = ctx.req.param("userId");
+    const rawPage = ctx.req.query("page");
+    const page = rawPage ? Number(rawPage) : 0;
+
+    const { error, result } = await safeTry(
+      db.query.threads.findMany({
+        with: {
+          author: {
+            columns: { username: true, name: true, profilePictureId: true },
+          },
+        },
+        limit: 6,
+        offset: page * 6,
+        orderBy: desc(threadsTable.createdAt),
+        where: and(eq(threadsTable.authorId, userId), ne(threadsTable.id, threadsTable.rootId)),
       }),
     );
 

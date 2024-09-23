@@ -1,21 +1,39 @@
 import { useThreadModalStore, useThreadStore } from "@/store";
-import { DialogClose } from "@radix-ui/react-dialog";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ThreadEditor } from "./create-thread";
-import { BubbleChatIconModded, Cancel01Icon, SentIcon } from "./icons/hugeicons";
+import { BubbleChatIconModded, Cancel01Icon, Delete02Icon, MoreVerticalIcon, SentIcon } from "./icons/hugeicons";
 import { LikeButton } from "./like-button";
 import { Paragraph } from "./paragraph";
 import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { UserImage } from "./user-image";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UserAccount, api } from "@/lib/api";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { safeTry } from "@server/lib/safe-try";
+import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
+
+async function deleteThread(threadId: string) {
+  const res = await safeTry(api.threads.post[":threadId"].$delete({ param: { threadId } }));
+
+  if (res.error) throw new Error("Something went wrong");
+  if (!res.result.ok) throw new Error("Something went wrong");
+
+  const { error, result } = await safeTry(res.result.json());
+
+  if (error) throw new Error("Something went wrong");
+
+  return result;
+}
 
 export type ThreadProps = {
   id: string;
   rootId: string | null;
   parentId: string | null;
   postId: string;
+  authorId: string;
   author: {
     name: string;
     username: string;
@@ -33,6 +51,7 @@ export function Thread({
   rootId,
   parentId,
   postId,
+  authorId,
   author,
   text,
   resources,
@@ -42,6 +61,19 @@ export function Thread({
 }: ThreadProps) {
   const navigate = useNavigate();
   const { show } = useThreadModalStore();
+  const queryClient = useQueryClient();
+  const userData = queryClient.getQueryData<UserAccount>(["user", "account"]);
+
+  const mutation = useMutation({
+    mutationKey: ["threads"],
+    mutationFn: deleteThread,
+    onSuccess: () => {
+      resetInfiniteQueryPagination(queryClient, ["main", "threads"]);
+      resetInfiniteQueryPagination(queryClient, [author.username, "threads"]);
+      queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
+      queryClient.invalidateQueries({ queryKey: [author.username, "threads"] });
+    },
+  });
 
   return (
     <div data-style={style} className="group flex pt-4 data-[style=main]:flex-col">
@@ -100,6 +132,7 @@ export function Thread({
                 onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
                 className="flex-grow cursor-pointer pb-8"
               />
+              {userData?.id === authorId && <DeleteThreadButton deleteHandler={() => mutation.mutate(id)} />}
             </div>
           )}
           <Paragraph text={text} author={author.username} postId={postId} />
@@ -113,23 +146,29 @@ export function Thread({
           </>
         )}
         <div className="!mt-1.5 flex -translate-x-2 gap-2">
-          <LikeButton threadId={id} likesCount={likesCount} />
+          <LikeButton threadId={id} likesCount={likesCount} userData={userData ?? null} />
           <Button
             variant="ghost"
             className="h-9 space-x-1 rounded-full px-2 text-foreground/60"
-            onClick={() =>
+            onClick={() => {
+              if (userData === undefined) {
+                navigate({ to: "/login" });
+                return;
+              }
+
               show(id, rootId, parentId, {
                 id,
                 rootId,
                 parentId,
                 postId,
+                authorId,
                 author,
                 text,
                 resources,
                 likesCount,
                 repliesCount,
-              })
-            }
+              });
+            }}
           >
             <BubbleChatIconModded width={20} height={20} strokeWidth={1.5} />
             {repliesCount > 0 && <span>{repliesCount}</span>}
@@ -147,6 +186,71 @@ export function Thread({
   );
 }
 
+type DeleteThreadButtonProps = {
+  deleteHandler: () => void;
+};
+
+function DeleteThreadButton({ deleteHandler }: DeleteThreadButtonProps) {
+  const [openWarning, setOpenWarning] = useState(false);
+
+  return (
+    <>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" className="h-10 w-10 -translate-y-2 translate-x-5 rounded-full">
+            <MoreVerticalIcon strokeWidth={2} width={24} height={24} className="min-h-6 min-w-6" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="end"
+          side="top"
+          className="w-40 origin-top-right animate-appear rounded-2xl border border-muted-foreground/20 px-0 py-3 shadow-xl transition-all duration-100 dark:bg-neutral-900"
+        >
+          <button
+            className="flex w-full justify-between px-4 py-2 text-red-500 focus-visible:outline-none dark:text-red-400"
+            onClick={() => setOpenWarning(true)}
+          >
+            <Delete02Icon strokeWidth={1.5} width={18} height={18} />
+            <span className="text-sm">Delete thread</span>
+          </button>
+        </PopoverContent>
+      </Popover>
+      {openWarning && (
+        <Dialog open={openWarning} onOpenChange={(value) => setOpenWarning(value)}>
+          <DialogContent className="max-w-[288px] divide-y divide-muted-foreground/30 !rounded-2xl border border-muted-foreground/30 p-0">
+            <DialogHeader>
+              <DialogTitle className="text-balance pt-4 text-center text-base">
+                Are you sure you want to delete this thread?
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex gap-0 divide-x divide-muted-foreground/30">
+              <DialogClose asChild className="basis-1/2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-12 rounded-none rounded-bl-2xl text-base focus-visible:ring-blue-500"
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <DialogClose asChild className="basis-1/2" autoFocus>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-12 rounded-none rounded-br-2xl text-base text-destructive hover:text-destructive focus-visible:ring-blue-500 dark:text-red-400 hover:dark:text-red-400"
+                  onClick={() => deleteHandler()}
+                >
+                  Delete
+                </Button>
+              </DialogClose>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+}
+
 type ThreadSmallViewProps = {
   user: {
     profilePictureId: string | null;
@@ -155,13 +259,17 @@ type ThreadSmallViewProps = {
   thread: ThreadProps;
 };
 
-export function ThreadSmallView({ user,thread }: ThreadSmallViewProps) {
+export function ThreadSmallView({ user, thread }: ThreadSmallViewProps) {
   const threadStore = useThreadStore((state) => state.thread);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    document.querySelector("#thread-editor")?.scrollIntoView();
+  }, []);
+
   return (
     <>
-      <div ref={imageContainerRef} className="relative flex h-[calc(100%-64px)] pb-8">
+      <div ref={imageContainerRef} className="relative flex pb-10">
         <UserImage
           profilePictureId={thread.author.profilePictureId ?? null}
           username={thread.author.username!}
@@ -179,7 +287,7 @@ export function ThreadSmallView({ user,thread }: ThreadSmallViewProps) {
             <Paragraph text={thread.text!} author={thread.author.username!} postId={thread.postId!} />
           </div>
           {thread.resources && (
-            <>
+            <div className="ml-3 mt-2">
               {thread.resources.length === 1 && (
                 <div className="max-w-xs">
                   <SinglePhoto images={thread.resources} />
@@ -187,13 +295,13 @@ export function ThreadSmallView({ user,thread }: ThreadSmallViewProps) {
               )}
               {thread.resources.length === 2 && <DoublePhoto images={thread.resources} />}
               {thread.resources.length >= 3 && <AlbumCarousel images={thread.resources} />}
-            </>
+            </div>
           )}
         </div>
         <div className="absolute bottom-2.5 left-[1.375rem] h-[calc(100%-64px)] w-0.5 bg-muted-foreground/60" />
       </div>
       {threadStore.map((_, i) => (
-        <div className="relative" key={i}>
+        <div id="thread-editor" className="relative" key={i}>
           <ThreadEditor
             index={i}
             user={user}

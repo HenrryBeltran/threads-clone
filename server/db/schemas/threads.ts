@@ -8,7 +8,7 @@ export const threads = sqliteTable("threads", {
   postId: text("post_id").notNull(),
   authorId: text("author_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   rootId: text("root_id").notNull(),
   parentId: text("parent_id"),
   text: text("text").notNull(),

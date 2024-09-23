@@ -7,10 +7,10 @@ export const likes = sqliteTable("likes", {
   id: text("id").primaryKey().notNull(),
   likedPost: text("liked_post")
     .notNull()
-    .references(() => threads.id),
+    .references(() => threads.id, { onDelete: "cascade" }),
   userLike: text("user_like")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),

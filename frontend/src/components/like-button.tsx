@@ -1,17 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { UserAccount, api } from "@/lib/api";
 import { safeTry } from "@server/lib/safe-try";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { FavouriteIcon } from "./icons/hugeicons";
 
 type Props = {
   threadId: string;
   likesCount: number;
+  userData: UserAccount | null;
 };
 
-export function LikeButton({ threadId, likesCount }: Props) {
+export function LikeButton({ threadId, likesCount, userData }: Props) {
+  const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();
   const likeQuery = useQuery({
@@ -96,6 +98,11 @@ export function LikeButton({ threadId, likesCount }: Props) {
       variant="ghost"
       className="h-9 space-x-1 rounded-full px-2 text-foreground/60"
       onClick={() => {
+        if (userData === null) {
+          navigate({ to: "/login" });
+          return;
+        }
+
         if (likeQuery.data?.like) {
           unlikeMutation.mutate();
         } else {

@@ -5,10 +5,10 @@ import { users } from "./users";
 export const searchHistory = sqliteTable("search_history", {
   id: text("id").primaryKey().notNull(),
   owner: text("owner")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   userSearch: text("user_search")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: text("created_at")
     .notNull()

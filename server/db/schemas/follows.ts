@@ -6,10 +6,10 @@ export const follows = sqliteTable("follows", {
   id: text("id").primaryKey().notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   targetId: text("target_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),

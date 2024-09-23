@@ -87,7 +87,9 @@ export function CreateThread() {
       resetThread();
     } else {
       const mention = location.pathname.slice(1);
-      editTextFromThread(0, mention);
+      if (mention.slice(1) !== user?.username) {
+        editTextFromThread(0, mention);
+      }
     }
   }, [threadModalData.open]);
 
@@ -173,8 +175,8 @@ export function CreateThread() {
                 </h2>
                 <div className="w-[53px] sm:hidden" />
               </div>
-              <div className="flex max-h-[520px] w-full flex-grow flex-col bg-background dark:bg-neutral-900 sm:max-w-xl sm:rounded-2xl sm:border sm:border-muted-foreground/20">
-                <div className="w-full flex-grow overflow-y-scroll p-3 sm:max-w-xl sm:p-6">
+              <div className="relative flex max-h-full w-full flex-grow flex-col bg-background dark:bg-neutral-900 sm:max-h-[620px] sm:max-w-xl sm:rounded-2xl sm:border sm:border-muted-foreground/20">
+                <div className="w-full flex-grow overflow-y-scroll p-3 pb-32 sm:max-w-xl sm:p-6 sm:pb-3">
                   {threadModalData.rootId === null && (
                     <>
                       {thread.map((_, i) => (
@@ -213,7 +215,7 @@ export function CreateThread() {
                     <span>Add to thread</span>
                   </button>
                 </div>
-                <div className="flex items-center justify-end gap-4 p-3 sm:p-6 sm:pt-3">
+                <div className="fixed bottom-0 z-10 flex w-full items-center justify-end gap-4 bg-background p-3 dark:bg-neutral-900 sm:static sm:bg-transparent sm:p-6 sm:pt-3 sm:dark:bg-transparent">
                   {thread[currentIndex].text.length >= 450 && (
                     <span
                       aria-invalid={thread[currentIndex].text.length > 500}
@@ -290,10 +292,7 @@ export function ThreadEditor({ user, index, placeholder }: ThreadEditorProps) {
         fetchPriority="high"
         className="h-11 w-11"
       />
-      <div
-        style={{ width: `${imageContainerRef.current?.clientWidth! - 44}px` }}
-        className="relative flex max-h-[520px] flex-col"
-      >
+      <div style={{ width: `${imageContainerRef.current?.clientWidth! - 44}px` }} className="relative flex flex-col">
         <div className="px-3">
           <span className="font-semibold leading-snug">{user.username}</span>
           <Editor index={index} placeholder={placeholder} />

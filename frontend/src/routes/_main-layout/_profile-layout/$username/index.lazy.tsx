@@ -4,10 +4,10 @@ import { safeTry } from "@server/lib/safe-try";
 import { createLazyFileRoute, useRouteContext } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_main-layout/_profile-layout/$username/")({
-  component: ProfileReplies,
+  component: ProfileIndex,
 });
 
-function ProfileReplies() {
+function ProfileIndex() {
   const ctx = useRouteContext({ from: "/_main-layout/_profile-layout" });
 
   if (typeof ctx.profile === "number") {

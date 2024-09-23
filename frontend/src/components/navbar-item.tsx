@@ -1,28 +1,19 @@
+import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { PostsPages } from "./threads-infinite-scroll";
 
 type Props = {
   children: React.ReactNode;
   href?: string;
   pathname?: string;
+  extraPathname?: string;
   username?: string;
   handleOnClick?: () => void;
 };
 
-export function NavbarItem({ children, href, pathname, username, handleOnClick }: Props) {
+export function NavbarItem({ children, href, pathname, extraPathname, username, handleOnClick }: Props) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
-  function resetInfiniteQueryPagination(queryKey: string[]) {
-    queryClient.setQueryData<PostsPages>(queryKey, (oldData) => {
-      if (!oldData) return undefined;
-      return {
-        pages: [],
-        pageParams: oldData.pageParams.slice(0, 1),
-      };
-    });
-  }
 
   return (
     <div className="relative h-full transition-transform active:scale-95 sm:h-auto">
@@ -36,7 +27,7 @@ export function NavbarItem({ children, href, pathname, username, handleOnClick }
               e.stopPropagation();
 
               if (window.scrollY < 100) {
-                resetInfiniteQueryPagination(["main", "threads"]);
+                resetInfiniteQueryPagination(queryClient, ["main", "threads"]);
                 queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
                 queryClient.setQueryData(["posting", "threads"], []);
               } else {
@@ -46,7 +37,7 @@ export function NavbarItem({ children, href, pathname, username, handleOnClick }
             }
 
             if (username && href && href.startsWith("/@")) {
-              resetInfiniteQueryPagination([username, "threads"]);
+              resetInfiniteQueryPagination(queryClient, [username, "threads"]);
               queryClient.invalidateQueries({ queryKey: [username, "threads"] });
             }
 
@@ -70,7 +61,7 @@ export function NavbarItem({ children, href, pathname, username, handleOnClick }
           }}
         >
           <div
-            aria-selected={!!href && !!pathname && pathname === href}
+            aria-selected={!!href && !!pathname && (pathname === href || pathname === extraPathname)}
             className="group z-10 fill-none text-neutral-400 transition-transform duration-200 [-webkit-transform:translateZ(0)] aria-selected:fill-foreground aria-selected:text-foreground dark:text-neutral-500 aria-selected:dark:text-foreground"
           >
             {children}

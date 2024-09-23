@@ -6,10 +6,11 @@ import { ProfileHeader } from "@/components/profile-header";
 import { ProfileLink } from "@/components/profile-link";
 import { Button } from "@/components/ui/button";
 import { UserAccount, api } from "@/lib/api";
+import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 import { useThreadModalStore } from "@/store";
 import { safeTry } from "@server/lib/safe-try";
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
-import { Outlet, createFileRoute, redirect, useRouteContext } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute, redirect, useLocation, useRouteContext } from "@tanstack/react-router";
 
 async function getProfile(username: string) {
   const res = await safeTry(api.user.profile[":username"].$get({ param: { username } }));
@@ -107,6 +108,7 @@ export const Route = createFileRoute("/_main-layout/_profile-layout")({
 function ProfileLayout() {
   const queryClient = useQueryClient();
   const { username }: { username: string } = Route.useParams();
+  const { pathname } = useLocation();
   const profileUsername = username.slice(1);
 
   const userData = queryClient.getQueryData<UserAccount>(["user", "account"]);
@@ -163,6 +165,31 @@ function ProfileLayout() {
             </Button>
           </div>
         )}
+      </div>
+      <div
+        data-tab={pathname.split("/").length > 2 ? "replies" : "threads"}
+        className="group mx-auto mt-3 grid w-full max-w-[620px] grid-cols-2 grid-rows-1 place-items-center border-b border-b-muted-foreground/30 font-medium"
+      >
+        <Link
+          className="flex w-full translate-y-px justify-center py-2 group-data-[tab=threads]:border-b-2 group-data-[tab=threads]:border-b-foreground group-data-[tab=replies]:text-muted-foreground/80"
+          to={`/@${profileUsername}`}
+          onClick={() => {
+            resetInfiniteQueryPagination(queryClient, [profileUsername, "threads"]);
+            queryClient.invalidateQueries({ queryKey: [profileUsername, "threads"] });
+          }}
+        >
+          Threads
+        </Link>
+        <Link
+          className="flex w-full translate-y-px justify-center py-2 group-data-[tab=replies]:border-b-2 group-data-[tab=replies]:border-b-foreground group-data-[tab=threads]:text-muted-foreground/80"
+          to={`/@${profileUsername}/replies`}
+          onClick={() => {
+            resetInfiniteQueryPagination(queryClient, [profileUsername, "threads", "replies"]);
+            queryClient.invalidateQueries({ queryKey: [profileUsername, "threads", "replies"] });
+          }}
+        >
+          Replies
+        </Link>
       </div>
       <Outlet />
     </div>

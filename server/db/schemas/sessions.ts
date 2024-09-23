@@ -7,7 +7,7 @@ export const sessions = sqliteTable("sessions", {
   token: text("token").unique().notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   expires: text("expires").notNull(),
   createdAt: text("created_at")
     .notNull()
