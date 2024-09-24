@@ -298,7 +298,7 @@ export function ThreadSmallView({ user, thread }: ThreadSmallViewProps) {
             </div>
           )}
         </div>
-        <div className="absolute bottom-2.5 left-[1.375rem] h-[calc(100%-64px)] w-0.5 bg-muted-foreground/60" />
+        <div className="absolute bottom-2.5 left-[1.375rem] h-[calc(100%-64px)] w-0.5 bg-muted-foreground/40" />
       </div>
       {threadStore.map((_, i) => (
         <div id="thread-editor" className="relative" key={i}>
@@ -307,7 +307,7 @@ export function ThreadSmallView({ user, thread }: ThreadSmallViewProps) {
             user={user}
             placeholder={i === 0 ? `Reply to ${thread.author.username}...` : "Say more..."}
           />
-          <div className="absolute left-[1.375rem] top-14 h-[calc(100%-66px)] w-0.5 bg-muted-foreground/60" />
+          <div className="absolute left-[1.375rem] top-14 h-[calc(100%-66px)] w-0.5 bg-muted-foreground/40" />
         </div>
       ))}
     </>

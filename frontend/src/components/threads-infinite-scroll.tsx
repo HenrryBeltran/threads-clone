@@ -6,8 +6,11 @@ import { useInView } from "react-intersection-observer";
 import { Loading03AnimatedIcon } from "./icons/hugeicons";
 import { Thread } from "./thread";
 import { ThreadsSkeleton } from "./threads-skeleton";
+import { LinkThreadNotFound } from "./link-thread-not-found";
 
 export type Posts = InferResponseType<typeof api.threads.posts.$get>;
+const repliesEndpoint = api.threads.replies.posts[":userId"].$get;
+export type Replies = InferResponseType<typeof repliesEndpoint>;
 
 export type PostsPages = {
   pages: Posts[];
@@ -16,11 +19,12 @@ export type PostsPages = {
 
 type Props = {
   queryKey: string[];
-  queryFn: QueryFunction<Posts, string[], number> | undefined;
+  queryFn: QueryFunction<Posts | Replies, string[], number> | undefined;
   noMorePostsMessage?: string;
+  type?: "thread" | "reply";
 };
 
-export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage }: Props) {
+export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage, type = "thread" }: Props) {
   const query = useInfiniteQuery({
     queryKey,
     queryFn,
@@ -53,9 +57,24 @@ export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage }:
           query.data &&
           query.data.pages.map((group, i) => (
             <Fragment key={i}>
-              {group.map((thread) => (
-                <Thread key={thread.postId} {...thread} />
-              ))}
+              {type === "reply" &&
+                (group as Replies).map((thread, it) => (
+                  <div key={it}>
+                    <div className="relative">
+                      {thread.parent === null ? <LinkThreadNotFound /> : <Thread {...thread.parent} />}
+                      {thread.parent !== null && (
+                        <div className="absolute left-5 top-[4.75rem] h-[calc(100%-76px)] w-0.5 bg-muted-foreground/40" />
+                      )}
+                    </div>
+                    <Thread {...thread} style="main" />
+                  </div>
+                ))}
+              {type === "thread" &&
+                (group as Posts).map((thread, it) => (
+                  <div key={it}>
+                    <Thread {...thread} />
+                  </div>
+                ))}
             </Fragment>
           ))}
         {(query.isFetchingNextPage || query.isRefetching) && (

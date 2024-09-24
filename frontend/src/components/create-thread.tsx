@@ -182,7 +182,7 @@ export function CreateThread() {
                       {thread.map((_, i) => (
                         <div key={i} className="relative">
                           <ThreadEditor user={user} index={i} placeholder={i > 0 ? "Say more..." : undefined} />
-                          <div className="absolute left-[1.375rem] top-14 h-[calc(100%-66px)] w-0.5 bg-muted-foreground/60" />
+                          <div className="absolute left-[1.375rem] top-14 h-[calc(100%-66px)] w-0.5 bg-muted-foreground/40" />
                         </div>
                       ))}
                     </>

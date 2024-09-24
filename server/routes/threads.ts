@@ -343,12 +343,17 @@ export const threads = new Hono()
     const { error, result } = await safeTry(
       db.query.threads.findMany({
         with: {
+          parent: {
+            with: {
+              author: { columns: { username: true, name: true, profilePictureId: true } },
+            },
+          },
           author: {
             columns: { username: true, name: true, profilePictureId: true },
           },
         },
-        limit: 6,
-        offset: page * 6,
+        limit: 4,
+        offset: page * 4,
         orderBy: desc(threadsTable.createdAt),
         where: and(eq(threadsTable.authorId, userId), ne(threadsTable.id, threadsTable.rootId)),
       }),

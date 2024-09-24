@@ -44,7 +44,11 @@ function ProfileReplies() {
 
   return (
     <>
-      <ThreadsInfiniteScroll queryKey={[profile.username, "threads", "replies"]} queryFn={profilePostsFetcher} />
+      <ThreadsInfiniteScroll
+        queryKey={[profile.username, "threads", "replies"]}
+        queryFn={profilePostsFetcher}
+        type="reply"
+      />
     </>
   );
 }
