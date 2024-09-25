@@ -1,9 +1,11 @@
+import { useLockScrolling } from "@/hooks/lock-scrolling";
+import { UserAccount } from "@/lib/api";
 import { useBackdropStore } from "@/store";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { FollowersCard } from "./followers-card";
 import { UserImage } from "./user-image";
-import { useLockScrolling } from "@/hooks/lock-scrolling";
 
 type Props = {
   username: string;
@@ -11,7 +13,6 @@ type Props = {
   followingsCount: number;
   profilePictureIdOne: string | null;
   profilePictureIdTwo: string | null;
-  userId?: string;
   targetId: string;
 };
 
@@ -21,12 +22,13 @@ export function ProfileFollowersCount({
   followingsCount,
   profilePictureIdOne,
   profilePictureIdTwo,
-  userId,
   targetId,
 }: Props) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const backdrop = useBackdropStore();
+  const queryClient = useQueryClient();
+  const userData = queryClient.getQueryData<UserAccount>(["user", "account"]);
   let dialog: HTMLDialogElement | null;
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export function ProfileFollowersCount({
           data-small={followersCount === 1}
           className="peer relative h-8 w-9 cursor-pointer data-[small=true]:w-6"
           onClick={() => {
-            if (userId === undefined) {
+            if (userData === null) {
               navigate({ to: "/login" });
               return;
             }
@@ -95,7 +97,7 @@ export function ProfileFollowersCount({
       <span
         className="cursor-pointer text-sm font-light text-muted-foreground underline-offset-2 hover:underline peer-[:hover]:underline"
         onClick={() => {
-          if (userId === undefined) {
+          if (userData === null) {
             navigate({ to: "/login" });
             return;
           }
@@ -112,11 +114,11 @@ export function ProfileFollowersCount({
         popover="auto"
         className="w-full max-w-md bg-transparent p-5"
       >
-        {open && userId && (
+        {open && userData && (
           <FollowersCard
             followersCount={followersCount}
             followingsCount={followingsCount}
-            userId={userId}
+            userId={userData.id}
             targetId={targetId}
             handleOnClick={() => dialog?.hidePopover()}
           />

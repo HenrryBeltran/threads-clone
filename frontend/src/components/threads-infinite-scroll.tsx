@@ -4,9 +4,9 @@ import { InferResponseType } from "hono/client";
 import { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Loading03AnimatedIcon } from "./icons/hugeicons";
+import { LinkThreadNotFound } from "./link-thread-not-found";
 import { Thread } from "./thread";
 import { ThreadsSkeleton } from "./threads-skeleton";
-import { LinkThreadNotFound } from "./link-thread-not-found";
 
 export type Posts = InferResponseType<typeof api.threads.posts.$get>;
 const repliesEndpoint = api.threads.replies.posts[":userId"].$get;
@@ -51,6 +51,13 @@ export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage, t
 
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-[620px] flex-col pb-24">
+      {query.isSuccess && query.data && query.data.pages[0].length === 0 && (
+        <p>
+          {type === "thread"
+            ? "This account doesn't have any posts yet."
+            : "This account doesn't have any replies yet."}
+        </p>
+      )}
       <div className="flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 px-6">
         {query.isLoading && <ThreadsSkeleton />}
         {query.isRefetching === false &&

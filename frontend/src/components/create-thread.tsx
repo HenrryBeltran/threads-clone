@@ -86,7 +86,7 @@ export function CreateThread() {
     if (threadModalData.open === false) {
       resetThread();
     } else {
-      const mention = location.pathname.slice(1);
+      const mention = location.pathname.slice(1).split("/")[0];
       if (mention.slice(1) !== user?.username) {
         editTextFromThread(0, mention);
       }

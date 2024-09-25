@@ -1,9 +1,11 @@
+import { zValidator } from "@hono/zod-validator";
 import camelcaseKeys from "camelcase-keys";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { nanoid } from "nanoid";
+import { z } from "zod";
 import { db } from "../../db";
 import { follows } from "../../db/schemas/follows";
 import { users } from "../../db/schemas/users";
@@ -174,9 +176,11 @@ export const accountFollow = new Hono()
 
     return ctx.json({ follow: false }, 200);
   })
-  .get("/followers/:targetId", getUser, async (ctx) => {
+  .get("/followers/:targetId", getUser, zValidator("query", z.object({ page: z.string() })), async (ctx) => {
     const user = ctx.get("user");
     const targetId = ctx.req.param("targetId");
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 10 : 0;
 
     const { error, result } = await safeTry(
       db.run(
@@ -195,12 +199,13 @@ export const accountFollow = new Hono()
           INNER JOIN users
             ON users.id = follows.user_id
           WHERE follows.target_id = ${targetId}
-          ORDER BY follows.created_at DESC;
+          ORDER BY follows.created_at DESC
+          LIMIT 10 OFFSET ${offset};
         `,
       ),
     );
 
-    if (error) {
+    if (error !== null) {
       return ctx.json(error, 500);
     }
 
@@ -208,9 +213,11 @@ export const accountFollow = new Hono()
 
     return ctx.json(rows, 200);
   })
-  .get("/followings/:targetId", getUser, async (ctx) => {
+  .get("/followings/:targetId", getUser, zValidator("query", z.object({ page: z.string() })), async (ctx) => {
     const user = ctx.get("user");
     const targetId = ctx.req.param("targetId");
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 10 : 0;
 
     const { error, result } = await safeTry(
       db.run(
@@ -229,12 +236,13 @@ export const accountFollow = new Hono()
           INNER JOIN users
             ON users.id = follows.target_id
           WHERE follows.user_id = ${targetId}
-          ORDER BY follows.created_at DESC;
+          ORDER BY follows.created_at DESC
+          LIMIT 10 OFFSET ${offset};
         `,
       ),
     );
 
-    if (error) {
+    if (error !== null) {
       return ctx.json(error, 500);
     }
 

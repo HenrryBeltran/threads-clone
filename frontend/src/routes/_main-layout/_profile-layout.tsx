@@ -143,7 +143,6 @@ function ProfileLayout() {
             followingsCount={profile.followingsCount}
             profilePictureIdOne={profile.targetId[0] ? profile.targetId[0].userId.profilePictureId : null}
             profilePictureIdTwo={profile.targetId[1] ? profile.targetId[1].userId.profilePictureId : null}
-            userId={profile?.id}
             targetId={profile.id}
           />
           <ProfileLink link={profile.link} />
@@ -168,7 +167,7 @@ function ProfileLayout() {
       </div>
       <div
         data-tab={pathname.split("/").length > 2 ? "replies" : "threads"}
-        className="group mx-auto mt-3 grid w-full max-w-[620px] grid-cols-2 grid-rows-1 place-items-center border-b border-b-muted-foreground/30 font-medium"
+        className="group mx-auto mb-1 mt-3 grid w-full max-w-[620px] grid-cols-2 grid-rows-1 place-items-center border-b border-b-muted-foreground/30 font-medium"
       >
         <Link
           className="flex w-full translate-y-px justify-center py-2 group-data-[tab=threads]:border-b-2 group-data-[tab=threads]:border-b-foreground group-data-[tab=replies]:text-muted-foreground/80"

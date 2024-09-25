@@ -1,5 +1,7 @@
 import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import { Loading03AnimatedIcon } from "./icons/hugeicons";
 import { ProfileRow } from "./profile-row";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -46,32 +48,56 @@ type FollowsProps = {
 };
 
 function FollowersContent({ userId, targetId, handleOnClick }: FollowsProps) {
-  const followers = useQuery({
+  const followers = useInfiniteQuery({
     queryKey: ["followers", targetId],
-    queryFn: async () => {
-      const res = await api.account.profile.followers[":targetId"].$get({ param: { targetId } });
+    queryFn: async ({ pageParam }) => {
+      const res = await api.account.profile.followers[":targetId"].$get({
+        param: { targetId },
+        query: { page: pageParam.toString() },
+      });
       const data = await res.json();
       return data;
     },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.length === 0) {
+        return undefined;
+      }
+      return lastPageParam + 1;
+    },
+    refetchOnMount: true,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView) {
+      followers.fetchNextPage();
+    }
+  }, [inView]);
 
   return (
     <TabsContent value="followers" className="m-0 h-[calc(512px-64px)] overflow-y-scroll p-5">
       {!followers.isLoading && (
         <div className="space-y-5">
           {followers.data &&
-            (followers.data.length > 0 ? (
-              followers.data.map((follower) => (
-                <ProfileRow
-                  key={follower.username}
-                  name={follower.name}
-                  username={follower.username}
-                  profilePictureId={follower.profilePictureId}
-                  followStatus={follower.followStatus}
-                  isMyProfile={userId === follower.id}
-                  handleOnClick={handleOnClick}
-                />
-              ))
+            (followers.data.pages.length > 0 ? (
+              followers.data.pages.map((group) =>
+                group.map((follower) => (
+                  <ProfileRow
+                    key={follower.username}
+                    name={follower.name}
+                    username={follower.username}
+                    profilePictureId={follower.profilePictureId}
+                    followStatus={follower.followStatus}
+                    isMyProfile={userId === follower.id}
+                    handleOnClick={handleOnClick}
+                  />
+                )),
+              )
             ) : (
               <span className="inline-block w-full p-8 text-center font-light text-muted-foreground">
                 Empty followers list.
@@ -84,37 +110,62 @@ function FollowersContent({ userId, targetId, handleOnClick }: FollowsProps) {
           <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="text-foreground" />
         </div>
       )}
+      <div ref={ref} className="h-px w-full" />
     </TabsContent>
   );
 }
 
 function FollowingsContent({ userId, targetId, handleOnClick: onClick }: FollowsProps) {
-  const followings = useQuery({
+  const followings = useInfiniteQuery({
     queryKey: ["followings", targetId],
-    queryFn: async () => {
-      const res = await api.account.profile.followings[":targetId"].$get({ param: { targetId } });
+    queryFn: async ({ pageParam }) => {
+      const res = await api.account.profile.followings[":targetId"].$get({
+        param: { targetId },
+        query: { page: pageParam.toString() },
+      });
       const data = await res.json();
       return data;
     },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.length === 0) {
+        return undefined;
+      }
+      return lastPageParam + 1;
+    },
+    refetchOnMount: true,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView) {
+      followings.fetchNextPage();
+    }
+  }, [inView]);
 
   return (
     <TabsContent value="following" className="m-0 h-[calc(512px-64px)] overflow-y-scroll p-5">
       {!followings.isLoading && (
         <div className="space-y-5">
           {followings.data &&
-            (followings.data.length > 0 ? (
-              followings.data.map((following) => (
-                <ProfileRow
-                  key={following.username}
-                  name={following.name}
-                  username={following.username}
-                  profilePictureId={following.profilePictureId}
-                  followStatus={following.followStatus}
-                  isMyProfile={userId === following.id}
-                  handleOnClick={onClick}
-                />
-              ))
+            (followings.data.pages.length > 0 ? (
+              followings.data.pages.map((group) =>
+                group.map((following) => (
+                  <ProfileRow
+                    key={following.username}
+                    name={following.name}
+                    username={following.username}
+                    profilePictureId={following.profilePictureId}
+                    followStatus={following.followStatus}
+                    isMyProfile={userId === following.id}
+                    handleOnClick={onClick}
+                  />
+                )),
+              )
             ) : (
               <span className="inline-block w-full p-8 text-center font-light text-muted-foreground">
                 {userId === targetId ? "You are not following anyone yet." : "Not following anyone yet."}
@@ -127,6 +178,7 @@ function FollowingsContent({ userId, targetId, handleOnClick: onClick }: Follows
           <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="text-foreground" />
         </div>
       )}
+      <div ref={ref} className="h-px w-full" />
     </TabsContent>
   );
 }

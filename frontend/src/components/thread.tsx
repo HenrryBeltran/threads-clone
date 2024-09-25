@@ -1,19 +1,52 @@
+import { UserAccount, api } from "@/lib/api";
+import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 import { useThreadModalStore, useThreadStore } from "@/store";
+import { safeTry } from "@server/lib/safe-try";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import updateLocale from "dayjs/plugin/updateLocale";
+import utc from "dayjs/plugin/utc";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { ThreadEditor } from "./create-thread";
-import { BubbleChatIconModded, Cancel01Icon, Delete02Icon, MoreVerticalIcon, SentIcon } from "./icons/hugeicons";
+import {
+  BubbleChatIconModded,
+  Cancel01Icon,
+  Copy02Icon,
+  Delete02Icon,
+  MoreHorizontalIcon,
+  SentIcon,
+} from "./icons/hugeicons";
 import { LikeButton } from "./like-button";
 import { Paragraph } from "./paragraph";
 import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { UserImage } from "./user-image";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserAccount, api } from "@/lib/api";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { safeTry } from "@server/lib/safe-try";
-import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
+import { UserImage } from "./user-image";
+
+dayjs.extend(relativeTime);
+dayjs.extend(updateLocale);
+dayjs.extend(utc);
+dayjs.updateLocale("en", {
+  relativeTime: {
+    future: "in %s",
+    past: "%s ago",
+    s: "%ds",
+    m: "1m",
+    mm: "%dm",
+    h: "1h",
+    hh: "%dh",
+    d: "1d",
+    dd: "%dd",
+    M: "1m",
+    MM: "%dm",
+    y: "1y",
+    yy: "%dy",
+  },
+});
 
 async function deleteThread(threadId: string) {
   const res = await safeTry(api.threads.post[":threadId"].$delete({ param: { threadId } }));
@@ -43,6 +76,7 @@ export type ThreadProps = {
   resources: string[] | null;
   likesCount: number;
   repliesCount: number;
+  createdAt: string;
   style?: "normal" | "main";
 };
 
@@ -57,6 +91,7 @@ export function Thread({
   resources,
   likesCount,
   repliesCount,
+  createdAt,
   style = "normal",
 }: ThreadProps) {
   const navigate = useNavigate();
@@ -99,13 +134,16 @@ export function Thread({
               to={`/@${author.username}`}
               onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
               className="font-semibold"
+              draggable={false}
             >
               {author.username}
             </Link>
             <div
               onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
-              className="flex-grow cursor-pointer pb-8"
-            />
+              className="flex-grow cursor-pointer"
+            >
+              <span className="pl-3 text-muted-foreground">{dayjs.utc(createdAt).local().fromNow(true)}</span>
+            </div>
           </div>
         )}
         {style === "normal" && (
@@ -120,18 +158,21 @@ export function Thread({
       <div className="flex-grow">
         <div>
           {style === "normal" && (
-            <div className="flex">
+            <div className="relative flex">
               <Link
                 to={`/@${author.username}`}
                 onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
                 className="font-semibold"
+                draggable={false}
               >
                 {author.username}
               </Link>
               <div
                 onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
-                className="flex-grow cursor-pointer pb-8"
-              />
+                className="flex-grow cursor-pointer pb-1"
+              >
+                <span className="pl-3 text-muted-foreground">{dayjs.utc(createdAt).local().fromNow(true)}</span>
+              </div>
               {userData?.id === authorId && <DeleteThreadButton deleteHandler={() => mutation.mutate(id)} />}
             </div>
           )}
@@ -139,7 +180,7 @@ export function Thread({
         </div>
         {resources && (
           <>
-            {text.length > 0 && <div className="h-1.5 w-full" />}
+            {resources.length > 0 && <div className="h-2.5 w-full" />}
             {resources.length === 1 && <SinglePhoto images={resources} />}
             {resources.length === 2 && <DoublePhoto images={resources} />}
             {resources.length >= 3 && <AlbumCarousel images={resources} />}
@@ -167,15 +208,18 @@ export function Thread({
                 resources,
                 likesCount,
                 repliesCount,
+                createdAt,
               });
             }}
           >
             <BubbleChatIconModded width={20} height={20} strokeWidth={1.5} />
             {repliesCount > 0 && <span>{repliesCount}</span>}
           </Button>
-          <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
-            <SentIcon width={20} height={20} strokeWidth={1.5} />
-          </Button>
+          <ShareLinkButton link={`${window.location.origin}/@${author.username}/post/${postId}`}>
+            <Button variant="ghost" className="h-9 space-x-1 rounded-full px-2 text-foreground/60">
+              <SentIcon width={20} height={20} strokeWidth={1.5} />
+            </Button>
+          </ShareLinkButton>
           <div
             onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
             className="flex-grow cursor-pointer"
@@ -183,6 +227,37 @@ export function Thread({
         </div>
       </div>
     </div>
+  );
+}
+
+function ShareLinkButton({ children, link }: { children: React.ReactNode; link: string }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent
+        align="start"
+        side="bottom"
+        className="w-52 origin-top-right animate-appear rounded-2xl border border-muted-foreground/20 px-0 py-3 shadow-xl transition-all duration-100 dark:bg-neutral-900"
+      >
+        <button
+          className="flex w-full justify-between px-5 py-2 focus-visible:outline-none"
+          onClick={() => {
+            navigator.clipboard.writeText(link);
+            toast("Copied", {
+              position: "bottom-center",
+              classNames: {
+                title:
+                  "text-base text-center text-secondary font-medium shadow-xl py-3.5 px-6 border border-muted-foreground/10 dark:bg-white bg-neutral-900 rounded-xl",
+                toast: "!bg-transparent pointer-events-none p-0 flex justify-center border-none !shadow-none",
+              },
+            });
+          }}
+        >
+          <span className="text-sm">Copy link</span>
+          <Copy02Icon strokeWidth={1.5} width={18} height={18} />
+        </button>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -197,21 +272,21 @@ function DeleteThreadButton({ deleteHandler }: DeleteThreadButtonProps) {
     <>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="ghost" className="h-10 w-10 -translate-y-2 translate-x-5 rounded-full">
-            <MoreVerticalIcon strokeWidth={2} width={24} height={24} className="min-h-6 min-w-6" />
+          <Button variant="ghost" className="absolute -top-2.5 right-0 h-10 w-10 rounded-full">
+            <MoreHorizontalIcon strokeWidth={2} width={24} height={24} className="min-h-6 min-w-6" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
           align="end"
           side="top"
-          className="w-40 origin-top-right animate-appear rounded-2xl border border-muted-foreground/20 px-0 py-3 shadow-xl transition-all duration-100 dark:bg-neutral-900"
+          className="w-52 origin-top-right animate-appear rounded-2xl border border-muted-foreground/20 px-0 py-3 shadow-xl transition-all duration-100 dark:bg-neutral-900"
         >
           <button
-            className="flex w-full justify-between px-4 py-2 text-red-500 focus-visible:outline-none dark:text-red-400"
+            className="flex w-full justify-between px-5 py-2 text-red-500 focus-visible:outline-none dark:text-red-400"
             onClick={() => setOpenWarning(true)}
           >
-            <Delete02Icon strokeWidth={1.5} width={18} height={18} />
             <span className="text-sm">Delete thread</span>
+            <Delete02Icon strokeWidth={1.5} width={18} height={18} />
           </button>
         </PopoverContent>
       </Popover>
@@ -284,6 +359,7 @@ export function ThreadSmallView({ user, thread }: ThreadSmallViewProps) {
         >
           <div className="px-3">
             <span className="font-semibold leading-snug">{thread.author.username!}</span>
+            <span className="pl-3 text-muted-foreground">{dayjs.utc(thread.createdAt).local().fromNow(true)}</span>
             <Paragraph text={thread.text!} author={thread.author.username!} postId={thread.postId!} />
           </div>
           {thread.resources && (
