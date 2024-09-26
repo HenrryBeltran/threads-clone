@@ -51,8 +51,8 @@ export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage, t
 
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-[620px] flex-col pb-24">
-      {query.isSuccess && query.data && query.data.pages[0].length === 0 && (
-        <p>
+      {query.isSuccess && query.data && query.data && query.data.pages[0] && query.data.pages[0].length === 0 && (
+        <p className="pt-6 text-center text-muted-foreground">
           {type === "thread"
             ? "This account doesn't have any posts yet."
             : "This account doesn't have any replies yet."}

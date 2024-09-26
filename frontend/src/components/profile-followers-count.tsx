@@ -112,7 +112,7 @@ export function ProfileFollowersCount({
         id="followers-popover"
         // @ts-ignore
         popover="auto"
-        className="w-full max-w-md bg-transparent p-5"
+        className="w-full max-w-md bg-transparent p-5 focus:outline-none"
       >
         {open && userData && (
           <FollowersCard

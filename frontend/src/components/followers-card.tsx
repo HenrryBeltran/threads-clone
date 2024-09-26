@@ -103,6 +103,11 @@ function FollowersContent({ userId, targetId, handleOnClick }: FollowsProps) {
                 Empty followers list.
               </span>
             ))}
+          {(followers.isFetchingNextPage || followers.isRefetching) && (
+            <div className="py-3">
+              <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto h-6 w-6" />
+            </div>
+          )}
         </div>
       )}
       {followers.isLoading && (
@@ -171,6 +176,11 @@ function FollowingsContent({ userId, targetId, handleOnClick: onClick }: Follows
                 {userId === targetId ? "You are not following anyone yet." : "Not following anyone yet."}
               </span>
             ))}
+          {(followings.isFetchingNextPage || followings.isRefetching) && (
+            <div className="py-3">
+              <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto h-6 w-6" />
+            </div>
+          )}
         </div>
       )}
       {followings.isLoading && (

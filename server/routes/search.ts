@@ -3,16 +3,14 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
+import { nanoid } from "nanoid";
 import { db } from "../db";
 import { searchHistory } from "../db/schemas/search-history";
 import { safeTry } from "../lib/safe-try";
-import { getUser } from "../middleware/getUser";
-import { nanoid } from "nanoid";
 import { getSession } from "../middleware/getSession";
+import { getUser } from "../middleware/getUser";
 
 dayjs.extend(utc);
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export type SearchResult = {
   id: string;
@@ -59,8 +57,6 @@ export const search = new Hono()
   })
   .get("/history", getUser, async (ctx) => {
     const user = ctx.get("user");
-
-    await delay(3000);
 
     const { error, result } = await safeTry(
       db.query.searchHistory.findMany({
