@@ -2,7 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { v2 as cloudinary } from "cloudinary";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, like, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
 import { z } from "zod";
@@ -38,14 +38,14 @@ function filterHashtagAndMentions(text: string, char: "#" | "@") {
 
 export const threads = new Hono()
   .get("/posts", zValidator("query", z.object({ page: z.string() })), async (ctx) => {
-    const rawPage = ctx.req.query("page");
-    const page = rawPage ? Number(rawPage) : 0;
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 6 : 0;
 
     const { error, result } = await safeTry(
       db.query.threads.findMany({
         with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
         limit: 6,
-        offset: page * 6,
+        offset,
         orderBy: desc(threadsTable.createdAt),
         where: isNull(threadsTable.parentId),
       }),
@@ -57,10 +57,37 @@ export const threads = new Hono()
 
     return ctx.json(result);
   })
+  .get("/posts/search", zValidator("query", z.object({ page: z.string(), q: z.string() })), async (ctx) => {
+    const q = ctx.req.query("q");
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 6 : 0;
+
+    if (q === undefined) {
+      return ctx.json({ message: "Query is undefined." }, 400);
+    }
+
+    const query = `%${q.replaceAll("%20", " ")}%`;
+
+    const { error, result } = await safeTry(
+      db.query.threads.findMany({
+        with: { author: { columns: { username: true, name: true, profilePictureId: true } } },
+        limit: 6,
+        offset,
+        orderBy: [desc(threadsTable.likesCount), desc(threadsTable.repliesCount)],
+        where: and(isNull(threadsTable.parentId), like(threadsTable.text, query)),
+      }),
+    );
+
+    if (error !== null) {
+      return ctx.json(error, 500);
+    }
+
+    return ctx.json(result);
+  })
   .get("/posts/:userId", zValidator("query", z.object({ page: z.string() })), async (ctx) => {
     const userId = ctx.req.param("userId");
-    const rawPage = ctx.req.query("page");
-    const page = rawPage ? Number(rawPage) : 0;
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 6 : 0;
 
     const { error, result } = await safeTry(
       db.query.threads.findMany({
@@ -70,7 +97,7 @@ export const threads = new Hono()
           },
         },
         limit: 6,
-        offset: page * 6,
+        offset,
         orderBy: desc(threadsTable.createdAt),
         where: and(eq(threadsTable.authorId, userId), eq(threadsTable.id, threadsTable.rootId)),
       }),
@@ -312,8 +339,8 @@ export const threads = new Hono()
   })
   .get("/replies/:parentId", zValidator("query", z.object({ offset: z.string() })), async (ctx) => {
     const parentId = ctx.req.param("parentId");
-    const rawPage = ctx.req.query("offset");
-    const page = rawPage ? Number(rawPage) : 0;
+    const page = ctx.req.query("offset");
+    const offset = page ? Number(page) * 6 : 0;
 
     const { error, result } = await safeTry(
       db.query.threads.findMany({
@@ -323,7 +350,7 @@ export const threads = new Hono()
           },
         },
         limit: 6,
-        offset: page * 6,
+        offset,
         orderBy: desc(threadsTable.createdAt),
         where: eq(threadsTable.parentId, parentId),
       }),
@@ -337,8 +364,8 @@ export const threads = new Hono()
   })
   .get("/replies/posts/:userId", zValidator("query", z.object({ page: z.string() })), async (ctx) => {
     const userId = ctx.req.param("userId");
-    const rawPage = ctx.req.query("page");
-    const page = rawPage ? Number(rawPage) : 0;
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 4 : 0;
 
     const { error, result } = await safeTry(
       db.query.threads.findMany({
@@ -353,7 +380,7 @@ export const threads = new Hono()
           },
         },
         limit: 4,
-        offset: page * 4,
+        offset,
         orderBy: desc(threadsTable.createdAt),
         where: and(eq(threadsTable.authorId, userId), ne(threadsTable.id, threadsTable.rootId)),
       }),

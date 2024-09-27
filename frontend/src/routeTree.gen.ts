@@ -15,6 +15,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as MainLayoutImport } from './routes/_main-layout'
 import { Route as AccountResetPasswordImport } from './routes/account/reset-password'
+import { Route as MainLayoutSearchImport } from './routes/_main-layout/search'
 import { Route as MainLayoutProfileLayoutImport } from './routes/_main-layout/_profile-layout'
 
 // Create Virtual Routes
@@ -27,7 +28,6 @@ const AccountVerificationLazyImport = createFileRoute('/account/verification')()
 const AccountCompleteProfileLazyImport = createFileRoute(
   '/account/complete-profile',
 )()
-const MainLayoutSearchLazyImport = createFileRoute('/_main-layout/search')()
 const MainLayoutSavedLazyImport = createFileRoute('/_main-layout/saved')()
 const MainLayoutLikedLazyImport = createFileRoute('/_main-layout/liked')()
 const MainLayoutActivityLazyImport = createFileRoute('/_main-layout/activity')()
@@ -88,13 +88,6 @@ const AccountCompleteProfileLazyRoute = AccountCompleteProfileLazyImport.update(
   import('./routes/account/complete-profile.lazy').then((d) => d.Route),
 )
 
-const MainLayoutSearchLazyRoute = MainLayoutSearchLazyImport.update({
-  path: '/search',
-  getParentRoute: () => MainLayoutRoute,
-} as any).lazy(() =>
-  import('./routes/_main-layout/search.lazy').then((d) => d.Route),
-)
-
 const MainLayoutSavedLazyRoute = MainLayoutSavedLazyImport.update({
   path: '/saved',
   getParentRoute: () => MainLayoutRoute,
@@ -120,6 +113,13 @@ const AccountResetPasswordRoute = AccountResetPasswordImport.update({
   path: '/account/reset-password',
   getParentRoute: () => rootRoute,
 } as any)
+
+const MainLayoutSearchRoute = MainLayoutSearchImport.update({
+  path: '/search',
+  getParentRoute: () => MainLayoutRoute,
+} as any).lazy(() =>
+  import('./routes/_main-layout/search.lazy').then((d) => d.Route),
+)
 
 const MainLayoutProfileLayoutRoute = MainLayoutProfileLayoutImport.update({
   id: '/_profile-layout',
@@ -195,6 +195,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutProfileLayoutImport
       parentRoute: typeof MainLayoutImport
     }
+    '/_main-layout/search': {
+      id: '/_main-layout/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof MainLayoutSearchImport
+      parentRoute: typeof MainLayoutImport
+    }
     '/account/reset-password': {
       id: '/account/reset-password'
       path: '/account/reset-password'
@@ -221,13 +228,6 @@ declare module '@tanstack/react-router' {
       path: '/saved'
       fullPath: '/saved'
       preLoaderRoute: typeof MainLayoutSavedLazyImport
-      parentRoute: typeof MainLayoutImport
-    }
-    '/_main-layout/search': {
-      id: '/_main-layout/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof MainLayoutSearchLazyImport
       parentRoute: typeof MainLayoutImport
     }
     '/account/complete-profile': {
@@ -283,10 +283,10 @@ export const routeTree = rootRoute.addChildren({
       MainLayoutProfileLayoutUsernameRepliesLazyRoute,
       MainLayoutProfileLayoutUsernameIndexLazyRoute,
     }),
+    MainLayoutSearchRoute,
     MainLayoutActivityLazyRoute,
     MainLayoutLikedLazyRoute,
     MainLayoutSavedLazyRoute,
-    MainLayoutSearchLazyRoute,
     MainLayoutIndexLazyRoute,
     MainLayoutUsernamePostPostIdLazyRoute,
   }),

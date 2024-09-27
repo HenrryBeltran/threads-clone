@@ -22,17 +22,18 @@ type Props = {
 };
 
 export default function Navbar({ username }: Props) {
-  const { pathname } = useLocation();
+  const { search, pathname } = useLocation();
   const showThreadModal = useThreadModalStore((state) => state.show);
   const paths = pathname.split("/");
   const backButtonPredicate = paths.length > 2 && paths[paths.length - 1] !== "replies";
+  const searchBackButtonPredicate = pathname === "/search" && search.q !== undefined;
 
   return (
     <nav
-      data-extra-button={backButtonPredicate}
+      data-extra-button={backButtonPredicate || searchBackButtonPredicate}
       className="fixed bottom-0 left-0 z-10 grid h-[68px] w-full grid-cols-5 grid-rows-1 items-center max-sm:bg-background/85 max-sm:backdrop-blur-3xl sm:static sm:z-auto sm:h-full data-[extra-button=true]:sm:grid-cols-6"
     >
-      {backButtonPredicate && <BackButton />}
+      {(backButtonPredicate || searchBackButtonPredicate) && <BackButton />}
       <NavbarItem href="/" pathname={pathname} username={username}>
         <Home06Icon {...menuIconsProps} />
       </NavbarItem>

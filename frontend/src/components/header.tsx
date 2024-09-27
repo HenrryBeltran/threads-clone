@@ -15,16 +15,17 @@ type Props = {
 
 export default function Header({ user }: Props) {
   const screen = useScreenSize();
-  const { pathname } = useLocation();
+  const { search, pathname } = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const paths = pathname.split("/");
   const backButtonPredicate = paths.length > 2 && paths[paths.length - 1] !== "replies";
+  const searchBackButtonPredicate = pathname === "/search" && search.q !== undefined;
 
   return (
     <header className="fixed left-0 right-0 top-0 z-20 mx-auto grid h-16 w-full grid-cols-3 grid-rows-1 items-center bg-background/85 backdrop-blur-3xl sm:h-[74px] sm:grid-cols-[1fr_max-content_1fr] md:max-w-screen-xl">
-      {backButtonPredicate && (
+      {(backButtonPredicate || searchBackButtonPredicate) && (
         <button
           className="group ml-3 flex h-12 w-12 items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95 sm:hidden"
           onClick={() => window.history.back()}

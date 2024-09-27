@@ -1,10 +1,11 @@
 import SearchForm from "@/components/forms/search-form";
 import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
 import { SearchHistory } from "@/components/search-history";
+import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { api } from "@/lib/api";
 import { safeTry } from "@server/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute, useLocation } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_main-layout/search")({
   component: Search,
@@ -24,6 +25,7 @@ async function fetcher() {
 }
 
 function Search() {
+  const { search } = useLocation();
   const query = useQuery({
     queryKey: ["user", "history"],
     queryFn: fetcher,
@@ -33,11 +35,46 @@ function Search() {
   return (
     <main className="mx-auto flex min-h-svh max-w-lg flex-col items-center px-6 pt-24 sm:px-0">
       <div className="relative w-full">
-        <SearchForm />
-        <div className="h-24 w-full" />
-        {query.isLoading && <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto" />}
-        {query.data && <SearchHistory result={query.data} />}
+        {search.q === undefined ? (
+          <>
+            <SearchForm />
+            <div className="h-24 w-full" />
+            {query.isLoading && <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto" />}
+            {query.data && <SearchHistory result={query.data} />}
+          </>
+        ) : (
+          <SearchResult q={search.q} />
+        )}
       </div>
     </main>
+  );
+}
+
+function SearchResult({ q }: { q: string }) {
+  async function getSearchThreads({ pageParam }: { pageParam: number }) {
+    const res = await safeTry(api.threads.posts.search.$get({ query: { page: pageParam.toString(), q } }));
+
+    if (res.error) throw new Error("Something went wrong");
+    if (!res.result.ok) throw new Error("Something went wrong");
+
+    const { error, result } = await safeTry(res.result.json());
+
+    if (error) throw new Error("Something went wrong");
+
+    return result;
+  }
+
+  return (
+    <>
+      <h2 className="mx-6 mb-2 border-b border-b-muted-foreground/30 pb-2 text-lg font-semibold tracking-tight">
+        Results
+      </h2>
+      <ThreadsInfiniteScroll
+        queryKey={["threads", "search"]}
+        queryFn={getSearchThreads}
+        threadsNotFoundMessage="No result found."
+        noMorePostsMessage="No more threads found."
+      />
+    </>
   );
 }

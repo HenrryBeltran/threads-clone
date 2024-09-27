@@ -20,11 +20,18 @@ export type PostsPages = {
 type Props = {
   queryKey: string[];
   queryFn: QueryFunction<Posts | Replies, string[], number> | undefined;
+  threadsNotFoundMessage?: string;
   noMorePostsMessage?: string;
   type?: "thread" | "reply";
 };
 
-export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage, type = "thread" }: Props) {
+export function ThreadsInfiniteScroll({
+  queryKey,
+  queryFn,
+  threadsNotFoundMessage,
+  noMorePostsMessage,
+  type = "thread",
+}: Props) {
   const query = useInfiniteQuery({
     queryKey,
     queryFn,
@@ -53,9 +60,11 @@ export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage, t
     <div className="mx-auto flex min-h-svh w-full max-w-[620px] flex-col pb-24">
       {query.isSuccess && query.data && query.data && query.data.pages[0] && query.data.pages[0].length === 0 && (
         <p className="pt-6 text-center text-muted-foreground">
-          {type === "thread"
-            ? "This account doesn't have any posts yet."
-            : "This account doesn't have any replies yet."}
+          {threadsNotFoundMessage === undefined &&
+            (type === "thread"
+              ? "This account doesn't have any posts yet."
+              : "This account doesn't have any replies yet.")}
+          {threadsNotFoundMessage !== undefined && threadsNotFoundMessage}
         </p>
       )}
       <div className="flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 px-6">
@@ -89,11 +98,15 @@ export function ThreadsInfiniteScroll({ queryKey, queryFn, noMorePostsMessage, t
             <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto h-6 w-6" />
           </div>
         )}
-        {query.hasNextPage === false && noMorePostsMessage && query.isFetching === false && (
-          <div className="flex justify-center py-6">
-            <p className="text-muted-foreground">{noMorePostsMessage}</p>
-          </div>
-        )}
+        {query.data?.pages[0] &&
+          query.data?.pages[0].length > 0 &&
+          query.hasNextPage === false &&
+          noMorePostsMessage &&
+          query.isFetching === false && (
+            <div className="flex justify-center py-6">
+              <p className="text-muted-foreground">{noMorePostsMessage}</p>
+            </div>
+          )}
       </div>
       <div ref={ref} className="h-px w-full bg-transparent" />
     </div>

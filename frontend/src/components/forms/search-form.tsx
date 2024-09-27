@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { ProfileRow } from "../profile-row";
+import { useNavigate } from "@tanstack/react-router";
+import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 
 export async function userSearch(userId?: string, keywords?: string) {
   if (!userId || !keywords) {
@@ -38,13 +40,14 @@ async function addToHistory(targetId: string) {
 }
 
 export default function SearchForm() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
 
   const [showResults, setShowResults] = useState(false);
   const [keywords, setKeywords] = useState("");
   const ref = useRef<HTMLInputElement>(null);
-  const [keywordsSearch] = useDebounce(keywords, 150);
+  const [keywordsSearch] = useDebounce(keywords, 200);
 
   const search = useQuery({
     queryKey: ["search", keywordsSearch],
@@ -61,7 +64,16 @@ export default function SearchForm() {
         className="absolute left-0 top-0 z-10 hidden h-[calc(100svh-96px)] w-full bg-background/70 data-[typing=true]:block dark:bg-background/80"
         onClick={() => setShowResults(false)}
       ></div>
-      <form className="absolute top-0 z-20 flex w-full flex-col items-center justify-center">
+      <form
+        className="absolute top-0 z-20 flex w-full flex-col items-center justify-center"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (keywords.length === 0) return;
+          navigate({ to: "/search", search: { q: keywords } });
+          resetInfiniteQueryPagination(queryClient, ["threads", "search"]);
+          queryClient.invalidateQueries({ queryKey: ["threads", "search"] });
+        }}
+      >
         <div
           data-typing={showResults}
           className="flex h-fit w-full flex-col rounded-2xl border border-neutral-200 bg-neutral-50 ring-1 ring-transparent transition-all has-[:focus]:border-neutral-300 has-[:active]:ring-transparent data-[typing=true]:w-[105%] data-[typing=true]:border-neutral-300 data-[typing=true]:shadow-xl dark:border-neutral-800 dark:bg-neutral-950 dark:has-[:focus]:border-neutral-700"
@@ -73,7 +85,7 @@ export default function SearchForm() {
             </div>
             <input
               ref={ref}
-              name="search"
+              name="q"
               type="text"
               autoFocus
               autoComplete="off"
@@ -110,9 +122,9 @@ export default function SearchForm() {
             )}
           </div>
           <div
-            data-typing={showResults && !!search.data && search.data.length > 0}
-            data-not-found={!!search.data && search.data.length === 0}
-            className="h-0 max-h-[400px] overflow-scroll border-t border-t-transparent transition-all data-[not-found=true]:h-[60px] data-[typing=false]:h-0 data-[typing=true]:h-[400px] data-[typing=false]:!border-t-transparent data-[typing=true]:border-t-muted-foreground/40 data-[typing=false]:p-0"
+            data-typing={showResults}
+            data-not-found={(!!search.data && search.data.length === 0) || !search.data}
+            className="h-0 max-h-[400px] overflow-scroll border-t border-t-transparent transition-all data-[typing=true]:h-[400px] data-[not-found=true]:max-h-[60px] data-[typing=false]:!border-t-transparent data-[typing=true]:border-t-muted-foreground/40 data-[typing=false]:p-0"
           >
             {showResults && (
               <button type="submit" className="flex w-full gap-5 py-4">
