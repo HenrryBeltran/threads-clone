@@ -67,7 +67,7 @@ export function Replies({ id }: { id: string }) {
           </div>
         )}
       </div>
-      {query.data?.pages[0].length !== 0 && <div ref={ref} className="h-px w-full" />}
+      {query.data?.pages[0] && query.data.pages[0].length !== 0 && <div ref={ref} className="h-px w-full" />}
     </div>
   );
 }

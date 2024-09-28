@@ -115,7 +115,9 @@ export function Thread({
       <div className="flex group-data-[style=normal]:flex-col group-data-[style=main]:pb-3">
         <Link
           to={`/@${author.username}`}
-          onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
           className="mr-3 min-h-11 min-w-11"
         >
           <UserImage
@@ -139,7 +141,12 @@ export function Thread({
               {author.username}
             </Link>
             <div
-              onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
+              onClick={() => {
+                resetInfiniteQueryPagination(queryClient, ["thread", "replies", id]);
+                queryClient.invalidateQueries({ queryKey: ["thread", "replies", id] });
+                queryClient.invalidateQueries({ queryKey: ["thread", author.username, postId] });
+                navigate({ to: `/@${author.username}/post/${postId}` });
+              }}
               className="flex-grow cursor-pointer"
             >
               <span className="pl-3 text-muted-foreground">{dayjs.utc(createdAt).local().fromNow(true)}</span>
@@ -149,6 +156,9 @@ export function Thread({
         {style === "normal" && (
           <div
             onClick={() => {
+              resetInfiniteQueryPagination(queryClient, ["thread", "replies", id]);
+              queryClient.invalidateQueries({ queryKey: ["thread", "replies", id] });
+              queryClient.invalidateQueries({ queryKey: ["thread", author.username, postId] });
               navigate({ to: `/@${author.username}/post/${postId}` });
             }}
             className="flex-grow cursor-pointer"
@@ -168,7 +178,13 @@ export function Thread({
                 {author.username}
               </Link>
               <div
-                onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
+                onClick={() => {
+                  resetInfiniteQueryPagination(queryClient, ["thread", "replies", id]);
+                  queryClient.invalidateQueries({ queryKey: ["thread", "replies", id] });
+                  queryClient.invalidateQueries({ queryKey: ["thread", author.username, postId] });
+
+                  navigate({ to: `/@${author.username}/post/${postId}` });
+                }}
                 className="flex-grow cursor-pointer pb-1"
               >
                 <span className="pl-3 text-muted-foreground">{dayjs.utc(createdAt).local().fromNow(true)}</span>

@@ -86,8 +86,11 @@ export function CreateThread() {
     if (threadModalData.open === false) {
       resetThread();
     } else {
-      const mention = location.pathname.slice(1).split("/")[0];
-      if (mention.includes("@") && mention.slice(1) !== user?.username) {
+      const paths = location.pathname.slice(1).split("/");
+      const mention = paths[0];
+      const isAReply = paths[1] === "post";
+
+      if (mention.includes("@") && mention.slice(1) !== user?.username && isAReply === false) {
         editTextFromThread(0, mention);
       }
     }

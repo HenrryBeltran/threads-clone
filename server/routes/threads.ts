@@ -2,7 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { v2 as cloudinary } from "cloudinary";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { and, asc, desc, eq, isNull, like, ne, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, like, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
 import { z } from "zod";
@@ -57,7 +57,7 @@ export const threads = new Hono()
 
     return ctx.json(result);
   })
-  .get("/posts/search", zValidator("query", z.object({ page: z.string(), q: z.string() })), async (ctx) => {
+  .get("/posts/search", getUser, zValidator("query", z.object({ page: z.string(), q: z.string() })), async (ctx) => {
     const q = ctx.req.query("q");
     const page = ctx.req.query("page");
     const offset = page ? Number(page) * 6 : 0;
@@ -351,7 +351,7 @@ export const threads = new Hono()
         },
         limit: 6,
         offset,
-        orderBy: desc(threadsTable.createdAt),
+        orderBy: [desc(threadsTable.repliesCount), desc(threadsTable.likesCount)],
         where: eq(threadsTable.parentId, parentId),
       }),
     );
