@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { logger } from "hono/logger";
 import { accountUser } from "./routes/account";
+import { activity } from "./routes/account/activity";
 import { accountFollow } from "./routes/account/follow";
 import { auth } from "./routes/auth";
 import { postLikes } from "./routes/likes";
@@ -23,7 +24,8 @@ const apiRoutes = app
   .route("/user", user)
   .route("/auth", auth)
   .route("/account/user", accountUser)
-  .route("/account/profile", accountFollow);
+  .route("/account/profile", accountFollow)
+  .route("/account/activity", activity);
 
 app.get("*", serveStatic({ root: "./frontend/dist" }));
 app.get("*", serveStatic({ path: "./frontend/dist/index.html" }));

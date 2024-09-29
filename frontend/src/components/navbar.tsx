@@ -9,6 +9,9 @@ import {
 import { useThreadModalStore } from "@/store";
 import { useLocation } from "@tanstack/react-router";
 import { NavbarItem } from "./navbar-item";
+import { safeTry } from "@server/lib/safe-try";
+import { api } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 const menuIconsProps: React.SVGProps<SVGSVGElement> = {
   className: "relative fill-inherit w-[28px] h-[26px]",
@@ -21,9 +24,24 @@ type Props = {
   username?: string;
 };
 
+async function getUnreadActivity() {
+  const res = await safeTry(api.account.activity.unread.$get());
+
+  if (res.error) throw new Error("Something went wrong");
+  if (!res.result.ok) throw new Error("Something went wrong");
+
+  const { error, result } = await safeTry(res.result.json());
+
+  if (error) throw new Error("Something went wrong");
+
+  return result;
+}
+
 export default function Navbar({ username }: Props) {
   const { search, pathname } = useLocation();
   const showThreadModal = useThreadModalStore((state) => state.show);
+  const unread = useQuery({ queryKey: ["unread"], queryFn: getUnreadActivity });
+
   const paths = pathname.split("/");
   const backButtonPredicate = paths.length > 2 && paths[paths.length - 1] !== "replies";
   const searchBackButtonPredicate = pathname === "/search" && search.q !== undefined;
@@ -43,7 +61,7 @@ export default function Navbar({ username }: Props) {
       <NavbarItem username={username} handleOnClick={() => showThreadModal()}>
         <PencilEdit02Icon {...menuIconsProps} />
       </NavbarItem>
-      <NavbarItem href="/activity" pathname={pathname} username={username}>
+      <NavbarItem href="/activity" pathname={pathname} username={username} readMark={unread.data?.unread}>
         <FavouriteIcon {...menuIconsProps} />
       </NavbarItem>
       <NavbarItem

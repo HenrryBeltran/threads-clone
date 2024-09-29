@@ -22,11 +22,11 @@ export const notifications = sqliteTable("notifications", {
 });
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
-  userActivity: one(users, {
+  senderInfo: one(users, {
     fields: [notifications.sender],
     references: [users.id],
   }),
-  userTarget: one(users, {
+  receiverInfo: one(users, {
     fields: [notifications.receiver],
     references: [users.id],
   }),

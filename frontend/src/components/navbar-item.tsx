@@ -8,10 +8,11 @@ type Props = {
   pathname?: string;
   extraPathname?: string;
   username?: string;
+  readMark?: boolean;
   handleOnClick?: () => void;
 };
 
-export function NavbarItem({ children, href, pathname, extraPathname, username, handleOnClick }: Props) {
+export function NavbarItem({ children, href, pathname, extraPathname, username, readMark, handleOnClick }: Props) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -70,8 +71,8 @@ export function NavbarItem({ children, href, pathname, extraPathname, username, 
         </Link>
       </div>
       <div
-        hidden
-        className="absolute bottom-2 left-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-500 sm:top-2"
+        hidden={readMark === undefined || readMark === false}
+        className="absolute bottom-2.5 left-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-500 sm:top-2.5"
       />
     </div>
   );
