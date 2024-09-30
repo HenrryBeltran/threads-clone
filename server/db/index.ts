@@ -1,8 +1,8 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
+import * as activities from "./schemas/activities";
 import * as follows from "./schemas/follows";
 import * as likes from "./schemas/likes";
-import * as notifications from "./schemas/notifications";
 import * as resetPassword from "./schemas/reset-password";
 import * as searchHistory from "./schemas/search-history";
 import * as sessions from "./schemas/sessions";
@@ -25,6 +25,6 @@ export const db = drizzle(client, {
     ...verifyUser,
     ...resetPassword,
     ...searchHistory,
-    ...notifications,
+    ...activities,
   },
 });

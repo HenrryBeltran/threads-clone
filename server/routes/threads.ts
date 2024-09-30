@@ -12,6 +12,7 @@ import { threads as threadsTable } from "../db/schemas/threads";
 import { users } from "../db/schemas/users";
 import { safeTry } from "../lib/safe-try";
 import { getUser } from "../middleware/getUser";
+import { createActivity } from "../lib/create-activity";
 
 dayjs.extend(utc);
 
@@ -288,6 +289,30 @@ export const threads = new Hono()
         if (increaseReplyCount.error !== null) {
           return ctx.json(increaseReplyCount.error, 500);
         }
+
+        const parentAuthor = await safeTry(
+          db.query.threads.findFirst({ columns: { authorId: true }, where: eq(threadsTable.id, body.parentId) }),
+        );
+
+        if (parentAuthor.error !== null) {
+          return ctx.json(parentAuthor.error, 500);
+        }
+
+        if (parentAuthor.result !== undefined && parentAuthor.result.authorId !== user.id) {
+          const { error } = await safeTry(
+            createActivity(
+              "reply",
+              user.id,
+              parentAuthor.result.authorId,
+              "Reply to your thread",
+              fullThread.result.postId,
+            ),
+          );
+
+          if (error !== null) {
+            return ctx.json(error, 500);
+          }
+        }
       }
 
       if (i > 0) {
@@ -301,6 +326,39 @@ export const threads = new Hono()
 
         if (increaseReplyCount.error !== null) {
           return ctx.json(increaseReplyCount.error, 500);
+        }
+      }
+
+      const mentionsLength = mentions.length;
+      if (mentionsLength > 0) {
+        for (let j = 0; j < mentionsLength; j++) {
+          const mention = mentions[j].slice(1);
+
+          const mentionUserId = await safeTry(
+            db.query.users.findFirst({ columns: { id: true }, where: eq(users.username, mention) }),
+          );
+
+          if (mentionUserId.error !== null) {
+            return ctx.json(mentionUserId.error, 500);
+          }
+
+          if (mentionUserId.result !== undefined) {
+            let message = "Mention you in a thread";
+
+            if (i > 0) {
+              message = "Mention you in a comment";
+            } else if (i === 0 && body.parentId !== null) {
+              message = "Mention you in a comment";
+            }
+
+            const { error } = await safeTry(
+              createActivity("mention", user.id, mentionUserId.result.id, message, fullThread.result.postId),
+            );
+
+            if (error !== null) {
+              return ctx.json(error, 500);
+            }
+          }
         }
       }
 

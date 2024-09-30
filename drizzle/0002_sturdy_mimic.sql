@@ -1,1 +1,0 @@
-ALTER TABLE `notifications` RENAME COLUMN `view_status` TO `read_status`;

@@ -12,15 +12,8 @@
     {
       "idx": 1,
       "version": "6",
-      "when": 1727486383832,
-      "tag": "0001_spooky_guardian",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1727486680644,
-      "tag": "0002_sturdy_mimic",
+      "when": 1727634619080,
+      "tag": "0001_dear_famine",
       "breakpoints": true
     }
   ]

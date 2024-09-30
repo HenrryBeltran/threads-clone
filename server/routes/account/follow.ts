@@ -11,6 +11,7 @@ import { follows } from "../../db/schemas/follows";
 import { users } from "../../db/schemas/users";
 import { safeTry } from "../../lib/safe-try";
 import { getUser } from "../../middleware/getUser";
+import { createActivity } from "../../lib/create-activity";
 
 dayjs.extend(utc);
 
@@ -115,6 +116,26 @@ export const accountFollow = new Hono()
 
     if (addFollowingCountError || addFollowerCountError || insertError) {
       return ctx.json(addFollowingCountError || addFollowerCountError || insertError, 500);
+    }
+
+    const { result: isFollowingMe } = await safeTry(
+      db.query.follows.findFirst({
+        where: and(eq(follows.userId, target.id), eq(follows.targetId, user.id)),
+      }),
+    );
+
+    if (isFollowingMe !== undefined && isFollowingMe !== null) {
+      const activity = await safeTry(createActivity("follow", user.id, target.id, "Followed you back"));
+
+      if (activity.error !== null) {
+        return ctx.json(activity.error, 500);
+      }
+    } else {
+      const activity = await safeTry(createActivity("follow", user.id, target.id, "Followed you"));
+
+      if (activity.error !== null) {
+        return ctx.json(activity.error, 500);
+      }
     }
 
     return ctx.json({ follow: true }, 200);

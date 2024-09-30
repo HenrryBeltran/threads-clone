@@ -1,17 +1,20 @@
+import { and, asc, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { getUser } from "../../middleware/getUser";
-import { safeTry } from "../../lib/safe-try";
 import { db } from "../../db";
-import { and, eq } from "drizzle-orm";
-import { notifications as notificationsTable } from "../../db/schemas/notifications";
+import { activities as activitiesTable } from "../../db/schemas/activities";
+import { safeTry } from "../../lib/safe-try";
+import { getUser } from "../../middleware/getUser";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
 
-type NotificationResult = {
+export type ActivityResult = {
   id: string;
   message: string;
-  type: "mention" | "like" | "reply";
+  type: "mention" | "reply" | "follow" | "like";
   sender: string;
   receiver: string;
   readStatus: boolean | null;
+  threadPostId: string | null;
   senderInfo: {
     username: string;
     profilePictureId: string | null;
@@ -24,54 +27,38 @@ type NotificationResult = {
   updatedAt: string;
 };
 
-export const activity = new Hono()
-  .get("/all", getUser, async (ctx) => {
+export const accountActivity = new Hono()
+  .get("/all", getUser, zValidator("query", z.object({ page: z.string() })), async (ctx) => {
     const user = ctx.get("user");
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 6 : 0;
 
-    const notifications = await safeTry(
-      db.query.notifications.findMany({
+    const { error, result } = await safeTry(
+      db.query.activities.findMany({
         with: {
           senderInfo: { columns: { username: true, profilePictureId: true } },
           receiverInfo: { columns: { username: true, profilePictureId: true } },
         },
-        where: eq(notificationsTable.receiver, user.id),
+        where: eq(activitiesTable.receiver, user.id),
+        orderBy: [asc(activitiesTable.readStatus), desc(activitiesTable.updatedAt)],
+        limit: 6,
+        offset,
       }),
     );
 
-    if (notifications.error !== null) {
-      return ctx.json(notifications.error, 500);
+    if (error !== null) {
+      return ctx.json(error, 500);
     }
 
-    const notificationsSize = notifications.result.length;
-
-    if (notificationsSize === 0) {
-      return ctx.json({ read: [], unread: [] }, 200);
-    }
-
-    const read: NotificationResult[] = [];
-    const unread: NotificationResult[] = [];
-
-    for (let i = 0; i < notificationsSize; i++) {
-      const notification = notifications.result[i];
-
-      if (notification.readStatus === null) continue;
-
-      if (notification.readStatus === true) {
-        read.push(notification);
-      } else {
-        unread.push(notification);
-      }
-    }
-
-    return ctx.json({ read, unread }, 200);
+    return ctx.json(result, 200);
   })
   .get("/unread", getUser, async (ctx) => {
     const user = ctx.get("user");
 
     const { error, result } = await safeTry(
-      db.query.notifications.findFirst({
+      db.query.activities.findFirst({
         columns: { readStatus: true },
-        where: and(eq(notificationsTable.receiver, user.id), eq(notificationsTable.readStatus, false)),
+        where: and(eq(activitiesTable.receiver, user.id), eq(activitiesTable.readStatus, false)),
       }),
     );
 
@@ -87,31 +74,29 @@ export const activity = new Hono()
       return ctx.json({ unread: false });
     }
 
-    console.log("~ Read status", result.readStatus);
-
     return ctx.json({ unread: true });
   })
   .post("/mark-as-read", getUser, async (ctx) => {
     const user = ctx.get("user");
 
-    const notifications = await safeTry(
-      db.query.notifications.findMany({
+    const activitiesQuery = await safeTry(
+      db.query.activities.findMany({
         columns: { id: true },
-        where: and(eq(notificationsTable.receiver, user.id), eq(notificationsTable.readStatus, false)),
+        where: and(eq(activitiesTable.receiver, user.id), eq(activitiesTable.readStatus, false)),
       }),
     );
 
-    if (notifications.error !== null) {
-      return ctx.json(notifications.error, 500);
+    if (activitiesQuery.error !== null) {
+      return ctx.json(activitiesQuery.error, 500);
     }
 
-    const notificationsSize = notifications.result.length;
-    if (notificationsSize === 0) {
+    const acitivitiesSize = activitiesQuery.result.length;
+    if (acitivitiesSize === 0) {
       return ctx.json({ message: "Already read" }, 200);
     }
 
     const { error } = await safeTry(
-      db.update(notificationsTable).set({ readStatus: true }).where(eq(notificationsTable.receiver, user.id)),
+      db.update(activitiesTable).set({ readStatus: true }).where(eq(activitiesTable.receiver, user.id)),
     );
 
     if (error !== null) {

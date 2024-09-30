@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import { db } from "../db";
 import { likes } from "../db/schemas/likes";
 import { threads as threadsTable } from "../db/schemas/threads";
-import { users } from "../db/schemas/users";
+import { createActivity } from "../lib/create-activity";
 import { safeTry } from "../lib/safe-try";
 import { getUser } from "../middleware/getUser";
 
@@ -54,7 +54,7 @@ export const postLikes = new Hono()
 
     const { error: threadError, result: thread } = await safeTry(
       db.query.threads.findFirst({
-        columns: { id: true, likesCount: true },
+        columns: { id: true, likesCount: true, authorId: true, postId: true },
         where: eq(threadsTable.id, threadId),
       }),
     );
@@ -97,6 +97,14 @@ export const postLikes = new Hono()
 
     if (updateLikeThreadsError || insertLikeError) {
       return ctx.json(updateLikeThreadsError || insertLikeError, 500);
+    }
+
+    const activity = await safeTry(
+      createActivity("like", user.id, thread.authorId, "Liked your thread", thread.postId),
+    );
+
+    if (activity.error !== null) {
+      return ctx.json(activity.error, 500);
     }
 
     return ctx.json({ like: true }, 200);
