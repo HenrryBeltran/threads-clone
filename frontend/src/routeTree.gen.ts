@@ -277,25 +277,271 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({
-  MainLayoutRoute: MainLayoutRoute.addChildren({
-    MainLayoutProfileLayoutRoute: MainLayoutProfileLayoutRoute.addChildren({
+interface MainLayoutProfileLayoutRouteChildren {
+  MainLayoutProfileLayoutUsernameRepliesLazyRoute: typeof MainLayoutProfileLayoutUsernameRepliesLazyRoute
+  MainLayoutProfileLayoutUsernameIndexLazyRoute: typeof MainLayoutProfileLayoutUsernameIndexLazyRoute
+}
+
+const MainLayoutProfileLayoutRouteChildren: MainLayoutProfileLayoutRouteChildren =
+  {
+    MainLayoutProfileLayoutUsernameRepliesLazyRoute:
       MainLayoutProfileLayoutUsernameRepliesLazyRoute,
+    MainLayoutProfileLayoutUsernameIndexLazyRoute:
       MainLayoutProfileLayoutUsernameIndexLazyRoute,
-    }),
-    MainLayoutSearchRoute,
-    MainLayoutActivityLazyRoute,
-    MainLayoutLikedLazyRoute,
-    MainLayoutSavedLazyRoute,
-    MainLayoutIndexLazyRoute,
-    MainLayoutUsernamePostPostIdLazyRoute,
-  }),
-  ForgottenPasswordLazyRoute,
-  LoginLazyRoute,
-  SignUpLazyRoute,
-  AccountResetPasswordRoute,
-  AccountCompleteProfileLazyRoute,
-  AccountVerificationLazyRoute,
-})
+  }
+
+const MainLayoutProfileLayoutRouteWithChildren =
+  MainLayoutProfileLayoutRoute._addFileChildren(
+    MainLayoutProfileLayoutRouteChildren,
+  )
+
+interface MainLayoutRouteChildren {
+  MainLayoutProfileLayoutRoute: typeof MainLayoutProfileLayoutRouteWithChildren
+  MainLayoutSearchRoute: typeof MainLayoutSearchRoute
+  MainLayoutActivityLazyRoute: typeof MainLayoutActivityLazyRoute
+  MainLayoutLikedLazyRoute: typeof MainLayoutLikedLazyRoute
+  MainLayoutSavedLazyRoute: typeof MainLayoutSavedLazyRoute
+  MainLayoutIndexLazyRoute: typeof MainLayoutIndexLazyRoute
+  MainLayoutUsernamePostPostIdLazyRoute: typeof MainLayoutUsernamePostPostIdLazyRoute
+}
+
+const MainLayoutRouteChildren: MainLayoutRouteChildren = {
+  MainLayoutProfileLayoutRoute: MainLayoutProfileLayoutRouteWithChildren,
+  MainLayoutSearchRoute: MainLayoutSearchRoute,
+  MainLayoutActivityLazyRoute: MainLayoutActivityLazyRoute,
+  MainLayoutLikedLazyRoute: MainLayoutLikedLazyRoute,
+  MainLayoutSavedLazyRoute: MainLayoutSavedLazyRoute,
+  MainLayoutIndexLazyRoute: MainLayoutIndexLazyRoute,
+  MainLayoutUsernamePostPostIdLazyRoute: MainLayoutUsernamePostPostIdLazyRoute,
+}
+
+const MainLayoutRouteWithChildren = MainLayoutRoute._addFileChildren(
+  MainLayoutRouteChildren,
+)
+
+export interface FileRoutesByFullPath {
+  '': typeof MainLayoutProfileLayoutRouteWithChildren
+  '/forgotten-password': typeof ForgottenPasswordLazyRoute
+  '/login': typeof LoginLazyRoute
+  '/sign-up': typeof SignUpLazyRoute
+  '/search': typeof MainLayoutSearchRoute
+  '/account/reset-password': typeof AccountResetPasswordRoute
+  '/activity': typeof MainLayoutActivityLazyRoute
+  '/liked': typeof MainLayoutLikedLazyRoute
+  '/saved': typeof MainLayoutSavedLazyRoute
+  '/account/complete-profile': typeof AccountCompleteProfileLazyRoute
+  '/account/verification': typeof AccountVerificationLazyRoute
+  '/': typeof MainLayoutIndexLazyRoute
+  '/$username/post/$postId': typeof MainLayoutUsernamePostPostIdLazyRoute
+  '/$username/replies': typeof MainLayoutProfileLayoutUsernameRepliesLazyRoute
+  '/$username': typeof MainLayoutProfileLayoutUsernameIndexLazyRoute
+}
+
+export interface FileRoutesByTo {
+  '/forgotten-password': typeof ForgottenPasswordLazyRoute
+  '/login': typeof LoginLazyRoute
+  '/sign-up': typeof SignUpLazyRoute
+  '': typeof MainLayoutProfileLayoutRouteWithChildren
+  '/search': typeof MainLayoutSearchRoute
+  '/account/reset-password': typeof AccountResetPasswordRoute
+  '/activity': typeof MainLayoutActivityLazyRoute
+  '/liked': typeof MainLayoutLikedLazyRoute
+  '/saved': typeof MainLayoutSavedLazyRoute
+  '/account/complete-profile': typeof AccountCompleteProfileLazyRoute
+  '/account/verification': typeof AccountVerificationLazyRoute
+  '/': typeof MainLayoutIndexLazyRoute
+  '/$username/post/$postId': typeof MainLayoutUsernamePostPostIdLazyRoute
+  '/$username/replies': typeof MainLayoutProfileLayoutUsernameRepliesLazyRoute
+  '/$username': typeof MainLayoutProfileLayoutUsernameIndexLazyRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/_main-layout': typeof MainLayoutRouteWithChildren
+  '/forgotten-password': typeof ForgottenPasswordLazyRoute
+  '/login': typeof LoginLazyRoute
+  '/sign-up': typeof SignUpLazyRoute
+  '/_main-layout/_profile-layout': typeof MainLayoutProfileLayoutRouteWithChildren
+  '/_main-layout/search': typeof MainLayoutSearchRoute
+  '/account/reset-password': typeof AccountResetPasswordRoute
+  '/_main-layout/activity': typeof MainLayoutActivityLazyRoute
+  '/_main-layout/liked': typeof MainLayoutLikedLazyRoute
+  '/_main-layout/saved': typeof MainLayoutSavedLazyRoute
+  '/account/complete-profile': typeof AccountCompleteProfileLazyRoute
+  '/account/verification': typeof AccountVerificationLazyRoute
+  '/_main-layout/': typeof MainLayoutIndexLazyRoute
+  '/_main-layout/$username/post/$postId': typeof MainLayoutUsernamePostPostIdLazyRoute
+  '/_main-layout/_profile-layout/$username/replies': typeof MainLayoutProfileLayoutUsernameRepliesLazyRoute
+  '/_main-layout/_profile-layout/$username/': typeof MainLayoutProfileLayoutUsernameIndexLazyRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | ''
+    | '/forgotten-password'
+    | '/login'
+    | '/sign-up'
+    | '/search'
+    | '/account/reset-password'
+    | '/activity'
+    | '/liked'
+    | '/saved'
+    | '/account/complete-profile'
+    | '/account/verification'
+    | '/'
+    | '/$username/post/$postId'
+    | '/$username/replies'
+    | '/$username'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/forgotten-password'
+    | '/login'
+    | '/sign-up'
+    | ''
+    | '/search'
+    | '/account/reset-password'
+    | '/activity'
+    | '/liked'
+    | '/saved'
+    | '/account/complete-profile'
+    | '/account/verification'
+    | '/'
+    | '/$username/post/$postId'
+    | '/$username/replies'
+    | '/$username'
+  id:
+    | '__root__'
+    | '/_main-layout'
+    | '/forgotten-password'
+    | '/login'
+    | '/sign-up'
+    | '/_main-layout/_profile-layout'
+    | '/_main-layout/search'
+    | '/account/reset-password'
+    | '/_main-layout/activity'
+    | '/_main-layout/liked'
+    | '/_main-layout/saved'
+    | '/account/complete-profile'
+    | '/account/verification'
+    | '/_main-layout/'
+    | '/_main-layout/$username/post/$postId'
+    | '/_main-layout/_profile-layout/$username/replies'
+    | '/_main-layout/_profile-layout/$username/'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  MainLayoutRoute: typeof MainLayoutRouteWithChildren
+  ForgottenPasswordLazyRoute: typeof ForgottenPasswordLazyRoute
+  LoginLazyRoute: typeof LoginLazyRoute
+  SignUpLazyRoute: typeof SignUpLazyRoute
+  AccountResetPasswordRoute: typeof AccountResetPasswordRoute
+  AccountCompleteProfileLazyRoute: typeof AccountCompleteProfileLazyRoute
+  AccountVerificationLazyRoute: typeof AccountVerificationLazyRoute
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  MainLayoutRoute: MainLayoutRouteWithChildren,
+  ForgottenPasswordLazyRoute: ForgottenPasswordLazyRoute,
+  LoginLazyRoute: LoginLazyRoute,
+  SignUpLazyRoute: SignUpLazyRoute,
+  AccountResetPasswordRoute: AccountResetPasswordRoute,
+  AccountCompleteProfileLazyRoute: AccountCompleteProfileLazyRoute,
+  AccountVerificationLazyRoute: AccountVerificationLazyRoute,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* prettier-ignore-end */
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/_main-layout",
+        "/forgotten-password",
+        "/login",
+        "/sign-up",
+        "/account/reset-password",
+        "/account/complete-profile",
+        "/account/verification"
+      ]
+    },
+    "/_main-layout": {
+      "filePath": "_main-layout.tsx",
+      "children": [
+        "/_main-layout/_profile-layout",
+        "/_main-layout/search",
+        "/_main-layout/activity",
+        "/_main-layout/liked",
+        "/_main-layout/saved",
+        "/_main-layout/",
+        "/_main-layout/$username/post/$postId"
+      ]
+    },
+    "/forgotten-password": {
+      "filePath": "forgotten-password.lazy.tsx"
+    },
+    "/login": {
+      "filePath": "login.lazy.tsx"
+    },
+    "/sign-up": {
+      "filePath": "sign-up.lazy.tsx"
+    },
+    "/_main-layout/_profile-layout": {
+      "filePath": "_main-layout/_profile-layout.tsx",
+      "parent": "/_main-layout",
+      "children": [
+        "/_main-layout/_profile-layout/$username/replies",
+        "/_main-layout/_profile-layout/$username/"
+      ]
+    },
+    "/_main-layout/search": {
+      "filePath": "_main-layout/search.tsx",
+      "parent": "/_main-layout"
+    },
+    "/account/reset-password": {
+      "filePath": "account/reset-password.tsx"
+    },
+    "/_main-layout/activity": {
+      "filePath": "_main-layout/activity.lazy.tsx",
+      "parent": "/_main-layout"
+    },
+    "/_main-layout/liked": {
+      "filePath": "_main-layout/liked.lazy.tsx",
+      "parent": "/_main-layout"
+    },
+    "/_main-layout/saved": {
+      "filePath": "_main-layout/saved.lazy.tsx",
+      "parent": "/_main-layout"
+    },
+    "/account/complete-profile": {
+      "filePath": "account/complete-profile.lazy.tsx"
+    },
+    "/account/verification": {
+      "filePath": "account/verification.lazy.tsx"
+    },
+    "/_main-layout/": {
+      "filePath": "_main-layout/index.lazy.tsx",
+      "parent": "/_main-layout"
+    },
+    "/_main-layout/$username/post/$postId": {
+      "filePath": "_main-layout/$username/post/$postId.lazy.tsx",
+      "parent": "/_main-layout"
+    },
+    "/_main-layout/_profile-layout/$username/replies": {
+      "filePath": "_main-layout/_profile-layout/$username/replies.lazy.tsx",
+      "parent": "/_main-layout/_profile-layout"
+    },
+    "/_main-layout/_profile-layout/$username/": {
+      "filePath": "_main-layout/_profile-layout/$username/index.lazy.tsx",
+      "parent": "/_main-layout/_profile-layout"
+    }
+  }
+}
+ROUTE_MANIFEST_END */

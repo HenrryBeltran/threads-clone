@@ -99,12 +99,14 @@ export const postLikes = new Hono()
       return ctx.json(updateLikeThreadsError || insertLikeError, 500);
     }
 
-    const activity = await safeTry(
-      createActivity("like", user.id, thread.authorId, "Liked your thread", thread.postId),
-    );
+    if (user.id !== thread.authorId) {
+      const activity = await safeTry(
+        createActivity("like", user.id, thread.authorId, "Liked your thread", thread.postId),
+      );
 
-    if (activity.error !== null) {
-      return ctx.json(activity.error, 500);
+      if (activity.error !== null) {
+        return ctx.json(activity.error, 500);
+      }
     }
 
     return ctx.json({ like: true }, 200);

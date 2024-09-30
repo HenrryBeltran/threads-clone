@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { optimizeImage } from "@/lib/optimize-image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@server/common/schemas/user";
+import { safeTry } from "@server/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
@@ -53,9 +54,9 @@ export function CompleteProfileForm() {
   }
 
   async function onSubmit(data: z.infer<typeof insertUserSchema>) {
-    try {
-      await api.account.user.$put({ json: { ...data, profilePicture } });
-    } catch (error) {
+    const { error } = await safeTry(api.account.user.$put({ json: { ...data, profilePicture } }));
+
+    if (error !== null) {
       form.setError("root", { message: "Something went wrong." });
       return;
     }

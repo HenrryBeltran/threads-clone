@@ -12,6 +12,8 @@ import { safeTry } from "@server/lib/safe-try";
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, redirect, useLocation, useRouteContext } from "@tanstack/react-router";
 
+/// TODO: Make the edit profile page
+
 async function getProfile(username: string) {
   const res = await safeTry(api.user.profile[":username"].$get({ param: { username } }));
 

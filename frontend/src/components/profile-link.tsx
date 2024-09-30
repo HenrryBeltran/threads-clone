@@ -9,6 +9,7 @@ export function ProfileLink({ link }: { link: string | null }) {
           <a
             href={link}
             target="_blank"
+            rel="noreferrer"
             className="text-sm font-light text-muted-foreground hover:underline hover:underline-offset-2"
           >
             {shortUrl(link)}

@@ -3,7 +3,7 @@ import utc from "dayjs/plugin/utc";
 import { and, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "../db";
-import { activities as activitiesTable } from "../db/schemas/activities";
+import { activities, activities as activitiesTable } from "../db/schemas/activities";
 import { safeTry } from "./safe-try";
 
 dayjs.extend(utc);
@@ -18,12 +18,12 @@ type CreateActivity = (
 
 export const createActivity: CreateActivity = async (type, sender, receiver, message, threadPostId = null) => {
   if (type === "follow") {
-    const follow = await updateRepeatedActivity(receiver, "follow");
+    const follow = await updateRepeatedActivity(sender, receiver, threadPostId, "follow");
     if (follow !== undefined) {
       return;
     }
   } else if (type === "like") {
-    const like = await updateRepeatedActivity(receiver, "like");
+    const like = await updateRepeatedActivity(sender, receiver, threadPostId, "like");
     if (like !== undefined) {
       return;
     }
@@ -38,11 +38,29 @@ export const createActivity: CreateActivity = async (type, sender, receiver, mes
   }
 };
 
-async function updateRepeatedActivity(receiver: string, type: "follow" | "like") {
+async function updateRepeatedActivity(
+  sender: string,
+  receiver: string,
+  threadPostId: string | null,
+  type: "follow" | "like",
+) {
+  const followFilter = [
+    eq(activities.sender, sender),
+    eq(activitiesTable.receiver, receiver),
+    eq(activitiesTable.type, type),
+  ];
+  const likeFilter = [
+    eq(activities.sender, sender),
+    eq(activitiesTable.receiver, receiver),
+    eq(activitiesTable.threadPostId, threadPostId!),
+    eq(activitiesTable.type, type),
+  ];
+  const filter = threadPostId === null ? followFilter : likeFilter;
+
   const findActivity = await safeTry(
     db.query.activities.findFirst({
       columns: { id: true },
-      where: and(eq(activitiesTable.receiver, receiver), eq(activitiesTable.type, type)),
+      where: and(...filter),
     }),
   );
 

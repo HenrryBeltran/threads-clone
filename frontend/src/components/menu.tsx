@@ -44,7 +44,7 @@ type OptionsProps = {
   close: () => void;
 };
 
-function MenuOptions({ setState, close: close }: OptionsProps) {
+function MenuOptions({ setState, close }: OptionsProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const mutation = useMutation({
