@@ -1,4 +1,4 @@
-import { ArrowRight01Icon, Cancel01Icon, Loading03AnimatedIcon, Search01Icon } from "@/components/icons/hugeicons";
+import { ArrowRight02Icon, Cancel01Icon, Loading03AnimatedIcon, Search01Icon } from "@/components/icons/hugeicons";
 import { UserAccount, api } from "@/lib/api";
 import { safeTry } from "@server/lib/safe-try";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -138,7 +138,7 @@ export default function SearchForm() {
                 </div>
                 <span className="flex-grow text-start font-medium">Search for &quot;{keywords}&quot;</span>
                 <div className="pr-5">
-                  <ArrowRight01Icon
+                  <ArrowRight02Icon
                     strokeWidth={2}
                     width={24}
                     height={24}

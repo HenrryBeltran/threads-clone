@@ -10,7 +10,15 @@ import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 import { useThreadModalStore } from "@/store";
 import { safeTry } from "@server/lib/safe-try";
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
-import { Link, Outlet, createFileRoute, redirect, useLocation, useRouteContext } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  redirect,
+  useLocation,
+  useNavigate,
+  useRouteContext,
+} from "@tanstack/react-router";
 
 /// TODO: Make the edit profile page
 
@@ -110,6 +118,7 @@ export const Route = createFileRoute("/_main-layout/_profile-layout")({
 function ProfileLayout() {
   const queryClient = useQueryClient();
   const { username }: { username: string } = Route.useParams();
+  const navigate = useNavigate();
   const { pathname } = useLocation();
   const profileUsername = username.slice(1);
 
@@ -150,7 +159,11 @@ function ProfileLayout() {
           <ProfileLink link={profile.link} />
         </div>
         {userData && userData.username === profileUsername && (
-          <Button variant="outline" className="my-4 w-full rounded-xl border-muted-foreground/40">
+          <Button
+            onClick={() => navigate({ to: `/@${profileUsername}/edit` })}
+            variant="outline"
+            className="my-4 w-full rounded-xl border-muted-foreground/40"
+          >
             Edit profile
           </Button>
         )}
