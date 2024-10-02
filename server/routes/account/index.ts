@@ -25,6 +25,7 @@ export const accountUser = new Hono()
 
     return ctx.json(user, 200);
   })
+  /// TODO: ensure if is and update should consider delete the old profile image from the bucket
   .put("/", zValidator("json", insertUserProfileSchema), getUser, async (ctx) => {
     const body = ctx.req.valid("json");
     const user = ctx.get("user");

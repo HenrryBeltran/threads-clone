@@ -4,44 +4,80 @@ import { FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
+import { api, UserAccount } from "@/lib/api";
 import { optimizeImage } from "@/lib/optimize-image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@server/common/schemas/user";
 import { safeTry } from "@server/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 type ProfilePicture = {
-  name: string;
   base64: string;
 };
 
-export function CompleteProfileForm() {
+function useFetchImage(imageUrl: string) {
+  const [img, setImg] = useState<string>();
+
+  const fetchImage = async () => {
+    if (imageUrl.length === 0) return;
+
+    const res = await fetch(imageUrl);
+    const imageBlob = await res.blob();
+    const reader = new FileReader();
+    reader.onload = function () {
+      setImg(this.result?.toString());
+    };
+    reader.readAsDataURL(imageBlob);
+  };
+
+  useEffect(() => {
+    fetchImage();
+  }, []);
+
+  return { img };
+}
+
+export function ProfileForm() {
+  const queryClient = useQueryClient();
+  const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
+  const { img } = useFetchImage(
+    user?.profilePictureId
+      ? `https://res.cloudinary.com/dglhgvcep/image/upload/h_84,w_84/dpr_2.0/v1716403676/${user?.profilePictureId}.jpg`
+      : "",
+  );
+
   const [profilePicture, setProfilePicture] = useState<ProfilePicture | undefined>();
   const [textLength, setTextLength] = useState(0);
-  const ref = useRef<HTMLInputElement>(null);
 
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof insertUserSchema>>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
-      name: "",
-      bio: "",
-      link: "",
+      name: user ? user.name : "",
+      bio: user ? user.bio : "",
+      link: user ? user.link : "",
     },
   });
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setTextLength(form.watch("bio").length);
+  }, [form.watch("bio")]);
+
+  useEffect(() => {
+    setProfilePicture(img ? { base64: img } : undefined);
+  }, [img]);
 
   async function handleUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) {
       return;
     }
 
-    const { base64, name } = await optimizeImage(
+    const { base64 } = await optimizeImage(
       e.target.files[0],
       {
         x: 1080,
@@ -50,7 +86,7 @@ export function CompleteProfileForm() {
       0.8,
     );
 
-    setProfilePicture({ base64, name });
+    setProfilePicture({ base64 });
   }
 
   async function onSubmit(data: z.infer<typeof insertUserSchema>) {
@@ -72,13 +108,15 @@ export function CompleteProfileForm() {
         <div className="relative mx-auto w-fit">
           <figure className="h-[84px] w-[84px] rounded-full">
             {!profilePicture ? (
-              <img
-                src="/images/empty-profile-picture/128x128.jpg"
-                width={84}
-                height={84}
-                alt="Profile picture"
-                className="rounded-full border border-muted-foreground/30"
-              />
+              <>
+                <img
+                  src="/images/empty-profile-picture/128x128.jpg"
+                  width={84}
+                  height={84}
+                  alt="Profile picture"
+                  className="rounded-full border border-muted-foreground/30"
+                />
+              </>
             ) : (
               <img
                 src={profilePicture.base64}
@@ -113,7 +151,7 @@ export function CompleteProfileForm() {
             variant="outline"
             type="button"
             size="icon"
-            disabled={profilePicture == undefined}
+            disabled={profilePicture === undefined}
             className="absolute -right-8 -top-4 rounded-full transition-all active:scale-95"
             onClick={() => {
               if (ref.current) {
@@ -143,9 +181,6 @@ export function CompleteProfileForm() {
           rows={3}
           className="resize-none rounded-xl border-none bg-muted px-5 py-3 text-base leading-snug outline-offset-0 focus-visible:ring-1 focus-visible:ring-muted-foreground/60 focus-visible:ring-offset-0 dark:bg-muted/75"
           maxLength={150}
-          onChange={(e) => {
-            setTextLength(e.currentTarget.value.length);
-          }}
         />
         <span className="flex justify-between">
           <span className="text-sm text-muted-foreground">Write something about you.</span>
@@ -168,7 +203,11 @@ export function CompleteProfileForm() {
       )}
       <Button
         type="submit"
-        aria-disabled={form.watch("name") === "" || form.formState.isSubmitting}
+        aria-disabled={
+          form.watch("name") === "" ||
+          (!form.formState.isDirty && img === profilePicture?.base64) ||
+          form.formState.isSubmitting
+        }
         className="!mt-8 w-full rounded-xl py-7 text-base aria-disabled:cursor-not-allowed aria-disabled:text-muted-foreground aria-disabled:hover:bg-primary"
         onClick={(e) => {
           if (e.currentTarget.ariaDisabled === "true") {

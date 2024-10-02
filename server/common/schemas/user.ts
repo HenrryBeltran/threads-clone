@@ -32,7 +32,6 @@ export const insertUserSchema = createInsertSchema(users, {
 export const insertUserProfileSchema = insertUserSchema.extend({
   profilePicture: z
     .object({
-      name: z.string(),
       base64: z.string().refine((s) => s.includes("data:image/jpeg;base64,"), {
         message: "Invalid base64 format.",
       }),
