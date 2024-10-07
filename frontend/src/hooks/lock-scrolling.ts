@@ -10,8 +10,7 @@ export function useLockScrolling(state: boolean) {
       body.style.height = "100svh";
       body.style.overflow = "hidden";
     } else {
-      body.style.height = "auto";
-      body.style.overflow = "visible";
+      body.removeAttribute("style");
     }
   }, [state]);
 }

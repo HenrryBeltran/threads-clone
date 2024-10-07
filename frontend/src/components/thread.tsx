@@ -3,7 +3,7 @@ import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 import { useThreadModalStore, useThreadStore } from "@/store";
 import { safeTry } from "@server/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
@@ -78,6 +78,7 @@ export type ThreadProps = {
   repliesCount: number;
   createdAt: string;
   style?: "normal" | "main";
+  elementId?: string;
 };
 
 export function Thread({
@@ -93,7 +94,9 @@ export function Thread({
   repliesCount,
   createdAt,
   style = "normal",
+  elementId,
 }: ThreadProps) {
+  const location = useLocation();
   const navigate = useNavigate();
   const { show } = useThreadModalStore();
   const queryClient = useQueryClient();
@@ -103,16 +106,30 @@ export function Thread({
     mutationKey: ["threads"],
     mutationFn: deleteThread,
     onSuccess: () => {
-      resetInfiniteQueryPagination(queryClient, ["main", "threads"]);
-      resetInfiniteQueryPagination(queryClient, [author.username, "threads"]);
-      queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
-      queryClient.invalidateQueries({ queryKey: [author.username, "threads"] });
+      toast("Thread deleted!", {
+        position: "bottom-center",
+        classNames: {
+          title:
+            "text-base text-center text-secondary font-medium shadow-xl py-3.5 px-6 border border-muted-foreground/10 dark:bg-white bg-neutral-900 rounded-xl",
+          toast: "!bg-transparent pointer-events-none p-0 flex justify-center border-none !shadow-none",
+        },
+      });
+      if (location.pathname.split("/").includes("post", 2)) {
+        queryClient.clear();
+        navigate({ to: `/@${userData?.username}` });
+        window.scrollTo({ top: 0, behavior: "instant" });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["main", "threads"] });
+        queryClient.invalidateQueries({ queryKey: [author.username, "threads"] });
+        queryClient.invalidateQueries({ queryKey: [author.username, "thread", "replies"] });
+        queryClient.invalidateQueries({ queryKey: ["thread", author.username, postId] });
+      }
     },
   });
 
   return (
-    <div data-style={style} className="group flex pt-4 data-[style=main]:flex-col">
-      <div className="flex group-data-[style=normal]:flex-col group-data-[style=main]:pb-3">
+    <div data-style={style} id={elementId} className="group flex pt-4 data-[style=main]:flex-col">
+      <div className="flex group-data-[style=normal]:flex-col">
         <Link
           to={`/@${author.username}`}
           onClick={() => {
@@ -131,7 +148,7 @@ export function Thread({
           />
         </Link>
         {style === "main" && (
-          <div className="flex flex-grow items-center">
+          <div className="relative flex flex-grow items-center">
             <Link
               to={`/@${author.username}`}
               onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
@@ -147,10 +164,11 @@ export function Thread({
                 queryClient.invalidateQueries({ queryKey: ["thread", author.username, postId] });
                 navigate({ to: `/@${author.username}/post/${postId}` });
               }}
-              className="flex-grow cursor-pointer"
+              className="flex h-full flex-grow cursor-pointer items-center"
             >
               <span className="pl-3 text-muted-foreground">{dayjs.utc(createdAt).local().fromNow(true)}</span>
             </div>
+            {userData?.id === authorId && <DeleteThreadButton deleteHandler={() => mutation.mutate(id)} />}
           </div>
         )}
         {style === "normal" && (
@@ -165,6 +183,17 @@ export function Thread({
           />
         )}
       </div>
+      {style === "main" && (
+        <div
+          className="min-h-3 w-full cursor-pointer"
+          onClick={() => {
+            resetInfiniteQueryPagination(queryClient, ["thread", "replies", id]);
+            queryClient.invalidateQueries({ queryKey: ["thread", "replies", id] });
+            queryClient.invalidateQueries({ queryKey: ["thread", author.username, postId] });
+            navigate({ to: `/@${author.username}/post/${postId}` });
+          }}
+        />
+      )}
       <div className="flex-grow">
         <div>
           {style === "normal" && (

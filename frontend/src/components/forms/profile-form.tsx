@@ -97,8 +97,13 @@ export function ProfileForm() {
       return;
     }
 
-    queryClient.invalidateQueries({ queryKey: ["user", "account"] });
-    navigate({ to: "/", replace: true });
+    if (user !== undefined && user.name.length > 0) {
+      queryClient.clear();
+      navigate({ to: `/@${user.username}`, replace: true });
+    } else {
+      queryClient.clear();
+      navigate({ to: "/", replace: true });
+    }
   }
 
   return (

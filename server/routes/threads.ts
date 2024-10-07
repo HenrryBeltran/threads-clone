@@ -10,9 +10,9 @@ import { postThreadSchema } from "../common/schemas/thread";
 import { db } from "../db";
 import { threads as threadsTable } from "../db/schemas/threads";
 import { users } from "../db/schemas/users";
+import { createActivity } from "../lib/create-activity";
 import { safeTry } from "../lib/safe-try";
 import { getUser } from "../middleware/getUser";
-import { createActivity } from "../lib/create-activity";
 
 dayjs.extend(utc);
 
@@ -372,7 +372,10 @@ export const threads = new Hono()
     const user = ctx.get("user");
 
     const thread = await safeTry(
-      db.query.threads.findFirst({ columns: { id: true, authorId: true }, where: eq(threadsTable.id, threadId) }),
+      db.query.threads.findFirst({
+        columns: { id: true, authorId: true, resources: true, parentId: true },
+        where: eq(threadsTable.id, threadId),
+      }),
     );
 
     if (thread.error !== null) {
@@ -385,6 +388,43 @@ export const threads = new Hono()
 
     if (user.id !== thread.result.authorId) {
       return ctx.json({ message: "Action not allowed." }, 403);
+    }
+
+    if (thread.result.resources !== null) {
+      const resourcesLength = thread.result.resources.length;
+      if (resourcesLength > 0) {
+        for (let i = 0; i < resourcesLength; i++) {
+          const resource = thread.result.resources[i];
+          await cloudinary.uploader.destroy(resource);
+        }
+      }
+    }
+
+    const parentThreadId = thread.result.parentId;
+    if (parentThreadId !== null) {
+      const { error, result } = await safeTry(
+        db.query.threads.findFirst({
+          columns: { id: true, repliesCount: true },
+          where: eq(threadsTable.id, parentThreadId),
+        }),
+      );
+
+      if (error !== null) {
+        return ctx.json(error, 500);
+      }
+
+      if (result !== undefined) {
+        const { error: updateError } = await safeTry(
+          db
+            .update(threadsTable)
+            .set({ repliesCount: result.repliesCount - 1 })
+            .where(eq(threadsTable.id, result.id)),
+        );
+
+        if (updateError !== null) {
+          return ctx.json(updateError, 500);
+        }
+      }
     }
 
     const { error } = await safeTry(db.delete(threadsTable).where(eq(threadsTable.id, thread.result.id)));
