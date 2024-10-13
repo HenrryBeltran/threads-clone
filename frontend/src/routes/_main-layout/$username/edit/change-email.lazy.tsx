@@ -5,6 +5,9 @@ export const Route = createLazyFileRoute("/_main-layout/$username/edit/change-em
 });
 
 function ChangeEmail() {
-  console.log("~ change-email");
-  return <div className="min-h-svh text-center">Hello /_main-layout/$username/edit/change-email!</div>;
+  return (
+    <div className="flex min-h-svh items-center justify-center text-center">
+      Hello /_main-layout/$username/edit/change-email!
+    </div>
+  );
 }

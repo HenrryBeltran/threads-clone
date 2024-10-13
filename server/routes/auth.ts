@@ -363,7 +363,7 @@ export const auth = new Hono()
         from:
           process.env.NODE_ENV === "development"
             ? "Threads Clone <onboarding@resend.dev>"
-            : "Threads Clone <noreply@threads-clone.henrryb.site>",
+            : "Threads Clone <noreply@threads-clone.henrry.site>",
         to: [foundUser.email!],
         subject: "Your Threads Clone password has been updated",
         html: ResetPasswordConfirmationTemplate(resetPasswordLink, shortResetPasswordLink),
@@ -451,7 +451,7 @@ export const auth = new Hono()
         from:
           process.env.NODE_ENV === "development"
             ? "Threads Clone <onboarding@resend.dev>"
-            : "Threads Clone <noreply@threads-clone.henrryb.site>",
+            : "Threads Clone <noreply@threads-clone.henrry.site>",
         to: [foundUser.email],
         subject: "Reset your Threads Clone password",
         html: ResetPasswordTemplate(foundUser.email, resetPasswordLink),

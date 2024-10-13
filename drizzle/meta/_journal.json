@@ -15,6 +15,20 @@
       "when": 1727634619080,
       "tag": "0001_dear_famine",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1728509584364,
+      "tag": "0002_sudden_scrambler",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1728511406248,
+      "tag": "0003_dapper_zarek",
+      "breakpoints": true
     }
   ]
 }

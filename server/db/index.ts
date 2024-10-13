@@ -8,6 +8,7 @@ import * as searchHistory from "./schemas/search-history";
 import * as sessions from "./schemas/sessions";
 import * as threads from "./schemas/threads";
 import * as users from "./schemas/users";
+import * as verifyEmail from "./schemas/verify-email";
 import * as verifyUser from "./schemas/verify-user";
 
 const client = createClient({
@@ -23,6 +24,7 @@ export const db = drizzle(client, {
     ...threads,
     ...sessions,
     ...verifyUser,
+    ...verifyEmail,
     ...resetPassword,
     ...searchHistory,
     ...activities,

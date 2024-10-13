@@ -63,7 +63,7 @@ export async function emailVerification(user: User) {
       from:
         process.env.NODE_ENV === "development"
           ? "Threads Clone <onboarding@resend.dev>"
-          : "Threads Clone <noreply@threads-clone.henrryb.site>",
+          : "Threads Clone <noreply@threads-clone.henrry.site>",
       to: [user.email],
       subject: "Welcome to Threads Clone! Confirm Your Account",
       html: WelcomeTemplate(user.username, verificationCode),
