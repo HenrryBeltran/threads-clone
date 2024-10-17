@@ -10,18 +10,14 @@ import { useThreadModalStore } from "@/store";
 import { useLocation } from "@tanstack/react-router";
 import { NavbarItem } from "./navbar-item";
 import { safeTry } from "@server/lib/safe-try";
-import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { api, UserAccount } from "@/lib/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const menuIconsProps: React.SVGProps<SVGSVGElement> = {
   className: "relative fill-inherit w-[28px] h-[26px]",
   width: 26,
   height: 26,
   strokeWidth: 2,
-};
-
-type Props = {
-  username?: string;
 };
 
 async function getUnreadActivity() {
@@ -37,9 +33,12 @@ async function getUnreadActivity() {
   return result;
 }
 
-export default function Navbar({ username }: Props) {
+export default function Navbar() {
   const { search, pathname } = useLocation();
   const showThreadModal = useThreadModalStore((state) => state.show);
+  const queryClient = useQueryClient();
+  const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
+  const username = user?.username;
   const unread = useQuery({ queryKey: ["unread"], queryFn: getUnreadActivity });
 
   const paths = pathname.split("/");

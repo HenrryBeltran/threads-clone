@@ -8,13 +8,14 @@ export function ConfirmNewEmail(username: string, newEmailLink: string) {
         This link will be only valid for 10 minutes.
       </p>
       <br/>
-      <br/>
       <a
         href="${newEmailLink}"
-        style="border-radius: 2rem; padding: 0.5rem 1.125rem; background-color: #333333; color: #ffffff;"
+        style="border-radius: 2rem; text-decoration: none; padding: 0.5rem 1.125rem; background-color: #333333; color: #ffffff;"
       >
         Confirm Email
       </a>
+      <br/>
+      <br/>
     </section>
     `;
 }

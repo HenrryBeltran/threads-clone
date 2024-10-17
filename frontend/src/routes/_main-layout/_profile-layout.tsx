@@ -20,8 +20,6 @@ import {
   useRouteContext,
 } from "@tanstack/react-router";
 
-/// TODO: Make the edit profile page
-
 async function getProfile(username: string) {
   const res = await safeTry(api.user.profile[":username"].$get({ param: { username } }));
 

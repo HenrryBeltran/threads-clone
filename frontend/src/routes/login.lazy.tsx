@@ -16,9 +16,7 @@ function Login() {
               Threads Clone
             </h1>
             <div className="mx-auto max-w-sm space-y-2">
-              <h2 className="tracking-tigh text-center text-2xl font-bold leading-none">
-                Log in
-              </h2>
+              <h2 className="tracking-tigh text-center text-2xl font-bold leading-none">Log in</h2>
               <p className="text-center text-sm leading-none text-muted-foreground">
                 Welcome to this threads clone project!
               </p>

@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
+import { TestAccountsPopover } from "../test-accounts-popover";
 
 type LoginForm = z.infer<typeof loginSchema>;
 
@@ -99,6 +100,10 @@ export function LoginForm() {
             "Log in"
           )}
         </Button>
+        <TestAccountsPopover
+          setUsername={(value) => form.setValue("username", value)}
+          setPassword={(value) => form.setValue("password", value)}
+        />
       </form>
       {form.formState.errors.root && (
         <span className="!mt-5 inline-block w-full text-sm font-medium text-destructive dark:text-red-400">

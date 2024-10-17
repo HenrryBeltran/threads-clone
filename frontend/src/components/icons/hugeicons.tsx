@@ -745,3 +745,31 @@ export const UserAccountIcon = (props: React.SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+
+export const AlertCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={props.width && 24}
+    height={props.height && 24}
+    color="currentColor"
+    fill="none"
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={props.strokeWidth} />
+    <path
+      d="M11.992 15H12.001"
+      stroke="currentColor"
+      strokeWidth={props.strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 12L12 8"
+      stroke="currentColor"
+      strokeWidth={props.strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

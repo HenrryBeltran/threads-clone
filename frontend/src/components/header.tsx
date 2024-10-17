@@ -9,15 +9,12 @@ import Menu from "./menu";
 import Navbar from "./navbar";
 import { Button } from "./ui/button";
 
-type Props = {
-  user: UserAccount | null;
-};
-
-export default function Header({ user }: Props) {
+export default function Header() {
   const screen = useScreenSize();
   const { search, pathname } = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
 
   const paths = pathname.split("/");
   const backButtonPredicate = paths.length > 2 && paths[paths.length - 1] !== "replies";
@@ -59,7 +56,7 @@ export default function Header({ user }: Props) {
       </Link>
       {screen.width > 640 && (
         <div className="w-full max-w-lg px-16 md:max-w-screen-sm">
-          <Navbar username={user ? user.username : undefined} />
+          <Navbar />
         </div>
       )}
       {user ? (

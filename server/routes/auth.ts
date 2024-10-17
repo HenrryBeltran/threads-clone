@@ -268,7 +268,7 @@ export const auth = new Hono()
       db.query.resetPassword.findFirst({ where: eq(resetPassword.token, temporalToken) }),
     );
 
-    if (tokenError) {
+    if (tokenError !== null) {
       return ctx.json(tokenError, 500);
     }
 
@@ -296,8 +296,8 @@ export const auth = new Hono()
       }),
     );
 
-    if (foundUserError) {
-      return ctx.json(foundUser, 500);
+    if (foundUserError !== null) {
+      return ctx.json(foundUserError, 500);
     }
 
     if (!foundUser) {
@@ -308,7 +308,7 @@ export const auth = new Hono()
       Bun.password.hash(body.newPassword, "bcrypt"),
     );
 
-    if (hashedNewPasswordError) {
+    if (hashedNewPasswordError !== null) {
       return ctx.json(hashedNewPasswordError, 500);
     }
 
@@ -316,7 +316,7 @@ export const auth = new Hono()
       db.delete(resetPassword).where(eq(resetPassword.id, tokenResult.id)),
     );
 
-    if (deleteTokenError) {
+    if (deleteTokenError !== null) {
       return ctx.json(deleteTokenError, 500);
     }
 
@@ -330,7 +330,7 @@ export const auth = new Hono()
         .where(eq(users.id, foundUser.id)),
     );
 
-    if (error) {
+    if (error !== null) {
       return ctx.json(error, 500);
     }
 

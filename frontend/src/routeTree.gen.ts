@@ -52,8 +52,11 @@ const MainLayoutUsernameEditChangeUsernameLazyImport = createFileRoute(
 const MainLayoutUsernameEditChangePasswordLazyImport = createFileRoute(
   '/_main-layout/$username/edit/change-password',
 )()
-const MainLayoutUsernameEditChangeEmailLazyImport = createFileRoute(
-  '/_main-layout/$username/edit/change-email',
+const MainLayoutUsernameEditChangeEmailIndexLazyImport = createFileRoute(
+  '/_main-layout/$username/edit/change-email/',
+)()
+const MainLayoutUsernameEditChangeEmailConfirmLazyImport = createFileRoute(
+  '/_main-layout/$username/edit/change-email/confirm',
 )()
 
 // Create/Update Routes
@@ -211,14 +214,24 @@ const MainLayoutUsernameEditChangePasswordLazyRoute =
     ),
   )
 
-const MainLayoutUsernameEditChangeEmailLazyRoute =
-  MainLayoutUsernameEditChangeEmailLazyImport.update({
-    path: '/$username/edit/change-email',
+const MainLayoutUsernameEditChangeEmailIndexLazyRoute =
+  MainLayoutUsernameEditChangeEmailIndexLazyImport.update({
+    path: '/$username/edit/change-email/',
     getParentRoute: () => MainLayoutRoute,
   } as any).lazy(() =>
-    import('./routes/_main-layout/$username/edit/change-email.lazy').then(
+    import('./routes/_main-layout/$username/edit/change-email/index.lazy').then(
       (d) => d.Route,
     ),
+  )
+
+const MainLayoutUsernameEditChangeEmailConfirmLazyRoute =
+  MainLayoutUsernameEditChangeEmailConfirmLazyImport.update({
+    path: '/$username/edit/change-email/confirm',
+    getParentRoute: () => MainLayoutRoute,
+  } as any).lazy(() =>
+    import(
+      './routes/_main-layout/$username/edit/change-email/confirm.lazy'
+    ).then((d) => d.Route),
   )
 
 // Populate the FileRoutesByPath interface
@@ -316,13 +329,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutIndexLazyImport
       parentRoute: typeof MainLayoutImport
     }
-    '/_main-layout/$username/edit/change-email': {
-      id: '/_main-layout/$username/edit/change-email'
-      path: '/$username/edit/change-email'
-      fullPath: '/$username/edit/change-email'
-      preLoaderRoute: typeof MainLayoutUsernameEditChangeEmailLazyImport
-      parentRoute: typeof MainLayoutImport
-    }
     '/_main-layout/$username/edit/change-password': {
       id: '/_main-layout/$username/edit/change-password'
       path: '/$username/edit/change-password'
@@ -372,6 +378,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutProfileLayoutUsernameIndexLazyImport
       parentRoute: typeof MainLayoutProfileLayoutImport
     }
+    '/_main-layout/$username/edit/change-email/confirm': {
+      id: '/_main-layout/$username/edit/change-email/confirm'
+      path: '/$username/edit/change-email/confirm'
+      fullPath: '/$username/edit/change-email/confirm'
+      preLoaderRoute: typeof MainLayoutUsernameEditChangeEmailConfirmLazyImport
+      parentRoute: typeof MainLayoutImport
+    }
+    '/_main-layout/$username/edit/change-email/': {
+      id: '/_main-layout/$username/edit/change-email/'
+      path: '/$username/edit/change-email'
+      fullPath: '/$username/edit/change-email'
+      preLoaderRoute: typeof MainLayoutUsernameEditChangeEmailIndexLazyImport
+      parentRoute: typeof MainLayoutImport
+    }
   }
 }
 
@@ -402,12 +422,13 @@ interface MainLayoutRouteChildren {
   MainLayoutLikedLazyRoute: typeof MainLayoutLikedLazyRoute
   MainLayoutSavedLazyRoute: typeof MainLayoutSavedLazyRoute
   MainLayoutIndexLazyRoute: typeof MainLayoutIndexLazyRoute
-  MainLayoutUsernameEditChangeEmailLazyRoute: typeof MainLayoutUsernameEditChangeEmailLazyRoute
   MainLayoutUsernameEditChangePasswordLazyRoute: typeof MainLayoutUsernameEditChangePasswordLazyRoute
   MainLayoutUsernameEditChangeUsernameLazyRoute: typeof MainLayoutUsernameEditChangeUsernameLazyRoute
   MainLayoutUsernameEditUpdateProfileLazyRoute: typeof MainLayoutUsernameEditUpdateProfileLazyRoute
   MainLayoutUsernamePostPostIdLazyRoute: typeof MainLayoutUsernamePostPostIdLazyRoute
   MainLayoutUsernameEditIndexLazyRoute: typeof MainLayoutUsernameEditIndexLazyRoute
+  MainLayoutUsernameEditChangeEmailConfirmLazyRoute: typeof MainLayoutUsernameEditChangeEmailConfirmLazyRoute
+  MainLayoutUsernameEditChangeEmailIndexLazyRoute: typeof MainLayoutUsernameEditChangeEmailIndexLazyRoute
 }
 
 const MainLayoutRouteChildren: MainLayoutRouteChildren = {
@@ -417,8 +438,6 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutLikedLazyRoute: MainLayoutLikedLazyRoute,
   MainLayoutSavedLazyRoute: MainLayoutSavedLazyRoute,
   MainLayoutIndexLazyRoute: MainLayoutIndexLazyRoute,
-  MainLayoutUsernameEditChangeEmailLazyRoute:
-    MainLayoutUsernameEditChangeEmailLazyRoute,
   MainLayoutUsernameEditChangePasswordLazyRoute:
     MainLayoutUsernameEditChangePasswordLazyRoute,
   MainLayoutUsernameEditChangeUsernameLazyRoute:
@@ -427,6 +446,10 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
     MainLayoutUsernameEditUpdateProfileLazyRoute,
   MainLayoutUsernamePostPostIdLazyRoute: MainLayoutUsernamePostPostIdLazyRoute,
   MainLayoutUsernameEditIndexLazyRoute: MainLayoutUsernameEditIndexLazyRoute,
+  MainLayoutUsernameEditChangeEmailConfirmLazyRoute:
+    MainLayoutUsernameEditChangeEmailConfirmLazyRoute,
+  MainLayoutUsernameEditChangeEmailIndexLazyRoute:
+    MainLayoutUsernameEditChangeEmailIndexLazyRoute,
 }
 
 const MainLayoutRouteWithChildren = MainLayoutRoute._addFileChildren(
@@ -446,7 +469,6 @@ export interface FileRoutesByFullPath {
   '/account/complete-profile': typeof AccountCompleteProfileLazyRoute
   '/account/verification': typeof AccountVerificationLazyRoute
   '/': typeof MainLayoutIndexLazyRoute
-  '/$username/edit/change-email': typeof MainLayoutUsernameEditChangeEmailLazyRoute
   '/$username/edit/change-password': typeof MainLayoutUsernameEditChangePasswordLazyRoute
   '/$username/edit/change-username': typeof MainLayoutUsernameEditChangeUsernameLazyRoute
   '/$username/edit/update-profile': typeof MainLayoutUsernameEditUpdateProfileLazyRoute
@@ -454,6 +476,8 @@ export interface FileRoutesByFullPath {
   '/$username/replies': typeof MainLayoutProfileLayoutUsernameRepliesLazyRoute
   '/$username/edit': typeof MainLayoutUsernameEditIndexLazyRoute
   '/$username': typeof MainLayoutProfileLayoutUsernameIndexLazyRoute
+  '/$username/edit/change-email/confirm': typeof MainLayoutUsernameEditChangeEmailConfirmLazyRoute
+  '/$username/edit/change-email': typeof MainLayoutUsernameEditChangeEmailIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
@@ -469,7 +493,6 @@ export interface FileRoutesByTo {
   '/account/complete-profile': typeof AccountCompleteProfileLazyRoute
   '/account/verification': typeof AccountVerificationLazyRoute
   '/': typeof MainLayoutIndexLazyRoute
-  '/$username/edit/change-email': typeof MainLayoutUsernameEditChangeEmailLazyRoute
   '/$username/edit/change-password': typeof MainLayoutUsernameEditChangePasswordLazyRoute
   '/$username/edit/change-username': typeof MainLayoutUsernameEditChangeUsernameLazyRoute
   '/$username/edit/update-profile': typeof MainLayoutUsernameEditUpdateProfileLazyRoute
@@ -477,6 +500,8 @@ export interface FileRoutesByTo {
   '/$username/replies': typeof MainLayoutProfileLayoutUsernameRepliesLazyRoute
   '/$username/edit': typeof MainLayoutUsernameEditIndexLazyRoute
   '/$username': typeof MainLayoutProfileLayoutUsernameIndexLazyRoute
+  '/$username/edit/change-email/confirm': typeof MainLayoutUsernameEditChangeEmailConfirmLazyRoute
+  '/$username/edit/change-email': typeof MainLayoutUsernameEditChangeEmailIndexLazyRoute
 }
 
 export interface FileRoutesById {
@@ -494,7 +519,6 @@ export interface FileRoutesById {
   '/account/complete-profile': typeof AccountCompleteProfileLazyRoute
   '/account/verification': typeof AccountVerificationLazyRoute
   '/_main-layout/': typeof MainLayoutIndexLazyRoute
-  '/_main-layout/$username/edit/change-email': typeof MainLayoutUsernameEditChangeEmailLazyRoute
   '/_main-layout/$username/edit/change-password': typeof MainLayoutUsernameEditChangePasswordLazyRoute
   '/_main-layout/$username/edit/change-username': typeof MainLayoutUsernameEditChangeUsernameLazyRoute
   '/_main-layout/$username/edit/update-profile': typeof MainLayoutUsernameEditUpdateProfileLazyRoute
@@ -502,6 +526,8 @@ export interface FileRoutesById {
   '/_main-layout/_profile-layout/$username/replies': typeof MainLayoutProfileLayoutUsernameRepliesLazyRoute
   '/_main-layout/$username/edit/': typeof MainLayoutUsernameEditIndexLazyRoute
   '/_main-layout/_profile-layout/$username/': typeof MainLayoutProfileLayoutUsernameIndexLazyRoute
+  '/_main-layout/$username/edit/change-email/confirm': typeof MainLayoutUsernameEditChangeEmailConfirmLazyRoute
+  '/_main-layout/$username/edit/change-email/': typeof MainLayoutUsernameEditChangeEmailIndexLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -519,7 +545,6 @@ export interface FileRouteTypes {
     | '/account/complete-profile'
     | '/account/verification'
     | '/'
-    | '/$username/edit/change-email'
     | '/$username/edit/change-password'
     | '/$username/edit/change-username'
     | '/$username/edit/update-profile'
@@ -527,6 +552,8 @@ export interface FileRouteTypes {
     | '/$username/replies'
     | '/$username/edit'
     | '/$username'
+    | '/$username/edit/change-email/confirm'
+    | '/$username/edit/change-email'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/forgotten-password'
@@ -541,7 +568,6 @@ export interface FileRouteTypes {
     | '/account/complete-profile'
     | '/account/verification'
     | '/'
-    | '/$username/edit/change-email'
     | '/$username/edit/change-password'
     | '/$username/edit/change-username'
     | '/$username/edit/update-profile'
@@ -549,6 +575,8 @@ export interface FileRouteTypes {
     | '/$username/replies'
     | '/$username/edit'
     | '/$username'
+    | '/$username/edit/change-email/confirm'
+    | '/$username/edit/change-email'
   id:
     | '__root__'
     | '/_main-layout'
@@ -564,7 +592,6 @@ export interface FileRouteTypes {
     | '/account/complete-profile'
     | '/account/verification'
     | '/_main-layout/'
-    | '/_main-layout/$username/edit/change-email'
     | '/_main-layout/$username/edit/change-password'
     | '/_main-layout/$username/edit/change-username'
     | '/_main-layout/$username/edit/update-profile'
@@ -572,6 +599,8 @@ export interface FileRouteTypes {
     | '/_main-layout/_profile-layout/$username/replies'
     | '/_main-layout/$username/edit/'
     | '/_main-layout/_profile-layout/$username/'
+    | '/_main-layout/$username/edit/change-email/confirm'
+    | '/_main-layout/$username/edit/change-email/'
   fileRoutesById: FileRoutesById
 }
 
@@ -625,12 +654,13 @@ export const routeTree = rootRoute
         "/_main-layout/liked",
         "/_main-layout/saved",
         "/_main-layout/",
-        "/_main-layout/$username/edit/change-email",
         "/_main-layout/$username/edit/change-password",
         "/_main-layout/$username/edit/change-username",
         "/_main-layout/$username/edit/update-profile",
         "/_main-layout/$username/post/$postId",
-        "/_main-layout/$username/edit/"
+        "/_main-layout/$username/edit/",
+        "/_main-layout/$username/edit/change-email/confirm",
+        "/_main-layout/$username/edit/change-email/"
       ]
     },
     "/forgotten-password": {
@@ -679,10 +709,6 @@ export const routeTree = rootRoute
       "filePath": "_main-layout/index.lazy.tsx",
       "parent": "/_main-layout"
     },
-    "/_main-layout/$username/edit/change-email": {
-      "filePath": "_main-layout/$username/edit/change-email.lazy.tsx",
-      "parent": "/_main-layout"
-    },
     "/_main-layout/$username/edit/change-password": {
       "filePath": "_main-layout/$username/edit/change-password.lazy.tsx",
       "parent": "/_main-layout"
@@ -710,6 +736,14 @@ export const routeTree = rootRoute
     "/_main-layout/_profile-layout/$username/": {
       "filePath": "_main-layout/_profile-layout/$username/index.lazy.tsx",
       "parent": "/_main-layout/_profile-layout"
+    },
+    "/_main-layout/$username/edit/change-email/confirm": {
+      "filePath": "_main-layout/$username/edit/change-email/confirm.lazy.tsx",
+      "parent": "/_main-layout"
+    },
+    "/_main-layout/$username/edit/change-email/": {
+      "filePath": "_main-layout/$username/edit/change-email/index.lazy.tsx",
+      "parent": "/_main-layout"
     }
   }
 }

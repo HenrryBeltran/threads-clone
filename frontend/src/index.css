@@ -101,7 +101,7 @@
     left: 50%;
     translate: -50% -50%;
     z-index: -1;
-    border-radius: 0.55rem;
+    border-radius: 0.75rem;
     opacity: 0.4;
 
     animation: increase-angle 3s linear infinite;
@@ -123,7 +123,7 @@
     left: 50%;
     translate: -50% -50%;
     z-index: -1;
-    border-radius: 0.55rem;
+    border-radius: 0.75rem;
 
     animation: increase-angle 3s linear infinite;
   }
