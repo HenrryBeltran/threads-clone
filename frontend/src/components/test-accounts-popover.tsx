@@ -44,7 +44,7 @@ export function TestAccountsPopover({ setUsername, setPassword }: Props) {
           variant="secondary"
           className="cool-border !mt-4 w-full rounded-[.7125rem] bg-background py-7 text-base hover:bg-background/90 dark:text-white"
         >
-          Login with test accounts
+          Log in with test accounts
         </Button>
       </PopoverTrigger>
       <PopoverContent className="mt-2 w-fit rounded-xl p-6">

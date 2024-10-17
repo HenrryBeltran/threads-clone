@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 type ProfilePicture = {
@@ -28,7 +29,7 @@ function useFetchImage(imageUrl: string) {
     const res = await fetch(imageUrl);
     const imageBlob = await res.blob();
     const reader = new FileReader();
-    reader.onload = function () {
+    reader.onload = function() {
       setImg(this.result?.toString());
     };
     reader.readAsDataURL(imageBlob);
@@ -100,6 +101,15 @@ export function ProfileForm() {
     if (user !== undefined && user.name.length > 0) {
       queryClient.clear();
       navigate({ to: `/@${user.username}`, replace: true });
+      toast("Profile info saved successfully!", {
+        duration: 6000,
+        position: "bottom-center",
+        classNames: {
+          title:
+            "text-base text-center text-secondary font-medium shadow-xl py-3.5 px-6 border border-muted-foreground/10 dark:bg-white bg-neutral-900 rounded-xl",
+          toast: "!bg-transparent pointer-events-none p-0 flex justify-center border-none !shadow-none",
+        },
+      });
     } else {
       queryClient.clear();
       navigate({ to: "/", replace: true });
