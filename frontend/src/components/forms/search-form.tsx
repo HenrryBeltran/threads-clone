@@ -153,7 +153,7 @@ export default function SearchForm() {
               </div>
             ) : (
               <>
-                <div className="mt-2.5 space-y-5 px-5">
+                <div className="mt-2.5 space-y-5 px-5 pb-5">
                   {search.data &&
                     search.data.map((result) => (
                       <ProfileRow
