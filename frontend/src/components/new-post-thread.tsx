@@ -22,7 +22,7 @@ export function NewPostThread() {
         </div>
       )}
       {query.data.length > 0 && query.isSuccess && (
-        <div className="cool-border mt-4 flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 rounded-lg bg-background px-6 py-3">
+        <div className="cool-border mt-4 flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 rounded-xl bg-background px-6 py-3">
           {query.data.map((thread, i) => (
             <Thread key={i} {...thread} />
           ))}
