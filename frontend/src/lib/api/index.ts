@@ -34,7 +34,7 @@ export const userAccountQueryOptions = queryOptions({
   queryKey: ["user", "account"],
   queryFn: getUserAccount,
   retry: false,
-  refetchOnWindowFocus: false,
-  refetchOnReconnect: false,
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
   staleTime: Infinity,
 });

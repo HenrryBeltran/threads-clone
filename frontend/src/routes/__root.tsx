@@ -96,7 +96,7 @@ function RootLayout() {
     },
     staleTime: Infinity,
     refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
   });
 
   return (

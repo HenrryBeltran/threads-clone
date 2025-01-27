@@ -74,14 +74,14 @@ const profileFetchOptions = (username: string) =>
   queryOptions({
     queryKey: ["profile", username],
     queryFn: () => getProfile(username),
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
   });
 
 const followStatusFetchOptions = (targetUsername: string) =>
   queryOptions({
     queryKey: ["follow", targetUsername],
     queryFn: () => getFollowStatus(targetUsername),
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
   });
 
 export const Route = createFileRoute("/_main-layout/_profile-layout")({
