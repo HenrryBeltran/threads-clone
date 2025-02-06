@@ -131,8 +131,9 @@ export function Thread({
     <div data-style={style} id={elementId} className="group flex pt-4 data-[style=main]:flex-col">
       <div className="flex group-data-[style=normal]:flex-col">
         <Link
-          to={`/@${author.username}`}
-          onClick={() => {
+          onClick={async (e) => {
+            e.preventDefault();
+            await navigate({ to: `/@${author.username}` });
             window.scrollTo({ top: 0, behavior: "instant" });
           }}
           className="mr-3 min-h-11 min-w-11"
@@ -150,8 +151,11 @@ export function Thread({
         {style === "main" && (
           <div className="relative flex flex-grow items-center">
             <Link
-              to={`/@${author.username}`}
-              onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
+              onClick={async (e) => {
+                e.preventDefault();
+                await navigate({ to: `/@${author.username}` });
+                window.scrollTo({ top: 0, behavior: "instant" });
+              }}
               className="font-semibold"
               draggable={false}
             >
@@ -199,8 +203,11 @@ export function Thread({
           {style === "normal" && (
             <div className="relative flex">
               <Link
-                to={`/@${author.username}`}
-                onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  await navigate({ to: `/@${author.username}` });
+                  window.scrollTo({ top: 0, behavior: "instant" });
+                }}
                 className="font-semibold"
                 draggable={false}
               >
