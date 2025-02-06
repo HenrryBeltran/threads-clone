@@ -493,7 +493,7 @@ function AlbumCarousel({ images }: AlbumProps) {
                   alt="Profile picture"
                   draggable="false"
                   loading="lazy"
-                  className="pointer-events-none h-60 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+                  className="pointer-events-none h-60 select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-400/45 dark:outline-neutral-100/25"
                 />
               </figure>
             </ImageContainer>
@@ -516,7 +516,7 @@ function DoublePhoto({ images }: AlbumProps) {
               height={384}
               alt="Profile picture"
               draggable="false"
-              className="pointer-events-none h-full max-h-96 w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+              className="pointer-events-none h-full max-h-96 w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-400/45 dark:outline-neutral-100/25"
             />
           </figure>
         </ImageContainer>
@@ -529,16 +529,15 @@ function SinglePhoto({ images }: AlbumProps) {
   const image = images[0];
 
   return (
-    <div className="flex">
+    <div>
       <ImageContainer index={0} images={[image]}>
         <figure className="h-full">
           <img
             src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_520/dpr_2.0/v1716403676/${image}.jpg`}
-            width={516}
             height={520}
             alt="Profile picture"
             draggable="false"
-            className="pointer-events-none max-h-[520px] w-fit max-w-full select-none rounded-xl object-cover outline outline-1 -outline-offset-1 outline-neutral-50/25"
+            className="pointer-events-none max-h-[520px] max-w-[516px] select-none rounded-xl object-contain outline outline-1 -outline-offset-1 outline-neutral-400/45 dark:outline-neutral-100/25"
           />
         </figure>
       </ImageContainer>
@@ -556,7 +555,7 @@ type ContainerProps = {
 function ImageContainer({ index, images, onClickTrigger, children }: ContainerProps) {
   return (
     <Dialog>
-      <DialogTrigger className="flex outline-none transition-transform active:scale-[.98]" onClick={onClickTrigger}>
+      <DialogTrigger className="outline-none transition-transform active:scale-[.98]" onClick={onClickTrigger}>
         {children}
       </DialogTrigger>
       <DialogContent className="left-0 right-0 flex min-w-[100vw] translate-x-0 items-center justify-center rounded-none border-none bg-black/60 p-0 outline-none dark:bg-transparent">
@@ -569,7 +568,7 @@ function ImageContainer({ index, images, onClickTrigger, children }: ContainerPr
           </Button>
         </DialogClose>
         <div className="flex min-h-svh max-w-[100svh] !rounded-none p-0 outline-none">
-          <PhotoPreview startIndex={index} images={images} />
+          <ViewPhoto startIndex={index} images={images} />
         </div>
       </DialogContent>
     </Dialog>
@@ -581,22 +580,31 @@ type PreviewProps = {
   images: string[];
 };
 
-function PhotoPreview({ startIndex, images }: PreviewProps) {
+function ViewPhoto({ startIndex, images }: PreviewProps) {
+  const [imageWidth, setImageWidth] = useState(0);
+  const ref = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      setImageWidth(ref.current.clientWidth);
+    }
+  }, [ref.current]);
+
   return (
     <div className="flex flex-grow items-center justify-center bg-black">
-      <Carousel opts={{ startIndex }}>
+      <Carousel opts={{ startIndex }} style={{ width: `${imageWidth}px` }}>
         <CarouselContent className="w-[100svh]">
           {images.map((image, index) => (
             <CarouselItem key={index} className="flex min-w-[100svh] max-w-[100svh]">
-              <div className="flex h-svh w-full items-center justify-center bg-black">
+              <div className="flex h-svh w-fit items-center justify-center bg-black">
                 <img
+                  ref={ref}
                   src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_520/dpr_2.0/v1716403676/${image}.jpg`}
-                  width={520}
                   height={520}
                   alt="Profile picture"
                   draggable="false"
                   loading="lazy"
-                  className="w-fit"
+                  className="max-h-svh object-contain"
                 />
               </div>
             </CarouselItem>
