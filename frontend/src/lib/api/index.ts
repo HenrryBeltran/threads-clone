@@ -33,7 +33,7 @@ export async function getUserAccount(): Promise<UserAccount | null> {
 export const userAccountQueryOptions = queryOptions({
   queryKey: ["user", "account"],
   queryFn: getUserAccount,
-  retry: false,
+  retry: true,
   refetchOnWindowFocus: true,
   refetchOnReconnect: true,
   staleTime: Infinity,
