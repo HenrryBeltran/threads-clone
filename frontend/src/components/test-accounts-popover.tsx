@@ -3,6 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { api } from "@/lib/api";
 import { safeTry } from "@server/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { UserImage } from "./user-image";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function TestAccountsPopover({ setUsername, setPassword }: Props) {
+  const [open, setOpen] = useState(false);
   const testAccounts = useQuery({
     queryKey: ["test", "accounts"],
     queryFn: async () => {
@@ -38,7 +40,7 @@ export function TestAccountsPopover({ setUsername, setPassword }: Props) {
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={(value) => setOpen(value)}>
       <PopoverTrigger asChild>
         <Button
           variant="secondary"
@@ -58,7 +60,10 @@ export function TestAccountsPopover({ setUsername, setPassword }: Props) {
               <button
                 key={account.username}
                 className="flex w-[156px] flex-col items-center rounded-xl border-4 border-neutral-200/50 bg-background p-4 transition-colors hover:border-neutral-300/70 hover:bg-neutral-100/90 dark:border-neutral-900 hover:dark:border-neutral-700/70 hover:dark:bg-neutral-900/90"
-                onClick={() => fillForm(account.username, account.password)}
+                onClick={() => {
+                  fillForm(account.username, account.password);
+                  setOpen(false);
+                }}
               >
                 <UserImage
                   username={account.username}
