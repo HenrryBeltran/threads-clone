@@ -33,20 +33,22 @@ function Search() {
   });
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-lg flex-col items-center px-6 pt-24 sm:px-0">
-      <div className="relative w-full">
-        {search.q === undefined ? (
-          <>
+    <>
+      {search.q === undefined ? (
+        <main className="mx-auto flex min-h-svh max-w-lg flex-col items-center px-6 pt-24 sm:px-0">
+          <div className="relative w-full">
             <SearchForm />
             <div className="h-24 w-full" />
             {query.isLoading && <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="mx-auto" />}
             {query.data && <SearchHistory result={query.data} />}
-          </>
-        ) : (
+          </div>
+        </main>
+      ) : (
+        <main>
           <SearchResult q={search.q} />
-        )}
-      </div>
-    </main>
+        </main>
+      )}
+    </>
   );
 }
 
@@ -66,9 +68,11 @@ function SearchResult({ q }: { q: string }) {
 
   return (
     <>
-      <h2 className="mx-6 mb-2 border-b border-b-muted-foreground/30 pb-2 text-lg font-semibold tracking-tight">
-        Results
-      </h2>
+      <div className="mx-auto flex w-full max-w-[620px] flex-col pt-24">
+        <h2 className="mx-6 mb-2 border-b border-b-muted-foreground/30 pb-2 text-lg font-semibold tracking-tight">
+          Results
+        </h2>
+      </div>
       <ThreadsInfiniteScroll
         queryKey={["threads", "search"]}
         queryFn={getSearchThreads}

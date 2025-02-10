@@ -21,6 +21,7 @@ import {
 } from "./icons/hugeicons";
 import { LikeButton } from "./like-button";
 import { Paragraph } from "./paragraph";
+import { SaveThreadButton } from "./save-thread-button";
 import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -272,6 +273,7 @@ export function Thread({
               <SentIcon width={20} height={20} strokeWidth={1.5} />
             </Button>
           </ShareLinkButton>
+          <SaveThreadButton threadId={id} userData={userData ?? null} />
           <div
             onClick={() => navigate({ to: `/@${author.username}/post/${postId}` })}
             className="flex-grow cursor-pointer"

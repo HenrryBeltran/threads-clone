@@ -18,7 +18,6 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: RootLayout,
   beforeLoad: async ({ context, location }) => {
-    console.log(">>> Run before load");
     const queryClient = context.queryClient;
 
     const { error, result: user } = await safeTry(queryClient.fetchQuery(userAccountQueryOptions));

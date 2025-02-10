@@ -10,6 +10,7 @@ import { root } from "./routes/root";
 import { search } from "./routes/search";
 import { threads } from "./routes/threads";
 import { user } from "./routes/user";
+import { postSaved } from "./routes/saved";
 
 const app = new Hono();
 
@@ -20,6 +21,7 @@ const apiRoutes = app
   .route("/", root)
   .route("/threads", threads)
   .route("/thread", postLikes)
+  .route("/thread", postSaved)
   .route("/search", search)
   .route("/user", user)
   .route("/auth", auth)

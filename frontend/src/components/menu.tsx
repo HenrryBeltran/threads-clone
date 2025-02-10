@@ -69,12 +69,28 @@ function MenuOptions({ setState, close }: OptionsProps) {
         </button>
       </li>
       <li>
-        <Link to="/saved" onClick={() => close()} className="inline-block w-full px-5 py-2.5">
+        <Link
+          onClick={async (e) => {
+            e.preventDefault();
+            close();
+            await navigate({ to: "/saved" });
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
+          className="inline-block w-full px-5 py-2.5"
+        >
           Saved
         </Link>
       </li>
       <li>
-        <Link to="/liked" onClick={() => close()} className="inline-block w-full px-5 py-2.5">
+        <Link
+          onClick={async (e) => {
+            e.preventDefault();
+            close();
+            await navigate({ to: "/liked" });
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
+          className="inline-block w-full px-5 py-2.5"
+        >
           Your likes
         </Link>
       </li>

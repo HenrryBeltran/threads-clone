@@ -33,6 +33,8 @@ async function getUnreadActivity() {
   return result;
 }
 
+const beyondPages = ["/search", "/liked", "/saved"];
+
 export default function Navbar() {
   const { search, pathname } = useLocation();
   const showThreadModal = useThreadModalStore((state) => state.show);
@@ -43,7 +45,14 @@ export default function Navbar() {
 
   const paths = pathname.split("/");
   const backButtonPredicate = paths.length > 2 && paths[paths.length - 1] !== "replies";
-  const searchBackButtonPredicate = pathname === "/search" && search.q !== undefined;
+  const isOnBeyondPages = beyondPages.includes(pathname);
+  let searchBackButtonPredicate = isOnBeyondPages;
+
+  if (pathname === "/search" && search.q !== undefined) {
+    searchBackButtonPredicate = true;
+  } else if (pathname === "/search" && search.q === undefined) {
+    searchBackButtonPredicate = false;
+  }
 
   return (
     <nav

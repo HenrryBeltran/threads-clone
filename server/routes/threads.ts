@@ -2,13 +2,15 @@ import { zValidator } from "@hono/zod-validator";
 import { v2 as cloudinary } from "cloudinary";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { and, desc, eq, isNull, like, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, like, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { customAlphabet, nanoid } from "nanoid";
 import { z } from "zod";
 import { postThreadSchema } from "../common/schemas/thread";
 import { db } from "../db";
-import { threads as threadsTable } from "../db/schemas/threads";
+import { likes as likesTable } from "../db/schemas/likes";
+import { saved as savedTable } from "../db/schemas/saved";
+import { threads as threadsTable, type SelectThreads } from "../db/schemas/threads";
 import { users } from "../db/schemas/users";
 import { createActivity } from "../lib/create-activity";
 import { safeTry } from "../lib/safe-try";
@@ -489,4 +491,64 @@ export const threads = new Hono()
     }
 
     return ctx.json(result);
+  })
+  .get("/liked/posts", getUser, zValidator("query", z.object({ page: z.string() })), async (ctx) => {
+    const user = ctx.get("user");
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 6 : 0;
+
+    const { error, result } = await safeTry(
+      db.query.likes.findMany({
+        with: {
+          likedPost: {
+            with: {
+              author: {
+                columns: { username: true, name: true, profilePictureId: true },
+              },
+            },
+          },
+        },
+        limit: 6,
+        offset,
+        orderBy: desc(likesTable.createdAt),
+        where: ({ userLike }) => eq(userLike, user.id),
+      }),
+    );
+
+    if (error !== null) {
+      return ctx.json(error, 500);
+    }
+
+    const posts = result.map(({ likedPost }) => likedPost);
+    return ctx.json(posts);
+  })
+  .get("/saved/posts", getUser, zValidator("query", z.object({ page: z.string() })), async (ctx) => {
+    const user = ctx.get("user");
+    const page = ctx.req.query("page");
+    const offset = page ? Number(page) * 6 : 0;
+
+    const { error, result } = await safeTry(
+      db.query.saved.findMany({
+        with: {
+          savedPost: {
+            with: {
+              author: {
+                columns: { username: true, name: true, profilePictureId: true },
+              },
+            },
+          },
+        },
+        limit: 6,
+        offset,
+        orderBy: desc(savedTable.createdAt),
+        where: ({ owner }) => eq(owner, user.id),
+      }),
+    );
+
+    if (error !== null) {
+      return ctx.json(error, 500);
+    }
+
+    const posts = result.map(({ savedPost }) => savedPost);
+    return ctx.json(posts);
   });

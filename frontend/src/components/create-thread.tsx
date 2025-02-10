@@ -69,16 +69,14 @@ export function CreateThread() {
       const oldData = queryClient.getQueryData<Posts>(["posting", "threads"]) ?? [];
       queryClient.setQueryData(["posting", "threads"], [...currentData, ...oldData]);
 
-      if (location.pathname !== "/") {
-        toast("Thread posted!", {
-          position: "bottom-center",
-          classNames: {
-            title:
-              "text-base text-center text-secondary font-medium shadow-xl py-3.5 px-6 border border-muted-foreground/10 dark:bg-white bg-neutral-900 rounded-xl",
-            toast: "!bg-transparent pointer-events-none p-0 flex justify-center border-none !shadow-none",
-          },
-        });
-      }
+      toast("Thread posted!", {
+        position: "bottom-center",
+        classNames: {
+          title:
+            "text-base text-center text-secondary font-medium shadow-xl py-3.5 px-6 border border-muted-foreground/10 dark:bg-white bg-neutral-900 rounded-xl",
+          toast: "!bg-transparent pointer-events-none p-0 flex justify-center border-none !shadow-none",
+        },
+      });
     },
   });
 
