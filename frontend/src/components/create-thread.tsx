@@ -11,7 +11,7 @@ import { Cancel01Icon } from "./icons/hugeicons";
 import { ThreadSmallView } from "./thread";
 import { Posts } from "./threads-infinite-scroll";
 import { Button } from "./ui/button";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { UploadAlbumButton } from "./upload-album-button";
 import { Resource, UploadedAlbumCarousel, UploadedAlbumDouble, UploadedSingleView } from "./upload-album-view";
 import { UserImage } from "./user-image";
@@ -105,6 +105,7 @@ export function CreateThread() {
               <DialogHeader>
                 <DialogTitle className="pt-4 text-center text-xl">Discard Thread?</DialogTitle>
               </DialogHeader>
+              <DialogDescription hidden>This action deletes you current thread</DialogDescription>
               <div className="flex gap-0 divide-x divide-muted-foreground/30">
                 <DialogClose asChild className="basis-1/2">
                   <Button

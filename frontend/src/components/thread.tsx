@@ -24,7 +24,15 @@ import { Paragraph } from "./paragraph";
 import { SaveThreadButton } from "./save-thread-button";
 import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { UserImage } from "./user-image";
 
@@ -352,6 +360,7 @@ function DeleteThreadButton({ deleteHandler }: DeleteThreadButtonProps) {
                 Are you sure you want to delete this thread?
               </DialogTitle>
             </DialogHeader>
+            <DialogDescription hidden>This actions deletes the selected thread forever.</DialogDescription>
             <div className="flex gap-0 divide-x divide-muted-foreground/30">
               <DialogClose asChild className="basis-1/2">
                 <Button
@@ -568,6 +577,8 @@ function ImageContainer({ index, images, onClickTrigger, children }: ContainerPr
         {children}
       </DialogTrigger>
       <DialogContent className="left-0 right-0 flex min-w-[100vw] translate-x-0 items-center justify-center rounded-none border-none bg-black/60 p-0 outline-none dark:bg-transparent">
+        <DialogTitle hidden />
+        <DialogDescription hidden />
         <DialogClose asChild>
           <Button
             variant="secondary"
