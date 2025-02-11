@@ -459,19 +459,22 @@ type AlbumProps = {
 
 function AlbumCarousel({ images }: AlbumProps) {
   const pointX = useRef<number | null>(null);
-  const itMoved = useRef(false);
+  const [itMoved, setItMoved] = useState(false);
+  const [longMove, setLongMove] = useState(false);
+  const [isTouchScreen, setIsTouchScreen] = useState(false);
 
   return (
     <div className="h-60 w-full overflow-hidden">
       <div
         className="relative h-64 overflow-x-scroll"
-        onPointerDown={(e) => {
+        onTouchStart={() => setIsTouchScreen(true)}
+        onMouseDown={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
           const x = e.clientX - rect.left;
 
           pointX.current = x;
         }}
-        onPointerMove={(e) => {
+        onMouseMove={(e) => {
           if (pointX.current) {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -479,15 +482,22 @@ function AlbumCarousel({ images }: AlbumProps) {
 
             e.currentTarget.scrollLeft += delta;
             pointX.current = x;
-            itMoved.current = true;
+
+            if (delta > 0.5) {
+              setLongMove(true);
+            }
+            if (delta > 0.3) {
+              setItMoved(true);
+            }
           }
         }}
-        onPointerUp={() => {
+        onMouseUp={() => {
           if (pointX.current) {
             pointX.current = null;
           }
+          setLongMove(false);
         }}
-        onPointerLeave={() => (pointX.current = null)}
+        onMouseLeave={() => (pointX.current = null)}
       >
         <div className="absolute left-0 top-0 flex w-max gap-4 active:cursor-grabbing">
           {images?.map((id, idx) => (
@@ -496,8 +506,8 @@ function AlbumCarousel({ images }: AlbumProps) {
               index={idx}
               images={images}
               onClickTrigger={(e) => {
-                if (itMoved.current) {
-                  itMoved.current = false;
+                if (itMoved && !longMove && !isTouchScreen) {
+                  setItMoved(false);
                   e.stopPropagation();
                   e.preventDefault();
                 }
