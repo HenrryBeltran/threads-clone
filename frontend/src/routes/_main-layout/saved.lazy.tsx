@@ -10,12 +10,12 @@ export const Route = createLazyFileRoute("/_main-layout/saved")({
 function Saved() {
   return (
     <main>
-      <LikedResult />
+      <SavedResult />
     </main>
   );
 }
 
-function LikedResult() {
+function SavedResult() {
   async function getSavedThreads({ pageParam }: { pageParam: number }) {
     const res = await safeTry(api.threads.saved.posts.$get({ query: { page: pageParam.toString() } }));
 
@@ -33,14 +33,16 @@ function LikedResult() {
     <>
       <div className="mx-auto flex w-full max-w-[620px] flex-col pt-24">
         <h2 className="mx-6 mb-2 border-b border-b-muted-foreground/30 pb-2 text-lg font-semibold tracking-tight">
-          Liked
+          Saved
         </h2>
       </div>
-      <ThreadsInfiniteScroll
-        queryKey={["threads", "saved"]}
-        queryFn={getSavedThreads}
-        threadsNotFoundMessage="No liked threads found."
-      />
+      <div className="w-full">
+        <ThreadsInfiniteScroll
+          queryKey={["threads", "saved"]}
+          queryFn={getSavedThreads}
+          threadsNotFoundMessage="No saved threads found."
+        />
+      </div>
     </>
   );
 }

@@ -49,17 +49,17 @@ export function TestAccountsPopover({ setUsername, setPassword }: Props) {
           Log in with test accounts
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="mt-2 w-fit rounded-xl p-6">
+      <PopoverContent className="mx-3 mb-2 mt-2 flex w-fit flex-col rounded-xl p-6 drop-shadow-xl">
         <div className="space-y-1.5 text-center">
-          <h3 className="text-xl font-bold leading-none tracking-tight">Test Accounts</h3>
+          <h3 className="text-lg font-bold leading-none tracking-tight sm:text-xl">Test Accounts</h3>
           <p className="leading-tight text-muted-foreground">Select one account to fill the form and login.</p>
         </div>
-        <div className="mt-4 grid w-fit grid-flow-row grid-cols-3 gap-4">
+        <div className="mt-4 grid grid-flow-row grid-cols-3 gap-4">
           {testAccounts.data &&
             testAccounts.data.map((account) => (
               <button
                 key={account.username}
-                className="flex w-[156px] flex-col items-center rounded-xl border-4 border-neutral-200/50 bg-background p-4 transition-colors hover:border-neutral-300/70 hover:bg-neutral-100/90 dark:border-neutral-900 hover:dark:border-neutral-700/70 hover:dark:bg-neutral-900/90"
+                className="flex flex-col items-center rounded-xl border-4 border-neutral-200/50 bg-background p-4 transition-colors hover:border-neutral-300/70 hover:bg-neutral-100/90 dark:border-neutral-900 hover:dark:border-neutral-700/70 hover:dark:bg-neutral-900/90 sm:w-[156px]"
                 onClick={() => {
                   fillForm(account.username, account.password);
                   setOpen(false);
@@ -72,7 +72,7 @@ export function TestAccountsPopover({ setUsername, setPassword }: Props) {
                   height={64}
                   fetchPriority="high"
                   loading="lazy"
-                  className="mb-4 aspect-square w-16"
+                  className="mb-4 aspect-square w-10 sm:w-16"
                 />
                 <span className="font-bold leading-tight">{account.username}</span>
                 <span className="leading-none text-muted-foreground">{account.name}</span>

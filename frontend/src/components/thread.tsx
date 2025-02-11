@@ -546,7 +546,7 @@ function SinglePhoto({ images }: AlbumProps) {
             height={520}
             alt="Profile picture"
             draggable="false"
-            className="pointer-events-none max-h-[520px] max-w-[516px] select-none rounded-xl object-contain outline outline-1 -outline-offset-1 outline-neutral-400/45 dark:outline-neutral-100/25"
+            className="pointer-events-none max-h-[520px] w-full max-w-[516px] select-none rounded-xl object-contain outline outline-1 -outline-offset-1 outline-neutral-400/45 dark:outline-neutral-100/25"
           />
         </figure>
       </ImageContainer>
