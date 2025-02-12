@@ -5,6 +5,7 @@ import { safeTry } from "@server/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
 import utc from "dayjs/plugin/utc";
@@ -37,6 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { UserImage } from "./user-image";
 
 dayjs.extend(relativeTime);
+dayjs.extend(LocalizedFormat);
 dayjs.extend(updateLocale);
 dayjs.extend(utc);
 dayjs.updateLocale("en", {
@@ -136,6 +138,26 @@ export function Thread({
     },
   });
 
+  function getDate() {
+    const createdAtDate = dayjs.utc(createdAt);
+    const nowDate = dayjs.utc();
+    const differenceDays = nowDate.diff(createdAtDate, "days");
+
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    const nextMonth = new Date(currentYear, currentMonth + 1, 0);
+    const daysInCurrentMonth = nextMonth.getDate();
+
+    if (differenceDays > daysInCurrentMonth) {
+      return dayjs.utc(createdAt).local().format("ll");
+    }
+
+    return dayjs.utc(createdAt).local().fromNow(true);
+  }
+
+  getDate();
+
   return (
     <div data-style={style} id={elementId} className="group flex pt-4 data-[style=main]:flex-col">
       <div className="flex group-data-[style=normal]:flex-col">
@@ -179,7 +201,7 @@ export function Thread({
               }}
               className="flex h-full flex-grow cursor-pointer items-center"
             >
-              <span className="pl-3 text-muted-foreground">{dayjs.utc(createdAt).local().fromNow(true)}</span>
+              <span className="pl-3 text-muted-foreground">{getDate()}</span>
             </div>
             {userData?.id === authorId && <DeleteThreadButton deleteHandler={() => mutation.mutate(id)} />}
           </div>
@@ -232,7 +254,7 @@ export function Thread({
                 }}
                 className="flex-grow cursor-pointer pb-1"
               >
-                <span className="pl-3 text-muted-foreground">{dayjs.utc(createdAt).local().fromNow(true)}</span>
+                <span className="pl-3 text-muted-foreground">{getDate()}</span>
               </div>
               {userData?.id === authorId && <DeleteThreadButton deleteHandler={() => mutation.mutate(id)} />}
             </div>
