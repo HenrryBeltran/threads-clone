@@ -611,30 +611,32 @@ type PreviewProps = {
 };
 
 function ViewPhoto({ startIndex, images }: PreviewProps) {
-  const [imageWidth, setImageWidth] = useState(0);
   const ref = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      setImageWidth(ref.current.clientWidth);
-    }
-  }, [ref.current]);
 
   return (
     <div className="flex flex-grow items-center justify-center bg-black">
-      <Carousel opts={{ startIndex }} style={{ width: `${imageWidth}px` }}>
-        <CarouselContent className="w-[100svh]">
+      <Carousel ref={ref} opts={{ startIndex }} className="w-full max-w-[100svw] md:w-[100svh] md:max-w-[100svh]">
+        <CarouselContent className="m-0 max-w-[100svh]">
           {images.map((image, index) => (
-            <CarouselItem key={index} className="flex min-w-[100svh] max-w-[100svh]">
-              <div className="flex h-svh w-fit items-center justify-center bg-black">
+            <CarouselItem key={index} className="w-full max-w-full pl-0 md:max-w-[100svh]">
+              <div className="flex h-dvh w-full items-center justify-center bg-black">
                 <img
-                  ref={ref}
                   src={`https://res.cloudinary.com/dglhgvcep/image/upload/h_520/dpr_2.0/v1716403676/${image}.jpg`}
                   height={520}
                   alt="Profile picture"
                   draggable="false"
                   loading="lazy"
-                  className="max-h-svh object-contain"
+                  className="max-h-dvh max-w-full object-contain"
+                  onLoad={(e) => {
+                    if (index !== 0) {
+                      return;
+                    }
+
+                    const width = e.currentTarget.clientWidth;
+                    if (ref.current) {
+                      ref.current.style.width = `${width}px`;
+                    }
+                  }}
                 />
               </div>
             </CarouselItem>
