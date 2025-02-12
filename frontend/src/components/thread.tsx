@@ -134,6 +134,10 @@ export function Thread({
         queryClient.invalidateQueries({ queryKey: [author.username, "threads"] });
         queryClient.invalidateQueries({ queryKey: [author.username, "thread", "replies"] });
         queryClient.invalidateQueries({ queryKey: ["thread", author.username, postId] });
+        queryClient.setQueryData(["main", "threads"], null);
+        queryClient.setQueryData([author.username, "threads"], null);
+        queryClient.setQueryData([author.username, "thread", "replies"], null);
+        queryClient.setQueryData(["thread", author.username, postId], null);
       }
     },
   });
