@@ -9,6 +9,8 @@ import Menu from "./menu";
 import Navbar from "./navbar";
 import { Button } from "./ui/button";
 
+const beyondPages = ["/search", "/liked", "/saved"];
+
 export default function Header() {
   const screen = useScreenSize();
   const { search, pathname } = useLocation();
@@ -17,8 +19,16 @@ export default function Header() {
   const user = queryClient.getQueryData<UserAccount>(["user", "account"]);
 
   const paths = pathname.split("/");
+
   const backButtonPredicate = paths.length > 2 && paths[paths.length - 1] !== "replies";
-  const searchBackButtonPredicate = pathname === "/search" && search.q !== undefined;
+  const isOnBeyondPages = beyondPages.includes(pathname);
+  let searchBackButtonPredicate = isOnBeyondPages;
+
+  if (pathname === "/search" && search.q !== undefined) {
+    searchBackButtonPredicate = true;
+  } else if (pathname === "/search" && search.q === undefined) {
+    searchBackButtonPredicate = false;
+  }
 
   return (
     <header className="fixed left-0 right-0 top-0 z-20 mx-auto grid h-16 w-full grid-cols-3 grid-rows-1 items-center bg-background/85 backdrop-blur-3xl sm:h-[74px] sm:grid-cols-[1fr_max-content_1fr] md:max-w-screen-xl">
