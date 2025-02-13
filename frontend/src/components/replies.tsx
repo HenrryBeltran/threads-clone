@@ -50,7 +50,7 @@ export function Replies({ id }: { id: string }) {
   return (
     <div className="divide-y divide-muted-foreground/30 pb-6">
       <span className="inline-block py-3 font-bold">Replies</span>
-      <div className="flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 pb-2">
+      <div className="flex w-full flex-col space-y-2 divide-y divide-muted-foreground/30 pb-16">
         {query.isLoading && <ThreadsSkeleton />}
         {query.isRefetching === false &&
           query.data &&
