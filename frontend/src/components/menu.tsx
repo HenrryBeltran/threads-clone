@@ -75,6 +75,8 @@ function MenuOptions({ setState, close }: OptionsProps) {
             close();
             await navigate({ to: "/saved" });
             window.scrollTo({ top: 0, behavior: "instant" });
+            queryClient.invalidateQueries({ queryKey: ["threads", "saved"] });
+            queryClient.setQueryData(["threads", "saved"], null);
           }}
           className="inline-block w-full px-5 py-2.5"
         >
@@ -88,6 +90,8 @@ function MenuOptions({ setState, close }: OptionsProps) {
             close();
             await navigate({ to: "/liked" });
             window.scrollTo({ top: 0, behavior: "instant" });
+            queryClient.invalidateQueries({ queryKey: ["threads", "liked"] });
+            queryClient.setQueryData(["threads", "liked"], null);
           }}
           className="inline-block w-full px-5 py-2.5"
         >
