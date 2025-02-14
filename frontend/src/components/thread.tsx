@@ -233,7 +233,7 @@ export function Thread({
           }}
         />
       )}
-      <div className="flex-grow">
+      <div className="flex w-[calc(100%-56px)] flex-grow flex-col">
         <div>
           {style === "normal" && (
             <div className="relative flex">
@@ -591,7 +591,7 @@ function SinglePhoto({ images }: AlbumProps) {
             height={520}
             alt="Profile picture"
             draggable="false"
-            className="pointer-events-none h-auto max-h-[520px] w-auto max-w-[516px] select-none rounded-xl object-contain outline outline-1 -outline-offset-1 outline-neutral-400/45 dark:outline-neutral-100/25"
+            className="pointer-events-none h-auto max-h-[520px] w-auto max-w-full select-none rounded-xl object-contain outline outline-1 -outline-offset-1 outline-neutral-400/45 dark:outline-neutral-100/25 sm:max-w-[516px]"
           />
         </figure>
       </ImageContainer>
@@ -609,7 +609,10 @@ type ContainerProps = {
 function ImageContainer({ index, images, onClickTrigger, children }: ContainerProps) {
   return (
     <Dialog>
-      <DialogTrigger className="outline-none transition-transform active:scale-[.98]" onClick={onClickTrigger}>
+      <DialogTrigger
+        className="max-w-full outline-none transition-transform active:scale-[.98]"
+        onClick={onClickTrigger}
+      >
         {children}
       </DialogTrigger>
       <DialogContent className="left-0 right-0 flex min-w-[100vw] translate-x-0 items-center justify-center rounded-none border-none bg-black/60 p-0 outline-none dark:bg-transparent">
