@@ -1,7 +1,9 @@
 import app from "./app";
 
+const port = Number(process.env.PORT ?? 3000);
+
 export const server = Bun.serve({
-  port: process.env.PORT || 3000,
+  port,
   fetch: app.fetch,
 });
 
