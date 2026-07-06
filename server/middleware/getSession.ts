@@ -41,9 +41,7 @@ export const getSession = createMiddleware<Env>(async (ctx, next) => {
   const expires = dayjs.utc(session.result.expires);
 
   if (now.isAfter(expires)) {
-    const { error: logoutError } = await safeTry(
-      db.delete(sessions).where(eq(sessions.id, session.result.id)),
-    );
+    const { error: logoutError } = await safeTry(db.delete(sessions).where(eq(sessions.id, session.result.id)));
 
     if (logoutError) {
       return ctx.json(logoutError, 500);
@@ -51,7 +49,12 @@ export const getSession = createMiddleware<Env>(async (ctx, next) => {
 
     deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
 
-    return ctx.json({ message: "Session expired." }, { status: 498 });
+    return new Response(JSON.stringify({ message: "Session expired." }), {
+      status: 498,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   ctx.set("session", session.result);

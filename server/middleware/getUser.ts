@@ -35,7 +35,12 @@ export const getUser = createMiddleware<Env>(async (ctx, next) => {
 
   if (!sessionToken) {
     console.warn("~ Session not found.");
-    return ctx.json(null, 204);
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   const session = await safeTry(
@@ -65,7 +70,12 @@ export const getUser = createMiddleware<Env>(async (ctx, next) => {
 
   if (!session.result) {
     console.warn("~ Session not found.");
-    return ctx.json(null, 204);
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   const now = dayjs.utc();
@@ -80,7 +90,12 @@ export const getUser = createMiddleware<Env>(async (ctx, next) => {
 
     deleteCookie(ctx, COOKIE_SESSION, cookieOptions);
 
-    return ctx.json({ message: "Session expired" }, { status: 498 });
+    return new Response(JSON.stringify({ message: "Session expired" }), {
+      status: 498,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   const user = session.result.userId;

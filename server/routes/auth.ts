@@ -255,7 +255,12 @@ export const auth = new Hono()
     if (now.isAfter(expires)) {
       await safeTry(db.delete(resetPassword).where(eq(resetPassword.id, result.id)));
 
-      return ctx.json({ message: "Token already expired." }, { status: 498 });
+      return new Response(JSON.stringify({ message: "Your token is already expired." }), {
+        status: 498,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     return ctx.json({ message: "Valid url." }, 200);
@@ -280,7 +285,12 @@ export const auth = new Hono()
     const expireToken = dayjs.utc(tokenResult.expires);
 
     if (now.isAfter(expireToken)) {
-      return ctx.json({ message: "Your token is already expired." }, { status: 498 });
+      return new Response(JSON.stringify({ message: "Your token is already expired." }), {
+        status: 498,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     const { error: foundUserError, result: foundUser } = await safeTry(
@@ -481,7 +491,12 @@ export const auth = new Hono()
     }
 
     if (dayjs(verifiedUser.expires).format() < dayjs.utc().format()) {
-      return ctx.json({ message: "Your verification code is already expired." }, { status: 498 });
+      return new Response(JSON.stringify({ message: "Your verification code is already expired." }), {
+        status: 498,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     const { error } = await safeTry(

@@ -237,7 +237,12 @@ export const accountUser = new Hono()
     const expires = dayjs.utc(verifyEmailQuery.result.expires);
 
     if (now.isAfter(expires)) {
-      return ctx.json({ message: "Token already expired." }, { status: 498 });
+      return new Response(JSON.stringify({ message: "Your token is already expired." }), {
+        status: 498,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     const { error } = await safeTry(
