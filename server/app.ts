@@ -29,7 +29,7 @@ const apiRoutes = app
   .route("/account/profile", accountFollow)
   .route("/account/activity", accountActivity);
 
-app.use("/assets/*", serveStatic({ root: "./frontend/dist" }));
+app.use("*", serveStatic({ root: "./frontend/dist" }));
 app.get("*", serveStatic({ path: "./frontend/dist/index.html" }));
 
 export default app;
