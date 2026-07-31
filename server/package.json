@@ -22,7 +22,9 @@
     "dependencies": {
         "@nestjs/common": "^11.0.1",
         "@nestjs/core": "^11.0.1",
+        "@nestjs/mapped-types": "*",
         "@nestjs/platform-express": "^11.0.1",
+        "@nestjs/serve-static": "^5.0.5",
         "@prisma/adapter-better-sqlite3": "^7.9.1",
         "@prisma/client": "^7.9.1",
         "dotenv": "^17.4.2",
