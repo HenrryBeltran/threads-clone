@@ -9,128 +9,128 @@ datasource db {
 }
 
 model activities {
-    id                               String  @id
-    sender                           String
-    receiver                         String
-    message                          String
-    type                             String
-    read_status                      Int?    @default(dbgenerated("false"))
-    thread_post_id                   String?
-    created_at                       String  @default("CURRENT_TIMESTAMP")
-    updated_at                       String  @default("CURRENT_TIMESTAMP")
-    users_activities_receiverTousers users   @relation("activities_receiverTousers", fields: [receiver], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    users_activities_senderTousers   users   @relation("activities_senderTousers", fields: [sender], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id                             String  @id
+    sender                         String
+    receiver                       String
+    message                        String
+    type                           String
+    readStatus                     Int?    @default(dbgenerated("false")) @map("read_status")
+    threadPostId                   String? @map("thread_post_id")
+    createdAt                      String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt                      String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    usersActivitiesReceiverToUsers users   @relation("activities_receiverTousers", fields: [receiver], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    usersActivitiesSenderToUsers   users   @relation("activities_senderTousers", fields: [sender], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model follows {
-    id                             String @id
-    user_id                        String
-    target_id                      String
-    created_at                     String @default("CURRENT_TIMESTAMP")
-    updated_at                     String @default("CURRENT_TIMESTAMP")
-    users_follows_target_idTousers users  @relation("follows_target_idTousers", fields: [target_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    users_follows_user_idTousers   users  @relation("follows_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id                          String @id
+    userId                      String @map("user_id")
+    targetId                    String @map("target_id")
+    createdAt                   String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt                   String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    usersFollowsTargetIdToUsers users  @relation("follows_target_idTousers", fields: [targetId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    usersFollowsUserIdToUsers   users  @relation("follows_user_idTousers", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model likes {
-    id         String  @id
-    liked_post String
-    user_like  String
-    created_at String  @default("CURRENT_TIMESTAMP")
-    updated_at String  @default("CURRENT_TIMESTAMP")
-    users      users   @relation(fields: [user_like], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    threads    threads @relation(fields: [liked_post], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id        String  @id
+    likedPost String  @map("liked_post")
+    userLike  String  @map("user_like")
+    createdAt String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    users     users   @relation(fields: [userLike], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    threads   threads @relation(fields: [likedPost], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model reset_password {
-    id         String @id
-    email      String @unique(map: "reset_password_email_unique")
-    token      String @unique(map: "reset_password_token_unique")
-    expires    String
-    created_at String @default("CURRENT_TIMESTAMP")
-    updated_at String @default("CURRENT_TIMESTAMP")
+    id        String @id
+    email     String @unique(map: "reset_password_email_unique")
+    token     String @unique(map: "reset_password_token_unique")
+    expires   String
+    createdAt String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt String @default("CURRENT_TIMESTAMP") @map("updated_at")
 }
 
 model search_history {
-    id                                      String @id
-    owner                                   String
-    user_search                             String
-    created_at                              String @default("CURRENT_TIMESTAMP")
-    updated_at                              String @default("CURRENT_TIMESTAMP")
-    users_search_history_user_searchTousers users  @relation("search_history_user_searchTousers", fields: [user_search], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    users_search_history_ownerTousers       users  @relation("search_history_ownerTousers", fields: [owner], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id                                  String @id
+    owner                               String
+    userSearch                          String @map("user_search")
+    createdAt                           String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt                           String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    usersSearchHistoryUserSearchToUsers users  @relation("search_history_user_searchTousers", fields: [userSearch], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    usersSearchHistoryOwnerToUsers      users  @relation("search_history_ownerTousers", fields: [owner], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model sessions {
-    id         String @id
-    token      String @unique(map: "sessions_token_unique")
-    user_id    String
-    expires    String
-    created_at String @default("CURRENT_TIMESTAMP")
-    updated_at String @default("CURRENT_TIMESTAMP")
-    users      users  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id        String @id
+    token     String @unique(map: "sessions_token_unique")
+    userId    String @map("user_id")
+    expires   String
+    createdAt String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    users     users  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model threads {
-    id            String  @id
-    post_id       String
-    author_id     String
-    root_id       String
-    parent_id     String?
-    text          String
-    resources     String?
-    hashtags      String?
-    mentions      String?
-    likes_count   Int     @default(0)
-    replies_count Int     @default(0)
-    created_at    String  @default("CURRENT_TIMESTAMP")
-    updated_at    String  @default("CURRENT_TIMESTAMP")
-    likes         likes[]
-    users         users   @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id           String  @id
+    postId       String  @map("post_id")
+    authorId     String  @map("author_id")
+    rootId       String  @map("root_id")
+    parentId     String? @map("parent_id")
+    text         String
+    resources    String?
+    hashtags     String?
+    mentions     String?
+    likesCount   Int     @default(0) @map("likes_count")
+    repliesCount Int     @default(0) @map("replies_count")
+    createdAt    String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt    String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    likes        likes[]
+    users        users   @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model users {
-    id                                               String           @id
-    email                                            String           @unique(map: "users_email_unique")
-    username                                         String           @unique(map: "users_username_unique")
-    password                                         String
-    name                                             String
-    bio                                              String
-    link                                             String?
-    profile_picture_id                               String?
-    roles                                            String           @default("user")
-    followers_count                                  Int              @default(0)
-    followings_count                                 Int              @default(0)
-    email_verified                                   String?
-    created_at                                       String           @default("CURRENT_TIMESTAMP")
-    updated_at                                       String           @default("CURRENT_TIMESTAMP")
-    activities_activities_receiverTousers            activities[]     @relation("activities_receiverTousers")
-    activities_activities_senderTousers              activities[]     @relation("activities_senderTousers")
-    follows_follows_target_idTousers                 follows[]        @relation("follows_target_idTousers")
-    follows_follows_user_idTousers                   follows[]        @relation("follows_user_idTousers")
-    likes                                            likes[]
-    search_history_search_history_user_searchTousers search_history[] @relation("search_history_user_searchTousers")
-    search_history_search_history_ownerTousers       search_history[] @relation("search_history_ownerTousers")
-    sessions                                         sessions[]
-    threads                                          threads[]
+    id                                          String           @id
+    email                                       String           @unique(map: "users_email_unique")
+    username                                    String           @unique(map: "users_username_unique")
+    password                                    String
+    name                                        String
+    bio                                         String
+    link                                        String?
+    profilePictureId                            String?          @map("profile_picture_id")
+    roles                                       String           @default("user")
+    followersCount                              Int              @default(0) @map("followers_count")
+    followingsCount                             Int              @default(0) @map("followings_count")
+    emailVerified                               String?          @map("email_verified")
+    createdAt                                   String           @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt                                   String           @default("CURRENT_TIMESTAMP") @map("updated_at")
+    activitiesActivitiesReceiverToUsers         activities[]     @relation("activities_receiverTousers")
+    activitiesActivitiesSenderToUsers           activities[]     @relation("activities_senderTousers")
+    followsFollowsTargetIdToUsers               follows[]        @relation("follows_target_idTousers")
+    followsFollowsUserIdToUsers                 follows[]        @relation("follows_user_idTousers")
+    likes                                       likes[]
+    searchHistorySearchHistoryUserSearchToUsers search_history[] @relation("search_history_user_searchTousers")
+    searchHistorySearchHistoryOwnerToUsers      search_history[] @relation("search_history_ownerTousers")
+    sessions                                    sessions[]
+    threads                                     threads[]
 }
 
 model verify_email {
-    id         String @id
-    new_email  String
-    token      String @unique(map: "verify_email_token_unique")
-    expires    String
-    created_at String @default("CURRENT_TIMESTAMP")
-    updated_at String @default("CURRENT_TIMESTAMP")
-    old_email  String
+    id        String @id
+    newEmail  String @map("new_email")
+    token     String @unique(map: "verify_email_token_unique")
+    expires   String
+    createdAt String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    oldEmail  String @map("old_email")
 }
 
 model verify_user {
-    id         String @id
-    email      String @unique(map: "verify_user_email_unique")
-    token      String @unique(map: "verify_user_token_unique")
-    code       String
-    expires    String
-    created_at String @default("CURRENT_TIMESTAMP")
-    updated_at String @default("CURRENT_TIMESTAMP")
+    id        String @id
+    email     String @unique(map: "verify_user_email_unique")
+    token     String @unique(map: "verify_user_token_unique")
+    code      String
+    expires   String
+    createdAt String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt String @default("CURRENT_TIMESTAMP") @map("updated_at")
 }
