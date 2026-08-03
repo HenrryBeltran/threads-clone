@@ -182,3 +182,4 @@ dev.db-wal
 # db
 db_backup
 queries
+session-*
