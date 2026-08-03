@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import daysjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { VerificationRepository, VerificationToken } from './verification.repository';
+import { VerificationRepository, VerificationRecord } from './verification.repository';
 import { MailService } from 'src/mail/mail.service';
 import { customAlphabet, nanoid } from 'nanoid';
 
@@ -15,7 +15,7 @@ export class VerificationService {
     ) {}
 
     async ensureVerificationToken(user: { username: string; email: string }): Promise<string> {
-        let existing: VerificationToken | null = null;
+        let existing: VerificationRecord | null = null;
         try {
             existing = await this.verificationRepo.findByEmail(user.email);
         } catch (e) {
@@ -45,4 +45,8 @@ export class VerificationService {
 
         return token;
     }
+
+    async verifyAccount(user: VerificationRecord, pin: string) {}
+
+    async getVerificationToken(user: VerificationRecord) {}
 }

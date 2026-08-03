@@ -9,27 +9,27 @@ datasource db {
 }
 
 model activities {
-    id                             String  @id
-    sender                         String
-    receiver                       String
-    message                        String
-    type                           String
-    readStatus                     Int?    @default(dbgenerated("false")) @map("read_status")
-    threadPostId                   String? @map("thread_post_id")
-    createdAt                      String  @default("CURRENT_TIMESTAMP") @map("created_at")
-    updatedAt                      String  @default("CURRENT_TIMESTAMP") @map("updated_at")
-    usersActivitiesReceiverToUsers users   @relation("activities_receiverTousers", fields: [receiver], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    usersActivitiesSenderToUsers   users   @relation("activities_senderTousers", fields: [sender], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id           String  @id
+    senderId     String  @map("sender")
+    receiverId   String  @map("receiver")
+    message      String
+    type         String
+    readStatus   Int?    @default(dbgenerated("false")) @map("read_status")
+    threadPostId String? @map("thread_post_id")
+    createdAt    String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt    String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    sender       users   @relation("ActivitiesSender", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    receiver     users   @relation("ActivitiesReceiver", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model follows {
-    id                          String @id
-    userId                      String @map("user_id")
-    targetId                    String @map("target_id")
-    createdAt                   String @default("CURRENT_TIMESTAMP") @map("created_at")
-    updatedAt                   String @default("CURRENT_TIMESTAMP") @map("updated_at")
-    usersFollowsTargetIdToUsers users  @relation("follows_target_idTousers", fields: [targetId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    usersFollowsUserIdToUsers   users  @relation("follows_user_idTousers", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id         String @id
+    followerId String @map("user_id")
+    targetId   String @map("target_id")
+    createdAt  String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt  String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    follower   users  @relation("FollowsFollower", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    target     users  @relation("FollowsTarget", fields: [targetId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model likes {
@@ -52,13 +52,13 @@ model reset_password {
 }
 
 model search_history {
-    id                                  String @id
-    owner                               String
-    userSearch                          String @map("user_search")
-    createdAt                           String @default("CURRENT_TIMESTAMP") @map("created_at")
-    updatedAt                           String @default("CURRENT_TIMESTAMP") @map("updated_at")
-    usersSearchHistoryUserSearchToUsers users  @relation("search_history_user_searchTousers", fields: [userSearch], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    usersSearchHistoryOwnerToUsers      users  @relation("search_history_ownerTousers", fields: [owner], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id           String @id
+    ownerId      String @map("owner")
+    userSearch   String @map("user_search")
+    createdAt    String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt    String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    owner        users  @relation("SearchHistoryOwner", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    searchedUser users  @relation("SearchHistorySearched", fields: [userSearch], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model sessions {
@@ -95,29 +95,29 @@ model threads {
 }
 
 model users {
-    id                                          String           @id
-    email                                       String           @unique(map: "users_email_unique")
-    username                                    String           @unique(map: "users_username_unique")
-    password                                    String
-    name                                        String
-    bio                                         String
-    link                                        String?
-    profilePictureId                            String?          @map("profile_picture_id")
-    roles                                       String           @default("user")
-    followersCount                              Int              @default(0) @map("followers_count")
-    followingsCount                             Int              @default(0) @map("followings_count")
-    emailVerified                               String?          @map("email_verified")
-    createdAt                                   String           @default("CURRENT_TIMESTAMP") @map("created_at")
-    updatedAt                                   String           @default("CURRENT_TIMESTAMP") @map("updated_at")
-    activitiesActivitiesReceiverToUsers         activities[]     @relation("activities_receiverTousers")
-    activitiesActivitiesSenderToUsers           activities[]     @relation("activities_senderTousers")
-    followsFollowsTargetIdToUsers               follows[]        @relation("follows_target_idTousers")
-    followsFollowsUserIdToUsers                 follows[]        @relation("follows_user_idTousers")
-    likes                                       likes[]
-    searchHistorySearchHistoryUserSearchToUsers search_history[] @relation("search_history_user_searchTousers")
-    searchHistorySearchHistoryOwnerToUsers      search_history[] @relation("search_history_ownerTousers")
-    sessions                                    sessions[]
-    threads                                     threads[]
+    id                 String           @id
+    email              String           @unique(map: "users_email_unique")
+    username           String           @unique(map: "users_username_unique")
+    password           String
+    name               String
+    bio                String
+    link               String?
+    profilePictureId   String?          @map("profile_picture_id")
+    roles              String           @default("user")
+    followersCount     Int              @default(0) @map("followers_count")
+    followingsCount    Int              @default(0) @map("followings_count")
+    emailVerified      String?          @map("email_verified")
+    createdAt          String           @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt          String           @default("CURRENT_TIMESTAMP") @map("updated_at")
+    sentActivities     activities[]     @relation("ActivitiesSender")
+    receivedActivities activities[]     @relation("ActivitiesReceiver")
+    following          follows[]        @relation("FollowsFollower")
+    followers          follows[]        @relation("FollowsTarget")
+    likes              likes[]
+    ownedSearchHistory search_history[] @relation("SearchHistoryOwner")
+    searchedHistory    search_history[] @relation("SearchHistorySearched")
+    sessions           sessions[]
+    threads            threads[]
 }
 
 model verify_email {
