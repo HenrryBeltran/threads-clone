@@ -19,7 +19,7 @@ export class CookieService {
     }
 
     clearSession(response: Response): void {
-        response.clearCookie(COOKIE_SESSION);
+        response.clearCookie(COOKIE_SESSION, sessionCookieOptions);
     }
 
     getToken(request: Request): string | undefined {

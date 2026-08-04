@@ -108,4 +108,40 @@ export class VerificationService {
 
         return { token: record.token };
     }
+
+    async resend(user: AuthUser): Promise<{ sended: boolean; timeLeft: number }> {
+        let record: VerificationRecord | null = null;
+        try {
+            record = await this.verificationRepo.findByEmail(user.email);
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        if (!record) throw new NotFoundException({ message: 'Account verification not found.' });
+
+        const isFirstEmail = record.createdAt === record.updatedAt;
+        const timeOffset = dayjs.utc().diff(dayjs.utc(record.updatedAt), 'seconds');
+
+        if (timeOffset <= 60 && !isFirstEmail) {
+            return { sended: false, timeLeft: 60 - timeOffset };
+        }
+
+        const code = customAlphabet('0123456789', 6)();
+        try {
+            await this.mailService.sendWelcome(user.username, user.email, code);
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        try {
+            await this.verificationRepo.updateCode(record.id, code);
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        return { sended: true, timeLeft: 60 };
+    }
 }

@@ -1,4 +1,5 @@
 import {
+    ConflictException,
     HttpException,
     HttpStatus,
     Injectable,
@@ -7,7 +8,7 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
-import { AuthRepository, LoginAuthUser } from './auth.repository';
+import { AuthRepository, LoginAuthUser, NewUser } from './auth.repository';
 import { Response } from 'express';
 import { PasswordService } from 'src/common/password.service';
 import { CookieService } from 'src/common/cookie.service';
@@ -16,6 +17,7 @@ import { VerificationService } from './verification.service';
 import { nanoid } from 'nanoid';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { SignUpDto } from './dto/sign-up.dto';
 
 dayjs.extend(utc);
 
@@ -90,6 +92,92 @@ export class AuthService {
             throw new HttpException({ token }, HttpStatus.TEMPORARY_REDIRECT);
         }
 
+        response.json(200);
+    }
+
+    async signUp(body: SignUpDto, response: Response) {
+        const username = body.username.toLocaleLowerCase();
+
+        let existingUsername: { id: string } | null = null;
+        try {
+            existingUsername = await this.repo.findByUsername(username);
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        if (existingUsername) {
+            throw new ConflictException({ message: `Username ${username} is already taken.`, path: 'username' });
+        }
+
+        let existingEmail: { id: string } | null = null;
+        try {
+            existingEmail = await this.repo.findByEmail(body.email);
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        if (existingEmail) {
+            throw new ConflictException({ message: 'This email is already register.', path: 'email' });
+        }
+
+        let hashedPassword = '';
+        try {
+            hashedPassword = await this.passwordService.hash(body.password);
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        let newUser: NewUser | null = null;
+        try {
+            newUser = await this.repo.createUser({ username, email: body.email, password: hashedPassword });
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        const sessionToken = nanoid();
+        const expires = dayjs.utc().add(1, 'year').format('YYYY-MM-DD HH:mm:ss');
+
+        try {
+            await this.repo.createUserSession({
+                token: sessionToken,
+                expires,
+                userId: newUser.id,
+                deviceName: null,
+                deviceType: null,
+                ipAddress: null,
+                userAgent: null,
+            });
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        this.cookieService.setSession(response, sessionToken);
+
+        let token = '';
+        try {
+            token = await this.verificationService.ensureVerificationToken(newUser);
+        } catch (e) {
+            Logger.log(e);
+            throw new HttpException({ token }, HttpStatus.TEMPORARY_REDIRECT);
+        }
+
+        response.status(201).json({ token });
+    }
+
+    async logout(sessionId: string, response: Response) {
+        try {
+            await this.repo.deleteSession(sessionId);
+        } catch (e) {
+            Logger.log(e);
+            throw new InternalServerErrorException('Something went wrong');
+        }
+
+        this.cookieService.clearSession(response);
         response.json(200);
     }
 }

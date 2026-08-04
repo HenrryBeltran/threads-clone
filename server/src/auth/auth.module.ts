@@ -11,9 +11,10 @@ import { VerificationService } from './verification.service';
 import { PasswordService } from 'src/common/password.service';
 import { CookieService } from 'src/common/cookie.service';
 import { DeviceService } from 'src/common/device.service';
+import { VerificationController } from './verification.controller';
 
 @Module({
-    controllers: [AuthController],
+    controllers: [AuthController, VerificationController],
     providers: [
         AuthService,
         VerificationService,
