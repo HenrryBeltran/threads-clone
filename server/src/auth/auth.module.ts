@@ -8,12 +8,18 @@ import { VerificationRepository } from './verification.repository';
 import { PasswordResetRepository } from './password-reset.repository';
 import { PrismaPasswordResetRepository } from './prisma.password-reset.repository';
 import { VerificationService } from './verification.service';
+import { PasswordService } from 'src/common/password.service';
+import { CookieService } from 'src/common/cookie.service';
+import { DeviceService } from 'src/common/device.service';
 
 @Module({
     controllers: [AuthController],
     providers: [
         AuthService,
         VerificationService,
+        PasswordService,
+        CookieService,
+        DeviceService,
         { provide: AuthRepository, useClass: PrismaAuthRepository },
         { provide: VerificationRepository, useClass: PrismaVerificationRepository },
         { provide: PasswordResetRepository, useClass: PrismaPasswordResetRepository },
