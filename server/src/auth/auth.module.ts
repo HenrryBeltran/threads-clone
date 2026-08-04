@@ -5,13 +5,18 @@ import { PrismaAuthRepository } from './prisma.auth.repository';
 import { AuthRepository } from './auth.repository';
 import { PrismaVerificationRepository } from './prisma.verification.repository';
 import { VerificationRepository } from './verification.repository';
+import { PasswordResetRepository } from './password-reset.repository';
+import { PrismaPasswordResetRepository } from './prisma.password-reset.repository';
+import { VerificationService } from './verification.service';
 
 @Module({
     controllers: [AuthController],
     providers: [
         AuthService,
+        VerificationService,
         { provide: AuthRepository, useClass: PrismaAuthRepository },
         { provide: VerificationRepository, useClass: PrismaVerificationRepository },
+        { provide: PasswordResetRepository, useClass: PrismaPasswordResetRepository },
     ],
 })
 export class AuthModule {}

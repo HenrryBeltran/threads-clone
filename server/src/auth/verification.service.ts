@@ -1,9 +1,10 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import daysjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import { VerificationRepository, VerificationRecord } from './verification.repository';
 import { MailService } from 'src/mail/mail.service';
 import { customAlphabet, nanoid } from 'nanoid';
+import daysjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import { AuthUser } from './auth.repository';
 
 daysjs.extend(utc);
 
@@ -46,7 +47,7 @@ export class VerificationService {
         return token;
     }
 
-    async verifyAccount(user: VerificationRecord, pin: string) {}
+    async verifyAccount(user: AuthUser, pin: string) {}
 
-    async getVerificationToken(user: VerificationRecord) {}
+    async getVerificationToken(user: AuthUser) {}
 }

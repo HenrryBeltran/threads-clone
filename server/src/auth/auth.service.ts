@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import { Response } from 'express';
-
-dayjs.extend(utc);
 
 @Injectable()
 export class AuthService {
