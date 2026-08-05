@@ -57,4 +57,6 @@ export abstract class AuthRepository {
     abstract findSessionWithUserByToken(token: string): Promise<SessionWithUser | null>;
     abstract deleteSession(id: string): Promise<void>;
     abstract verifyEmail(userId: string): Promise<void>;
+    abstract updatePassword(userId: string, password: string): Promise<void>;
+    abstract deleteAllUserSessions(userId: string): Promise<void>;
 }

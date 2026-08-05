@@ -10,7 +10,6 @@ dayjs.extend(utc);
 @Injectable()
 export class PrismaAuthRepository implements AuthRepository {
     constructor(private readonly prisma: PrismaService) {}
-
     async findRegisteredUser(usernameOrEmail: string): Promise<LoginAuthUser | null> {
         return await this.prisma.users.findFirst({
             select: {
@@ -133,5 +132,19 @@ export class PrismaAuthRepository implements AuthRepository {
                 updatedAt: dayjs.utc().format('YYYY-MM-DD HH:mm:ss'),
             },
         });
+    }
+
+    async updatePassword(userId: string, password: string): Promise<void> {
+        await this.prisma.users.update({
+            where: { id: userId },
+            data: {
+                password,
+                updatedAt: dayjs.utc().format('YYYY-MM-DD HH:mm:ss'),
+            },
+        });
+    }
+
+    async deleteAllUserSessions(userId: string): Promise<void> {
+        await this.prisma.sessions.deleteMany({ where: { userId } });
     }
 }

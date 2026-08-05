@@ -12,12 +12,15 @@ import { PasswordService } from 'src/common/password.service';
 import { CookieService } from 'src/common/cookie.service';
 import { DeviceService } from 'src/common/device.service';
 import { VerificationController } from './verification.controller';
+import { PasswordResetController } from './password-reset.controller';
+import { PasswordResetService } from './password-reset.service';
 
 @Module({
-    controllers: [AuthController, VerificationController],
+    controllers: [AuthController, VerificationController, PasswordResetController],
     providers: [
         AuthService,
         VerificationService,
+        PasswordResetService,
         PasswordService,
         CookieService,
         DeviceService,
