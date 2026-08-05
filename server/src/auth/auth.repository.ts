@@ -28,6 +28,20 @@ export type CreateSessionData = {
 
 export type Session = sessionsModel;
 
+export type SessionResponse = {
+    id: string;
+    userId: string;
+    expires: string;
+    deviceName: string | null;
+    deviceType: string | null;
+    ipAddress: string | null;
+    lastActiveAt: string | null;
+    userAgent: string | null;
+    isCurrent: boolean;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type AuthUser = {
     id: string;
     email: string;
@@ -58,5 +72,7 @@ export abstract class AuthRepository {
     abstract deleteSession(id: string): Promise<void>;
     abstract verifyEmail(userId: string): Promise<void>;
     abstract updatePassword(userId: string, password: string): Promise<void>;
-    abstract deleteAllUserSessions(userId: string): Promise<void>;
+    abstract findSessionsByUserId(userId: string): Promise<Session[]>;
+    abstract deleteUserSession(sessionId: string, userId: string): Promise<boolean>;
+    abstract deleteSessionsByUserId(userId: string, exceptId?: string): Promise<void>;
 }

@@ -10,6 +10,7 @@ dayjs.extend(utc);
 @Injectable()
 export class PrismaAuthRepository implements AuthRepository {
     constructor(private readonly prisma: PrismaService) {}
+
     async findRegisteredUser(usernameOrEmail: string): Promise<LoginAuthUser | null> {
         return await this.prisma.users.findFirst({
             select: {
@@ -144,7 +145,19 @@ export class PrismaAuthRepository implements AuthRepository {
         });
     }
 
-    async deleteAllUserSessions(userId: string): Promise<void> {
-        await this.prisma.sessions.deleteMany({ where: { userId } });
+    async findSessionsByUserId(userId: string): Promise<Session[]> {
+        return await this.prisma.sessions.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+
+    async deleteUserSession(sessionId: string, userId: string): Promise<boolean> {
+        let { count } = await this.prisma.sessions.deleteMany({ where: { id: sessionId, userId } });
+        return count > 0;
+    }
+
+    async deleteSessionsByUserId(userId: string, exceptId?: string): Promise<void> {
+        await this.prisma.sessions.deleteMany({ where: { userId, ...(exceptId ? { NOT: { id: exceptId } } : {}) } });
     }
 }

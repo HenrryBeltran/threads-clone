@@ -21,7 +21,7 @@ export class VerificationController {
             response.status(204).send();
             return;
         }
-        response.json(await this.verificationService.verifyAccount(request.user, dto.pin));
+        return this.verificationService.verifyAccount(request.user, dto.pin);
     }
 
     @Get('/token')
@@ -30,7 +30,7 @@ export class VerificationController {
             response.status(204).send();
             return;
         }
-        response.json(await this.verificationService.getVerificationToken(request.user));
+        return this.verificationService.getVerificationToken(request.user);
     }
 
     @Get('/resend')
@@ -39,6 +39,6 @@ export class VerificationController {
             response.status(204).send();
             return;
         }
-        response.json(await this.verificationService.resend(request.user));
+        return this.verificationService.resend(request.user);
     }
 }

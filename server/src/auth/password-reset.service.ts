@@ -179,7 +179,7 @@ export class PasswordResetService {
         }
 
         try {
-            await this.authRepo.deleteAllUserSessions(registeredUser.id);
+            await this.authRepo.deleteSessionsByUserId(registeredUser.id);
         } catch (e) {
             Logger.log(e);
             throw new InternalServerErrorException('Something went wrong');

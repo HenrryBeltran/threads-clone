@@ -14,13 +14,16 @@ import { DeviceService } from 'src/common/device.service';
 import { VerificationController } from './verification.controller';
 import { PasswordResetController } from './password-reset.controller';
 import { PasswordResetService } from './password-reset.service';
+import { SessionsService } from './sessions.service';
+import { SessionsController } from './sessions.controller';
 
 @Module({
-    controllers: [AuthController, VerificationController, PasswordResetController],
+    controllers: [AuthController, VerificationController, PasswordResetController, SessionsController],
     providers: [
         AuthService,
         VerificationService,
         PasswordResetService,
+        SessionsService,
         PasswordService,
         CookieService,
         DeviceService,
