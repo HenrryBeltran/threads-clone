@@ -7,6 +7,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AccountModule } from './account/account.module';
 
 @Module({
     imports: [
@@ -14,9 +16,11 @@ import { MailModule } from './mail/mail.module';
             rootPath: join(process.cwd(), '..', 'frontend', 'dist'),
             exclude: ['/api/{*path}'],
         }),
+        ThrottlerModule.forRoot(),
         PrismaModule,
-        UsersModule,
         AuthModule,
+        UsersModule,
+        AccountModule,
         MailModule,
     ],
     controllers: [AppController],

@@ -31,5 +31,6 @@ import { SessionsController } from './sessions.controller';
         { provide: VerificationRepository, useClass: PrismaVerificationRepository },
         { provide: PasswordResetRepository, useClass: PrismaPasswordResetRepository },
     ],
+    exports: [AuthRepository],
 })
 export class AuthModule {}
