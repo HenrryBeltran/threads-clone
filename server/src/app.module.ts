@@ -16,7 +16,7 @@ import { AccountModule } from './account/account.module';
             rootPath: join(process.cwd(), '..', 'frontend', 'dist'),
             exclude: ['/api/{*path}'],
         }),
-        ThrottlerModule.forRoot(),
+        ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 100 }]),
         PrismaModule,
         AuthModule,
         UsersModule,

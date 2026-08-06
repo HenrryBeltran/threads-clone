@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Injectable, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Injectable, Param, Post, UseGuards } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { PasswordResetService } from './password-reset.service';
 import { ForgottenPasswordDto } from './dto/forgotten-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -18,6 +19,8 @@ export class PasswordResetController {
         return this.passwordResetService.resetPassword(temporalToken, resetPasswordDto.newPassword);
     }
 
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 3, ttl: 600_000 } })
     @Post('/forgotten-password')
     forgottenPassword(@Body() forgottenPasswordDto: ForgottenPasswordDto) {
         return this.passwordResetService.forgottenPassword(forgottenPasswordDto.email);

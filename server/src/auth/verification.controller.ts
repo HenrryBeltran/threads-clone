@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Injectable, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Response } from 'express';
 import { VerifyPinDto } from './dto/verify-pin.dto';
 import { GetUserGuard } from './guards/get-user.guard';
@@ -7,7 +8,8 @@ import { VerificationService } from './verification.service';
 
 @Injectable()
 @Controller('verify-account')
-@UseGuards(GetUserGuard)
+@UseGuards(GetUserGuard, ThrottlerGuard)
+@Throttle({ default: { limit: 3, ttl: 300_000 } })
 export class VerificationController {
     constructor(private readonly verificationService: VerificationService) {}
 

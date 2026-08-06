@@ -4,6 +4,7 @@ import { Type } from 'class-transformer';
 class ProfilePictureDto {
     @IsString()
     @Matches(/data:image\/jpeg;base64,/, { message: 'Invalid base64 format.' })
+    @MaxLength(7_000_000, { message: 'Image is too large.' })
     base64!: string;
 }
 

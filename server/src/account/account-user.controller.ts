@@ -23,6 +23,8 @@ export class AccountUserController {
         return this.accountUserService.getAccount(request.user);
     }
 
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 10, ttl: 900_000 } })
     @Put('/')
     async updateUserAccount(
         @Body() dto: ProfileDto,
@@ -60,6 +62,8 @@ export class AccountUserController {
         return this.accountUserService.updateEmail(request.user, dto);
     }
 
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 5, ttl: 600_000 } })
     @Post('/email/verification')
     async verifyNewEmail(
         @Query('token') token: string,
