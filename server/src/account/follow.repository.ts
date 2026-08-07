@@ -11,6 +11,6 @@ export abstract class FollowRepository {
     abstract findFollow(followerId: string, targetId: string): Promise<{ id: string } | null>;
     abstract createFollow(followerId: string, targetId: string): Promise<boolean>;
     abstract deleteFollow(id: string, followerId: string, targetId: string): Promise<void>;
-    abstract findFollowers(targetId: string, userId: string, offset: number): Promise<FollowRow[]>;
-    abstract findFollowings(targetId: string, userId: string, offset: number): Promise<FollowRow[]>;
+    abstract findFollowers(targetId: string, userId: string, offset: number, limit: number): Promise<FollowRow[]>;
+    abstract findFollowings(targetId: string, userId: string, offset: number, limit: number): Promise<FollowRow[]>;
 }

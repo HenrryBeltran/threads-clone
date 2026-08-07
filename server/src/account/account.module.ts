@@ -14,10 +14,11 @@ import { FollowRepository } from './follow.repository';
 import { PrismaFollowRepository } from './prisma.follow.repository';
 import { ActivityRepository } from './activity.repository';
 import { PrismaActivityRepository } from './prisma.activity.repository';
+import { AccountActivityController } from './account-activity.controller';
 
 @Module({
     imports: [AuthModule],
-    controllers: [AccountUserController, AccountProfileController],
+    controllers: [AccountUserController, AccountProfileController, AccountActivityController],
     providers: [
         AccountUserService,
         AccountProfileService,

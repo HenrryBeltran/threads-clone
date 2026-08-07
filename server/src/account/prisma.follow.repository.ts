@@ -75,7 +75,7 @@ export class PrismaFollowRepository implements FollowRepository {
         ]);
     }
 
-    async findFollowers(targetId: string, userId: string, offset: number): Promise<FollowRow[]> {
+    async findFollowers(targetId: string, userId: string, offset: number, limit: number): Promise<FollowRow[]> {
         const rows = await this.prisma.follows.findMany({
             select: {
                 follower: {
@@ -92,7 +92,7 @@ export class PrismaFollowRepository implements FollowRepository {
             },
             where: { targetId },
             orderBy: { createdAt: 'desc' },
-            take: 10,
+            take: limit,
             skip: offset,
         });
 
@@ -105,7 +105,7 @@ export class PrismaFollowRepository implements FollowRepository {
         }));
     }
 
-    async findFollowings(targetId: string, userId: string, offset: number): Promise<FollowRow[]> {
+    async findFollowings(targetId: string, userId: string, offset: number, limit: number): Promise<FollowRow[]> {
         const rows = await this.prisma.follows.findMany({
             select: {
                 target: {
@@ -122,7 +122,7 @@ export class PrismaFollowRepository implements FollowRepository {
             },
             where: { followerId: targetId },
             orderBy: { createdAt: 'desc' },
-            take: 10,
+            take: limit,
             skip: offset,
         });
 

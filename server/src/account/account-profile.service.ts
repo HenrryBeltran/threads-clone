@@ -111,7 +111,7 @@ export class AccountProfileService {
     async getFollowers(user: AuthUser, targetId: string, page?: string): Promise<FollowRow[]> {
         let rows: FollowRow[] = [];
         try {
-            rows = await this.repo.findFollowers(targetId, user.id, page ? Number(page) * 10 : 0);
+            rows = await this.repo.findFollowers(targetId, user.id, page ? Number(page) * 10 : 0, 10);
         } catch (e) {
             Logger.log(e);
             throw new InternalServerErrorException('Something went wrong');
@@ -122,7 +122,7 @@ export class AccountProfileService {
     async getFollowings(user: AuthUser, targetId: string, page?: string): Promise<FollowRow[]> {
         let rows: FollowRow[] = [];
         try {
-            rows = await this.repo.findFollowings(targetId, user.id, page ? Number(page) * 10 : 0);
+            rows = await this.repo.findFollowings(targetId, user.id, page ? Number(page) * 10 : 0, 10);
         } catch (e) {
             Logger.log(e);
             throw new InternalServerErrorException('Something went wrong');
