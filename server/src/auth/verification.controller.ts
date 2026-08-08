@@ -7,7 +7,7 @@ import { AuthRequest } from './auth-request';
 import { VerificationService } from './verification.service';
 
 @Injectable()
-@Controller('verify-account')
+@Controller('auth/verify-account')
 @UseGuards(GetUserGuard, ThrottlerGuard)
 @Throttle({ default: { limit: 3, ttl: 300_000 } })
 export class VerificationController {
