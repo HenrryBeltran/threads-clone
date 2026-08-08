@@ -35,13 +35,25 @@ model follows {
 }
 
 model likes {
-    id        String  @id
-    postId    String  @map("liked_post")
-    userId    String  @map("user_like")
-    createdAt String  @default("CURRENT_TIMESTAMP") @map("created_at")
-    updatedAt String  @default("CURRENT_TIMESTAMP") @map("updated_at")
-    users     users   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    threads   threads @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id         String  @id
+    postId     String  @map("liked_post")
+    userId     String  @map("user_like")
+    createdAt  String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt  String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    users      users   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    threads    threads @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model saved {
+    id          String  @id
+    ownerId     String  @map("owner")
+    savedPostId String  @map("saved_post")
+    createdAt   String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt   String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    owner       users   @relation("SavedOwner", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    savedPost   threads @relation("SavedPost", fields: [savedPostId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+    @@unique([ownerId, savedPostId], map: "saved_owner_post_unique")
 }
 
 model reset_password {
@@ -93,6 +105,7 @@ model threads {
     createdAt    String  @default("CURRENT_TIMESTAMP") @map("created_at")
     updatedAt    String  @default("CURRENT_TIMESTAMP") @map("updated_at")
     likes        likes[]
+    savedBy      saved[] @relation("SavedPost")
     users        users   @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
@@ -116,6 +129,7 @@ model users {
     following          follows[]        @relation("FollowsFollower")
     followers          follows[]        @relation("FollowsTarget")
     likes              likes[]
+    saved              saved[]         @relation("SavedOwner")
     ownedSearchHistory search_history[] @relation("SearchHistoryOwner")
     searchedHistory    search_history[] @relation("SearchHistorySearched")
     sessions           sessions[]

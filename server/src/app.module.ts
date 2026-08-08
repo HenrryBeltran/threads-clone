@@ -10,6 +10,9 @@ import { MailModule } from './mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AccountModule } from './account/account.module';
 import { LikesModule } from './threads/likes.module';
+import { ThreadsModule } from './threads/threads.module';
+import { SavedModule } from './saved/saved.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
     imports: [
@@ -24,6 +27,9 @@ import { LikesModule } from './threads/likes.module';
         AccountModule,
         MailModule,
         LikesModule,
+        ThreadsModule,
+        SavedModule,
+        SearchModule,
     ],
     controllers: [AppController],
     providers: [AppService],
