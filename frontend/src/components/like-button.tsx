@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { UserAccount, api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { UserImage } from "./user-image";

@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";

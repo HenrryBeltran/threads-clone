@@ -9,7 +9,7 @@ import {
 import { useThreadModalStore } from "@/store";
 import { useLocation } from "@tanstack/react-router";
 import { NavbarItem } from "./navbar-item";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { api, UserAccount } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 

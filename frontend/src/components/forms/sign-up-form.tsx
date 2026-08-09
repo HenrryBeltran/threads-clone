@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { InputPassword } from "@/components/ui/input-password";
 import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUpSchema } from "@server/common/schemas/auth";
-import { safeTry } from "@server/lib/safe-try";
+import { signUpSchema } from "@/lib/schemas/auth";
+import { safeTry } from "@/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -41,11 +41,7 @@ export function SignUpForm() {
         path?: string;
       };
 
-      form.setError(
-        (path as "username" | "email" | "password" | "confirmPassword" | "root") ??
-          "root",
-        { message },
-      );
+      form.setError((path as "username" | "email" | "password" | "confirmPassword" | "root") ?? "root", { message });
       return;
     }
 
@@ -122,12 +118,7 @@ export function SignUpForm() {
           }}
         >
           {form.formState.isSubmitting ? (
-            <Loading03AnimatedIcon
-              strokeWidth={3}
-              width={24}
-              height={24}
-              className="text-secondary"
-            />
+            <Loading03AnimatedIcon strokeWidth={3} width={24} height={24} className="text-secondary" />
           ) : (
             "Sign up"
           )}
@@ -144,24 +135,16 @@ export function SignUpForm() {
         form.formState.errors.confirmPassword) && (
         <div className="!mt-5 flex flex-col text-destructive dark:text-red-400">
           {form.formState.errors.username && (
-            <span className="text-pretty text-sm font-medium">
-              ⓧ {form.formState.errors.username.message}
-            </span>
+            <span className="text-pretty text-sm font-medium">ⓧ {form.formState.errors.username.message}</span>
           )}
           {form.formState.errors.email && (
-            <span className="text-pretty text-sm font-medium">
-              ⓧ {form.formState.errors.email.message}
-            </span>
+            <span className="text-pretty text-sm font-medium">ⓧ {form.formState.errors.email.message}</span>
           )}
           {form.formState.errors.password && (
-            <span className="text-pretty text-sm font-medium">
-              ⓧ {form.formState.errors.password.message}
-            </span>
+            <span className="text-pretty text-sm font-medium">ⓧ {form.formState.errors.password.message}</span>
           )}
           {form.formState.errors.confirmPassword && (
-            <span className="text-pretty text-sm font-medium">
-              ⓧ {form.formState.errors.confirmPassword.message}
-            </span>
+            <span className="text-pretty text-sm font-medium">ⓧ {form.formState.errors.confirmPassword.message}</span>
           )}
         </div>
       )}

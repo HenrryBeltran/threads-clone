@@ -1,8 +1,8 @@
 import ResetPasswordForm from "@/components/forms/reset-password-form";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { temporalTokenSchema } from "@server/common/schemas";
-import { safeTry } from "@server/lib/safe-try";
+import { temporalTokenSchema } from "@/lib/schemas";
+import { safeTry } from "@/lib/safe-try";
 import { Link, createFileRoute, useSearch } from "@tanstack/react-router";
 import { z } from "zod";
 

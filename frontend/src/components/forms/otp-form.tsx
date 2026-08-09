@@ -1,8 +1,8 @@
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { inputOTPSchema } from "@server/common/schemas/auth";
-import { safeTry } from "@server/lib/safe-try";
+import { inputOTPSchema } from "@/lib/schemas/auth";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";

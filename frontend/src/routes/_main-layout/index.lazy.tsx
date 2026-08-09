@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { UserImage } from "@/components/user-image";
 import { UserAccount, api } from "@/lib/api";
 import { useThreadModalStore } from "@/store";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
 

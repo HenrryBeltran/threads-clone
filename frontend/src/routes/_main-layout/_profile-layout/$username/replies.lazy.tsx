@@ -1,6 +1,6 @@
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { UserAccount, api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { createLazyFileRoute, useRouteContext } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_main-layout/_profile-layout/$username/replies")({

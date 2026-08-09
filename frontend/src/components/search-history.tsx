@@ -2,7 +2,7 @@ import { Cancel01Icon } from "@/components/icons/hugeicons";
 import { Link } from "@tanstack/react-router";
 import { UserImage } from "./user-image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { api } from "@/lib/api";
 
 type Result = {

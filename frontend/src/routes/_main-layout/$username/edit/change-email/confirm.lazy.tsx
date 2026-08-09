@@ -1,6 +1,6 @@
 import { AlertCircleIcon } from "@/components/icons/hugeicons";
 import { api, UserAccount } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

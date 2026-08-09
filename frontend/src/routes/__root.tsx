@@ -5,7 +5,7 @@ import { NotFound } from "@/components/not-found";
 import { Toaster } from "@/components/ui/sonner";
 import { api, userAccountQueryOptions } from "@/lib/api";
 import { accountVerificationQueryOptions } from "@/lib/api/get-account-verification-query";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
 

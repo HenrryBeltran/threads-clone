@@ -1,6 +1,6 @@
 import { ArrowRight02Icon, Cancel01Icon, Loading03AnimatedIcon, Search01Icon } from "@/components/icons/hugeicons";
 import { UserAccount, api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { useDebounce } from "use-debounce";

@@ -1,6 +1,6 @@
 import { UserImage } from "@/components/user-image";
 import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { ActivityResult } from "@server/routes/account/activity";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";

@@ -1,7 +1,7 @@
 import { useLockScrolling } from "@/hooks/lock-scrolling";
 import { UserAccount, api } from "@/lib/api";
 import { useThreadModalStore, useThreadStore } from "@/store";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";

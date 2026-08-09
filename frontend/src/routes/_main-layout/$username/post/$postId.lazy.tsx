@@ -4,7 +4,7 @@ import { Replies } from "@/components/replies";
 import { Thread } from "@/components/thread";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";

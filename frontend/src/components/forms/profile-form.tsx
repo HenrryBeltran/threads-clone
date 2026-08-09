@@ -7,8 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { api, UserAccount } from "@/lib/api";
 import { optimizeImage } from "@/lib/optimize-image";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertUserSchema } from "@server/common/schemas/user";
-import { safeTry } from "@server/lib/safe-try";
+import { insertUserSchema } from "@/lib/schemas/user";
+import { safeTry } from "@/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -29,7 +29,7 @@ function useFetchImage(imageUrl: string) {
     const res = await fetch(imageUrl);
     const imageBlob = await res.blob();
     const reader = new FileReader();
-    reader.onload = function() {
+    reader.onload = function () {
       setImg(this.result?.toString());
     };
     reader.readAsDataURL(imageBlob);

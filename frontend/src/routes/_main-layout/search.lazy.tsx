@@ -3,7 +3,7 @@ import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
 import { SearchHistory } from "@/components/search-history";
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
 import { createLazyFileRoute, useLocation } from "@tanstack/react-router";
 

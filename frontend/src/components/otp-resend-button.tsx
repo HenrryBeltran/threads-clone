@@ -1,6 +1,6 @@
 import { useCountdown } from "@/hooks/countdown";
 import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation } from "@tanstack/react-query";
 
 export function OTPResendButton() {
@@ -31,16 +31,10 @@ export function OTPResendButton() {
         </span>
       </p>
       {mutation.isPending && <p className="text-center font-bold">Sending...</p>}
-      {mutation.isSuccess && mutation.data.sended && (
-        <p className="text-center font-bold">Sended.</p>
-      )}
-      {mutation.isSuccess && !mutation.data.sended && (
-        <ResendCountdown waitTime={mutation.data.timeLeft} />
-      )}
+      {mutation.isSuccess && mutation.data.sended && <p className="text-center font-bold">Sended.</p>}
+      {mutation.isSuccess && !mutation.data.sended && <ResendCountdown waitTime={mutation.data.timeLeft} />}
       {mutation.isError && (
-        <p className="text-center text-destructive dark:text-red-400">
-          Something went wrong. Try again.
-        </p>
+        <p className="text-center text-destructive dark:text-red-400">Something went wrong. Try again.</p>
       )}
     </>
   );
@@ -50,12 +44,6 @@ export function ResendCountdown({ waitTime }: { waitTime: number }) {
   const { timeLeft } = useCountdown(waitTime);
 
   return (
-    <>
-      {timeLeft > 0 && (
-        <p className="text-center text-destructive dark:text-red-400">
-          Wait {timeLeft}s to resend.
-        </p>
-      )}
-    </>
+    <>{timeLeft > 0 && <p className="text-center text-destructive dark:text-red-400">Wait {timeLeft}s to resend.</p>}</>
   );
 }

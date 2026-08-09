@@ -12,7 +12,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
-      "@server": path.resolve(__dirname, "../hono-server"),
     },
   },
 

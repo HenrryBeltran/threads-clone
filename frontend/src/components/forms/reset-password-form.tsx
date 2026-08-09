@@ -1,12 +1,12 @@
 import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { resetPasswordSchema } from "@server/common/schemas/auth";
+import { resetPasswordSchema } from "@/lib/schemas/auth";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { InputPassword } from "../ui/input-password";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { api } from "@/lib/api";
 import { Link } from "@tanstack/react-router";
 

@@ -1,7 +1,7 @@
 import { UserAccount, api } from "@/lib/api";
 import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 import { useThreadModalStore, useThreadStore } from "@/store";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";

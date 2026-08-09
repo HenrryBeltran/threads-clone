@@ -1,6 +1,6 @@
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_main-layout/saved")({
