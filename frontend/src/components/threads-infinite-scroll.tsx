@@ -1,16 +1,15 @@
-import { api } from "@/lib/api";
 import { QueryFunction, useInfiniteQuery } from "@tanstack/react-query";
-import { InferResponseType } from "hono/client";
 import { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Loading03AnimatedIcon } from "./icons/hugeicons";
 import { LinkThreadNotFound } from "./link-thread-not-found";
 import { Thread } from "./thread";
 import { ThreadsSkeleton } from "./threads-skeleton";
+import type { ThreadRow } from "@/lib/api";
 
-export type Posts = InferResponseType<typeof api.threads.posts.$get>;
-const repliesEndpoint = api.threads.replies.posts[":userId"].$get;
-export type Replies = InferResponseType<typeof repliesEndpoint>;
+export type Posts = ThreadRow[];
+export type ReplyThread = ThreadRow & { parent: ThreadRow | null };
+export type Replies = ReplyThread[];
 
 export type PostsPages = {
   pages: Posts[];

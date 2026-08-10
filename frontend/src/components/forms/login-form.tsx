@@ -2,9 +2,9 @@ import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputPassword } from "@/components/ui/input-password";
-import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/schemas/auth";
+import { post } from "@/lib/api/client";
 import { safeTry } from "@/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -23,7 +23,7 @@ export function LoginForm() {
   });
 
   const onSubmit: SubmitHandler<LoginForm> = async (value) => {
-    const res = await safeTry(api.auth.login.$post({ json: value }));
+    const res = await safeTry(post<{ token: string }>("/auth/login", value));
 
     if (res.error) {
       form.setError("root", { message: "Something went wrong." });
@@ -31,14 +31,13 @@ export function LoginForm() {
     }
 
     if (res.result.status === 307) {
-      const { result } = await safeTry(res.result.json());
-
       queryClient.invalidateQueries({ queryKey: ["user", "account"] });
+      const { token } = res.result.data as { token: string };
 
-      if (result?.token && result.token !== "") {
+      if (token && token !== "") {
         navigate({
           to: "/account/verification",
-          search: { token: result.token },
+          search: { token },
           replace: true,
         });
       } else {
@@ -48,7 +47,7 @@ export function LoginForm() {
     }
 
     if (!res.result.ok) {
-      const { message, path } = (await res.result.json()) as {
+      const { message, path } = res.result.data as {
         message?: string;
         path?: string;
       };

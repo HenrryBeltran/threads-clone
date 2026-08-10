@@ -33,6 +33,26 @@ export type ThreadRow = {
   createdAt: string;
 };
 
+export type ActivityResult = {
+  id: string;
+  message: string;
+  type: "mention" | "reply" | "follow" | "like";
+  sender: string;
+  receiver: string;
+  readStatus: boolean | null;
+  threadPostId: string | null;
+  senderInfo: {
+    username: string;
+    profilePictureId: string | null;
+  };
+  receiverInfo: {
+    username: string;
+    profilePictureId: string | null;
+  };
+  createdAt: string;
+  updatedAt: string;
+};
+
 export async function getUserAccount(): Promise<UserAccount | null> {
   const res = await safeTry(get<UserAccount>("/account/user"));
 

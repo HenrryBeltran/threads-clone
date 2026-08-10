@@ -1,5 +1,6 @@
 import { AlertCircleIcon } from "@/components/icons/hugeicons";
-import { api, UserAccount } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
+import { post } from "@/lib/api/client";
 import { safeTry } from "@/lib/safe-try";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
@@ -17,20 +18,18 @@ function ChangeEmailConfirm() {
   const query = useQuery({
     queryKey: ["change-email"],
     queryFn: async () => {
-      const { error, result } = await safeTry(
-        api.account.user.email.verification.$post({ query: { token: temporal_token } }),
+      const response = await safeTry(
+        post<{ message?: string }>("/account/user/email/verification?token=" + encodeURIComponent(temporal_token)),
       );
 
-      if (error !== null) return Error("Something went wrong");
-      if (!result.ok) {
+      if (response.error !== null) return Error("Something went wrong");
+
+      if (!response.result.ok) {
         setIsOk(false);
+        return response.result.data as { message?: string };
       }
 
-      const { error: parseError, result: data } = await safeTry(result.json());
-
-      if (parseError !== null) return Error("Something went wrong");
-
-      return data;
+      return response.result.data;
     },
     staleTime: Infinity,
     refetchOnMount: false,

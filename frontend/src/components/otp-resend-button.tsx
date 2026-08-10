@@ -1,21 +1,19 @@
 import { useCountdown } from "@/hooks/countdown";
-import { api } from "@/lib/api";
+import { get } from "@/lib/api/client";
 import { safeTry } from "@/lib/safe-try";
 import { useMutation } from "@tanstack/react-query";
 
 export function OTPResendButton() {
   const mutation = useMutation({
     mutationFn: async () => {
-      const { error, result } = await safeTry(api.auth["verify-account"].resend.$get());
+      const { error, result } = await safeTry(
+        get<{ sended: boolean; timeLeft: number }>("/auth/verify-account/resend"),
+      );
 
       if (error) throw new Error("Server error");
       if (!result.ok) throw new Error("Something went wrong");
 
-      const { result: data } = await safeTry(result.json());
-
-      if (!data) throw new Error("JSON parse fail.");
-
-      return data;
+      return result.data;
     },
   });
 

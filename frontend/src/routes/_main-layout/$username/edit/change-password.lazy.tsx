@@ -1,7 +1,8 @@
 import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
 import { Button } from "@/components/ui/button";
 import { InputPassword } from "@/components/ui/input-password";
-import { api, UserAccount } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
+import { post } from "@/lib/api/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema } from "@/lib/schemas/auth";
 import { safeTry } from "@/lib/safe-try";
@@ -30,15 +31,15 @@ function ChangePassword() {
   });
 
   async function onSubmit(data: ChangePasswordSchema) {
-    const res = await safeTry(api.account.user.password.$post({ json: data }));
+    const response = await safeTry(post("/account/user/password", data));
 
-    if (res.error) {
+    if (response.error) {
       form.setError("root", { message: "Something went wrong." });
       return;
     }
 
-    if (!res.result.ok) {
-      const { message } = await res.result.json();
+    if (!response.result.ok) {
+      const { message } = response.result.data as { message: string };
 
       form.setError("root", { message });
       return;

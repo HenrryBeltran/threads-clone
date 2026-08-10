@@ -8,7 +8,8 @@ import {
 } from "@/components/icons/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { api, UserAccount } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
+import { del } from "@/lib/api/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -27,16 +28,12 @@ function EditProfilePage() {
   const mutation = useMutation({
     mutationKey: ["user", "account", "delete"],
     mutationFn: async () => {
-      const res = await safeTry(api.account.user.$delete());
+      const response = await safeTry(del("/account/user"));
 
-      if (res.error !== null) return Error("Something went wrong");
-      if (!res.result.ok) return Error("Something went wrong");
+      if (response.error !== null) return Error("Something went wrong");
+      if (!response.result.ok) return Error("Something went wrong");
 
-      const { error, result } = await safeTry(res.result.json());
-
-      if (error !== null) return Error("Something went wrong");
-
-      return result;
+      return response.result.data;
     },
     onSuccess: () => {
       queryClient.clear();

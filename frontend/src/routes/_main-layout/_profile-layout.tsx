@@ -5,7 +5,8 @@ import { ProfileFollowersCount } from "@/components/profile-followers-count";
 import { ProfileHeader } from "@/components/profile-header";
 import { ProfileLink } from "@/components/profile-link";
 import { Button } from "@/components/ui/button";
-import { UserAccount, api } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
+import { get } from "@/lib/api/client";
 import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 import { useThreadModalStore } from "@/store";
 import { safeTry } from "@/lib/safe-try";
@@ -21,15 +22,15 @@ import {
 } from "@tanstack/react-router";
 
 async function getProfile(username: string) {
-  const res = await safeTry(api.user.profile[":username"].$get({ param: { username } }));
+  const response = await safeTry(get<UserAccount>("/user/profile/" + username));
 
-  if (res.error) {
+  if (response.error) {
     console.error("Unexpected error.");
     return null;
   }
 
-  if (!res.result.ok) {
-    if (res.result.status === 404) {
+  if (!response.result.ok) {
+    if (response.result.status === 404) {
       console.error("Profile account not found.");
       return 404;
     }
@@ -37,37 +38,23 @@ async function getProfile(username: string) {
     return null;
   }
 
-  const data = await safeTry(res.result.json());
-
-  if (data.error) {
-    console.error("Fail to parse data.");
-    return null;
-  }
-
-  return data.result;
+  return response.result.data;
 }
 
 async function getFollowStatus(targetUsername: string) {
-  const res = await safeTry(api.account.profile.follow[":targetUsername"].$get({ param: { targetUsername } }));
+  const response = await safeTry(get<{ follow: boolean }>("/account/profile/follow/" + targetUsername));
 
-  if (res.error) {
+  if (response.error) {
     console.error("Unexpected error.");
     return null;
   }
 
-  if (!res.result.ok) {
+  if (!response.result.ok) {
     console.error("Something went wrong.");
     return null;
   }
 
-  const data = await safeTry(res.result.json());
-
-  if (data.error) {
-    console.error("Fail to parse data.");
-    return null;
-  }
-
-  return data.result;
+  return response.result.data;
 }
 
 const profileFetchOptions = (username: string) =>

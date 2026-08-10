@@ -1,6 +1,6 @@
 import ResetPasswordForm from "@/components/forms/reset-password-form";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { get } from "@/lib/api/client";
 import { temporalTokenSchema } from "@/lib/schemas";
 import { safeTry } from "@/lib/safe-try";
 import { Link, createFileRoute, useSearch } from "@tanstack/react-router";
@@ -15,18 +15,12 @@ export const Route = createFileRoute("/account/reset-password")({
   validateSearch: resetPasswordSearchSchema,
   loaderDeps: ({ search: { temporal_token } }) => ({ temporal_token }),
   loader: async ({ deps: { temporal_token } }) => {
-    const res = await safeTry(
-      api.auth["reset-password"][":temporal-token"].$get({ param: { "temporal-token": temporal_token } }),
-    );
+    const response = await safeTry(get("/auth/reset-password/" + temporal_token));
 
-    if (res.error) return null;
-    if (!res.result.ok) return null;
+    if (response.error) return null;
+    if (!response.result.ok) return null;
 
-    const { result: data } = await safeTry(res.result.json());
-
-    if (!data) return null;
-
-    return data;
+    return response.result.data;
   },
   errorComponent: NotValidToken,
 });

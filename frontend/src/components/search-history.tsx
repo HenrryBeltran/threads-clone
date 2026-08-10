@@ -3,9 +3,9 @@ import { Link } from "@tanstack/react-router";
 import { UserImage } from "./user-image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { safeTry } from "@/lib/safe-try";
-import { api } from "@/lib/api";
+import { del } from "@/lib/api/client";
 
-type Result = {
+export type SearchHistoryResult = {
   id: string;
   userSearch: {
     username: string;
@@ -16,7 +16,7 @@ type Result = {
 };
 
 type Props = {
-  result: Result[];
+  result: SearchHistoryResult[];
 };
 
 export function SearchHistory({ result }: Props) {
@@ -24,32 +24,24 @@ export function SearchHistory({ result }: Props) {
   const deleteOneRow = useMutation({
     mutationKey: ["user", "history"],
     mutationFn: async (rowId: string) => {
-      const res = await safeTry(api.search.history[":rowId"].$delete({ param: { rowId } }));
+      const res = await safeTry(del("/search/history/" + rowId));
 
       if (res.error) throw new Error("Something went wrong");
       if (!res.result.ok) throw new Error("Something went wrong");
 
-      const { result: data } = await safeTry(res.result.json());
-
-      if (!data) return null;
-
-      return data;
+      return res.result.data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user", "history"] }),
   });
   const clearHistory = useMutation({
     mutationKey: ["user", "history"],
     mutationFn: async () => {
-      const res = await safeTry(api.search.history.$delete());
+      const response = await safeTry(del("/search/history"));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const { result: data } = await safeTry(res.result.json());
-
-      if (!data) return null;
-
-      return data;
+      return response.result.data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user", "history"] }),
   });

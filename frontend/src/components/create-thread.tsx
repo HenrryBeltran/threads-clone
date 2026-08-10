@@ -1,5 +1,5 @@
 import { useLockScrolling } from "@/hooks/lock-scrolling";
-import { UserAccount, api } from "@/lib/api";
+import { ThreadRow, UserAccount } from "@/lib/api";
 import { useThreadModalStore, useThreadStore } from "@/store";
 import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, Di
 import { UploadAlbumButton } from "./upload-album-button";
 import { Resource, UploadedAlbumCarousel, UploadedAlbumDouble, UploadedSingleView } from "./upload-album-view";
 import { UserImage } from "./user-image";
+import { post } from "@/lib/api/client";
 
 export type Thread = {
   text: string;
@@ -31,16 +32,12 @@ type JSONPost = {
 };
 
 async function postThread(json: JSONPost) {
-  const res = await safeTry(api.threads.post.$post({ json }));
+  const response = await safeTry(post<ThreadRow[]>("/threads/post", json));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok) throw new Error("Something went wrong");
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 export function CreateThread() {

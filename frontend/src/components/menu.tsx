@@ -3,7 +3,7 @@ import { ArrowLeft02Icon, Loading03AnimatedIcon, Moon02Icon, Sun03Icon } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTheme } from "@/hooks/theme";
-import { api } from "@/lib/api";
+import { post } from "@/lib/api/client";
 import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -49,7 +49,7 @@ function MenuOptions({ setState, close }: OptionsProps) {
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: async () => {
-      const { error } = await safeTry(api.auth.logout.$post());
+      const { error } = await safeTry(post("/auth/logout"));
 
       if (error) {
         return null;

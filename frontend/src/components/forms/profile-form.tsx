@@ -4,10 +4,11 @@ import { FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { api, UserAccount } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
 import { optimizeImage } from "@/lib/optimize-image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@/lib/schemas/user";
+import { put } from "@/lib/api/client";
 import { safeTry } from "@/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -60,7 +61,7 @@ export function ProfileForm() {
     defaultValues: {
       name: user ? user.name : "",
       bio: user ? user.bio : "",
-      link: user ? user.link : "",
+      link: user?.link ?? "",
     },
   });
   const ref = useRef<HTMLInputElement>(null);
@@ -91,7 +92,7 @@ export function ProfileForm() {
   }
 
   async function onSubmit(data: z.infer<typeof insertUserSchema>) {
-    const { error } = await safeTry(api.account.user.$put({ json: { ...data, profilePicture } }));
+    const { error } = await safeTry(put("/account/user", { ...data, profilePicture }));
 
     if (error !== null) {
       form.setError("root", { message: "Something went wrong." });

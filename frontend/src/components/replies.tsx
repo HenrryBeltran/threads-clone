@@ -1,4 +1,5 @@
-import { api } from "@/lib/api";
+import { ThreadRow } from "@/lib/api";
+import { get } from "@/lib/api/client";
 import { safeTry } from "@/lib/safe-try";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useEffect } from "react";
@@ -8,18 +9,12 @@ import { Thread } from "./thread";
 import { ThreadsSkeleton } from "./threads-skeleton";
 
 async function getReplies(pageParam: number, parentId: string) {
-  const res = await safeTry(
-    api.threads.replies[":parentId"].$get({ query: { offset: pageParam.toString() }, param: { parentId } }),
-  );
+  const response = await safeTry(get<ThreadRow[]>("/threads/replies/" + parentId, { offset: pageParam }));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok) throw new Error("Something went wrong");
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 export function Replies({ id }: { id: string }) {

@@ -2,7 +2,8 @@ import { AlertCircleIcon, Loading03AnimatedIcon } from "@/components/icons/hugei
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api, UserAccount } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
+import { post } from "@/lib/api/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { emailSchema } from "@/lib/schemas";
 import { safeTry } from "@/lib/safe-try";
@@ -31,20 +32,20 @@ function ChangeEmail() {
   });
 
   const onSubmit: SubmitHandler<Email> = async (value) => {
-    const res = await safeTry(api.account.user.email.$post({ json: { newEmail: value.email } }));
+    const response = await safeTry(post("/account/user/email", { newEmail: value.email }));
 
-    if (res.error !== null) {
+    if (response.error !== null) {
       form.setError("root", { message: "Something went wrong." });
       return;
     }
 
-    if (!res.result.ok) {
-      if ((res.result.status as number) === 429) {
+    if (!response.result.ok) {
+      if ((response.result.status as number) === 429) {
         form.setError("root", { message: "Too many request, try again later." });
         return;
       }
 
-      const { message, path } = (await res.result.json()) as {
+      const { message, path } = response.result.data as {
         message?: string;
         path?: string;
       };
