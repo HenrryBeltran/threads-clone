@@ -51,7 +51,7 @@ export function ProfileFollowersCount({
     dialog.addEventListener("toggle", handleToggle);
 
     return () => dialog?.removeEventListener("toggle", handleToggle);
-  });
+  }, []);
 
   useLockScrolling(open);
 

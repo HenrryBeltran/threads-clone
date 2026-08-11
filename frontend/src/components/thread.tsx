@@ -1,7 +1,8 @@
-import { UserAccount, api } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
+import { del } from "@/lib/api/client";
 import { resetInfiniteQueryPagination } from "@/lib/reset-infinity-query";
 import { useThreadModalStore, useThreadStore } from "@/store";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
@@ -60,16 +61,12 @@ dayjs.updateLocale("en", {
 });
 
 async function deleteThread(threadId: string) {
-  const res = await safeTry(api.threads.post[":threadId"].$delete({ param: { threadId } }));
+  const response = await safeTry(del<{ message: string }>("/threads/post/" + threadId));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok) throw new Error("Something went wrong");
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 export type ThreadProps = {

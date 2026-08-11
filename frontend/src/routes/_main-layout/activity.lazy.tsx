@@ -1,7 +1,7 @@
 import { UserImage } from "@/components/user-image";
-import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
-import { ActivityResult } from "@server/routes/account/activity";
+import { type ActivityResult } from "@/lib/api";
+import { get, post } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
@@ -37,29 +37,21 @@ export const Route = createLazyFileRoute("/_main-layout/activity")({
 });
 
 async function getAllActivities({ pageParam }: { pageParam: number }) {
-  const res = await safeTry(api.account.activity.all.$get({ query: { page: pageParam.toString() } }));
+  const response = await safeTry(get<ActivityResult[]>("/account/activity/all", { page: pageParam }));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok) throw new Error("Something went wrong");
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 async function markAsRead() {
-  const res = await safeTry(api.account.activity["mark-as-read"].$post());
+  const response = await safeTry(post("/account/activity/mark-as-read"));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok) throw new Error("Something went wrong");
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 function Activity() {

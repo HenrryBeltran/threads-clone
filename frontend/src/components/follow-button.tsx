@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { post } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
@@ -21,17 +21,12 @@ export function FollowButton({ className, targetUsername, followStatus }: Props)
   const followMutation = useMutation({
     mutationKey: ["follow", targetUsername],
     mutationFn: async () => {
-      const res = await safeTry(
-        api.account.profile.follow[":targetUsername"].$post({
-          param: { targetUsername },
-        }),
-      );
+      const response = await safeTry(post<{ follow: boolean }>("/account/profile/follow/" + targetUsername));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const data = await res.result.json();
-      return data;
+      return response.result.data;
     },
     onMutate: () => {
       queryClient.setQueryData(["follow", targetUsername], { follow: true });
@@ -53,17 +48,12 @@ export function FollowButton({ className, targetUsername, followStatus }: Props)
   const unfollowMutation = useMutation({
     mutationKey: ["follow", targetUsername],
     mutationFn: async () => {
-      const res = await safeTry(
-        api.account.profile.unfollow[":targetUsername"].$post({
-          param: { targetUsername },
-        }),
-      );
+      const response = await safeTry(post<{ follow: boolean }>("/account/profile/unfollow/" + targetUsername));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const data = await res.result.json();
-      return data;
+      return response.result.data;
     },
     onMutate: () => {
       queryClient.setQueryData(["follow", targetUsername], { follow: false });

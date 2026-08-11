@@ -9,8 +9,9 @@ import {
 import { useThreadModalStore } from "@/store";
 import { useLocation } from "@tanstack/react-router";
 import { NavbarItem } from "./navbar-item";
-import { safeTry } from "@server/lib/safe-try";
-import { api, UserAccount } from "@/lib/api";
+import { safeTry } from "@/lib/safe-try";
+import { UserAccount } from "@/lib/api";
+import { get } from "@/lib/api/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const menuIconsProps: React.SVGProps<SVGSVGElement> = {
@@ -21,16 +22,12 @@ const menuIconsProps: React.SVGProps<SVGSVGElement> = {
 };
 
 async function getUnreadActivity() {
-  const res = await safeTry(api.account.activity.unread.$get());
+  const response = await safeTry(get<{ unread: boolean }>("/account/activity/unread"));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok) throw new Error("Something went wrong");
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 const beyondPages = ["/search", "/liked", "/saved"];

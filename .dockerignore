@@ -177,3 +177,14 @@ dist
 # db
 db_backup
 queries
+
+# extras
+node_modules/
+**/node_modules
+**/dist
+server/generated
+server/.env
+frontend/.env
+**/.env
+**/dev.db*
+**/.git

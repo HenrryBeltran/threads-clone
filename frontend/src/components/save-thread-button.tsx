@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { UserAccount, api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { UserAccount } from "@/lib/api";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Bookmark02Icon } from "./icons/hugeicons";
+import { get, post } from "@/lib/api/client";
 
 type Props = {
   threadId: string;
@@ -18,29 +19,23 @@ export function SaveThreadButton({ threadId, userData }: Props) {
   const saveQuery = useQuery({
     queryKey: ["saved", threadId],
     queryFn: async () => {
-      const res = await safeTry(api.thread.post.save[":threadId"].$get({ param: { threadId } }));
+      const response = await safeTry(get<{ saved: boolean }>("/thread/post/save/" + threadId));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const data = await res.result.json();
-      return data;
+      return response.result.data;
     },
   });
   const saveMutation = useMutation({
     mutationKey: ["saved", threadId],
     mutationFn: async () => {
-      const res = await safeTry(
-        api.thread.post.save[":threadId"].$post({
-          param: { threadId },
-        }),
-      );
+      const response = await safeTry(post<{ saved: boolean }>("/thread/post/save/" + threadId));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const data = await res.result.json();
-      return data;
+      return response.result.data;
     },
     onMutate: () => {
       queryClient.setQueryData(["saved", threadId], { saved: true });
@@ -62,17 +57,12 @@ export function SaveThreadButton({ threadId, userData }: Props) {
   const unsaveMutation = useMutation({
     mutationKey: ["saved", threadId],
     mutationFn: async () => {
-      const res = await safeTry(
-        api.thread.post.unsave[":threadId"].$post({
-          param: { threadId },
-        }),
-      );
+      const response = await safeTry(post<{ saved: boolean }>("/thread/post/unsave/" + threadId));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const data = await res.result.json();
-      return data;
+      return response.result.data;
     },
     onMutate: () => {
       queryClient.setQueryData(["saved", threadId], { saved: false });

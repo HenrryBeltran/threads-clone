@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { UserAccount, api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { UserAccount } from "@/lib/api";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { FavouriteIcon } from "./icons/hugeicons";
+import { get, post } from "@/lib/api/client";
 
 type Props = {
   threadId: string;
@@ -19,29 +20,23 @@ export function LikeButton({ threadId, likesCount, userData }: Props) {
   const likeQuery = useQuery({
     queryKey: ["like", threadId],
     queryFn: async () => {
-      const res = await safeTry(api.thread.post.like[":threadId"].$get({ param: { threadId } }));
+      const response = await safeTry(get<{ like: boolean }>("/thread/post/like/" + threadId));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const data = await res.result.json();
-      return data;
+      return response.result.data;
     },
   });
   const likeMutation = useMutation({
     mutationKey: ["like", threadId],
     mutationFn: async () => {
-      const res = await safeTry(
-        api.thread.post.like[":threadId"].$post({
-          param: { threadId },
-        }),
-      );
+      const response = await safeTry(post("/thread/post/like/" + threadId));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const data = await res.result.json();
-      return data;
+      return response.result.data;
     },
     onMutate: () => {
       queryClient.setQueryData(["like", threadId], { like: true });
@@ -63,17 +58,12 @@ export function LikeButton({ threadId, likesCount, userData }: Props) {
   const unlikeMutation = useMutation({
     mutationKey: ["like", threadId],
     mutationFn: async () => {
-      const res = await safeTry(
-        api.thread.post.unlike[":threadId"].$post({
-          param: { threadId },
-        }),
-      );
+      const response = await safeTry(post("/thread/post/unlike/" + threadId));
 
-      if (res.error) throw new Error("Something went wrong");
-      if (!res.result.ok) throw new Error("Something went wrong");
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
 
-      const data = await res.result.json();
-      return data;
+      return response.result.data;
     },
     onMutate: () => {
       queryClient.setQueryData(["like", threadId], { like: false });

@@ -1,13 +1,13 @@
 import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { resetPasswordSchema } from "@server/common/schemas/auth";
+import { resetPasswordSchema } from "@/lib/schemas/auth";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { InputPassword } from "../ui/input-password";
-import { safeTry } from "@server/lib/safe-try";
-import { api } from "@/lib/api";
+import { safeTry } from "@/lib/safe-try";
+import { post } from "@/lib/api/client";
 import { Link } from "@tanstack/react-router";
 
 type Props = {
@@ -26,17 +26,15 @@ export default function ResetPasswordForm({ temporalToken }: Props) {
   });
 
   async function onSubmit(data: z.infer<typeof resetPasswordSchema>) {
-    const res = await safeTry(
-      api.auth["reset-password"][":temporal-token"].$post({ json: data, param: { "temporal-token": temporalToken } }),
-    );
+    const response = await safeTry(post("/auth/reset-password/" + temporalToken, data));
 
-    if (res.error) {
+    if (response.error) {
       form.setError("root", { message: "Something went wrong." });
       return;
     }
 
-    if (!res.result.ok) {
-      const { message } = await res.result.json();
+    if (!response.result.ok) {
+      const { message } = response.result.data as { message: string };
 
       form.setError("root", { message });
       return;

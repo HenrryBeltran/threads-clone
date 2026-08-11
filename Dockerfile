@@ -1,42 +1,48 @@
-FROM oven/bun:1.3.14-slim AS build
+# syntax=docker/dockerfile:1
 
-WORKDIR /app
+# ---------------- Build stage: Nest + Prisma ----------------
+FROM node:22-slim AS server-build
 
-ENV NODE_ENV=production
+WORKDIR /app/server
 
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
     build-essential \
-    pkg-config \
-    python-is-python3
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY bun.lockb package.json ./
-RUN bun install --frozen-lockfile
+COPY server/package.json server/package-lock.json ./
+RUN npm ci
 
-COPY frontend/package.json frontend/bun.lockb ./frontend/
-RUN cd frontend && bun install --frozen-lockfile
+ENV DATABASE_URL=file:/app/server/dev.db
 
-COPY . .
+COPY server/ ./
+RUN npx prisma generate
+RUN npm run build
+
+# ---------------- Build stage: Vite frontend ----------------
+FROM oven/bun:1.3.14-slim AS frontend-build
 
 WORKDIR /app/frontend
+
+COPY frontend/package.json frontend/bun.lockb ./
+RUN bun install --frozen-lockfile
+
+COPY frontend/ ./
 RUN bun run build
 
-WORKDIR /app
-RUN bun run build:server
-
-
 # ---------------- Runtime ----------------
+FROM node:22-slim AS runtime
 
-FROM oven/bun:1.3.14-slim
-
-WORKDIR /app
+WORKDIR /app/server
 
 ENV NODE_ENV=production
 
-COPY --from=build /app/server.js .
+COPY --from=server-build /app/server/node_modules ./node_modules
+COPY --from=server-build /app/server/dist ./dist
 
-COPY --from=build /app/frontend/dist ./frontend/dist
+COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
 EXPOSE 3000
 
-CMD ["bun", "server.js"]
+CMD ["node", "dist/src/main.js"]

@@ -2,10 +2,11 @@ import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api, UserAccount } from "@/lib/api";
+import { UserAccount } from "@/lib/api";
+import { post } from "@/lib/api/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { usernameSchema as usernameFieldSchema } from "@server/common/schemas";
-import { safeTry } from "@server/lib/safe-try";
+import { usernameSchema as usernameFieldSchema } from "@/lib/schemas";
+import { safeTry } from "@/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -30,15 +31,15 @@ function ChangeUsername() {
   });
 
   const onSubmit: SubmitHandler<Username> = async (value) => {
-    const res = await safeTry(api.account.user.username.$post({ json: { newUsername: value.username } }));
+    const response = await safeTry(post("/account/user/username", { newUsername: value.username }));
 
-    if (res.error !== null) {
+    if (response.error !== null) {
       form.setError("root", { message: "Something went wrong." });
       return;
     }
 
-    if (!res.result.ok) {
-      const { message, path } = (await res.result.json()) as {
+    if (!response.result.ok) {
+      const { message, path } = response.result.data as {
         message?: string;
         path?: string;
       };

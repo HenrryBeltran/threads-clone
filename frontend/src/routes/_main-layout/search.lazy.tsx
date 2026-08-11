@@ -1,9 +1,10 @@
 import SearchForm from "@/components/forms/search-form";
 import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
-import { SearchHistory } from "@/components/search-history";
+import { SearchHistory, type SearchHistoryResult } from "@/components/search-history";
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
-import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { type ThreadRow } from "@/lib/api";
+import { get } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
 import { createLazyFileRoute, useLocation } from "@tanstack/react-router";
 
@@ -12,16 +13,12 @@ export const Route = createLazyFileRoute("/_main-layout/search")({
 });
 
 async function fetcher() {
-  const res = await safeTry(api.search.history.$get());
+  const response = await safeTry(get<SearchHistoryResult[]>("/search/history"));
 
-  if (res.error) return null;
-  if (!res.result.ok) return null;
+  if (response.error) return null;
+  if (!response.result.ok) return null;
 
-  const { result: data } = await safeTry(res.result.json());
-
-  if (!data) return null;
-
-  return data;
+  return response.result.data;
 }
 
 function Search() {
@@ -54,16 +51,12 @@ function Search() {
 
 function SearchResult({ q }: { q: string }) {
   async function getSearchThreads({ pageParam }: { pageParam: number }) {
-    const res = await safeTry(api.threads.posts.search.$get({ query: { page: pageParam.toString(), q } }));
+    const response = await safeTry(get<ThreadRow[]>("/threads/posts/search", { page: pageParam, q }));
 
-    if (res.error) throw new Error("Something went wrong");
-    if (!res.result.ok) throw new Error("Something went wrong");
+    if (response.error) throw new Error("Something went wrong");
+    if (!response.result.ok) throw new Error("Something went wrong");
 
-    const { error, result } = await safeTry(res.result.json());
-
-    if (error) throw new Error("Something went wrong");
-
-    return result;
+    return response.result.data;
   }
 
   return (

@@ -1,9 +1,9 @@
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { queryOptions } from "@tanstack/react-query";
-import { api } from ".";
+import { get } from "./client";
 
-async function getVerifcationToken() {
-  const res = await safeTry(api.auth["verify-account"].token.$get());
+async function getVerificationToken() {
+  const res = await safeTry(get<{ token: string }>("/auth/verify-account/token"));
 
   if (res.error) {
     throw new Error("Server error");
@@ -13,12 +13,12 @@ async function getVerifcationToken() {
     throw new Error("Something went wrong");
   }
 
-  return res.result.json();
+  return res.result.data;
 }
 
 export const accountVerificationQueryOptions = queryOptions({
   queryKey: ["account", "verification"],
-  queryFn: getVerifcationToken,
+  queryFn: getVerificationToken,
   retry: false,
   refetchOnWindowFocus: false,
   refetchOnReconnect: false,

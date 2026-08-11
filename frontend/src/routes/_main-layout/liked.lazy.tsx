@@ -1,6 +1,7 @@
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
-import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { type ThreadRow } from "@/lib/api";
+import { get } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_main-layout/liked")({
@@ -17,16 +18,12 @@ function Liked() {
 
 function LikedResult() {
   async function getSearchThreads({ pageParam }: { pageParam: number }) {
-    const res = await safeTry(api.threads.liked.posts.$get({ query: { page: pageParam.toString() } }));
+    const response = await safeTry(get<ThreadRow[]>("/threads/liked/posts", { page: pageParam }));
 
-    if (res.error) throw new Error("Something went wrong");
-    if (!res.result.ok) throw new Error("Something went wrong");
+    if (response.error) throw new Error("Something went wrong");
+    if (!response.result.ok) throw new Error("Something went wrong");
 
-    const { error, result } = await safeTry(res.result.json());
-
-    if (error) throw new Error("Something went wrong");
-
-    return result;
+    return response.result.data;
   }
 
   return (

@@ -1,6 +1,7 @@
 import { ArrowRight02Icon, Cancel01Icon, Loading03AnimatedIcon, Search01Icon } from "@/components/icons/hugeicons";
-import { UserAccount, api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { UserAccount } from "@/lib/api";
+import { safeTry } from "@/lib/safe-try";
+import { get, post } from "@/lib/api/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
@@ -14,29 +15,25 @@ export async function userSearch(userId?: string, keywords?: string) {
     return null;
   }
 
-  const res = await safeTry(api.search[":userId"][":keywords"].$get({ param: { userId, keywords } }));
+  const res = await safeTry(
+    get<{ id: string; username: string; name: string; profilePictureId: string | null; followStatus: number }[]>(
+      "/search/" + userId + "/" + encodeURIComponent(keywords),
+    ),
+  );
 
   if (res.error) throw new Error(res.error.message);
   if (!res.result.ok) throw new Error("Fail to search user.");
 
-  const { result: data } = await safeTry(res.result.json());
-
-  if (!data) return null;
-
-  return data;
+  return res.result.data;
 }
 
 async function addToHistory(targetId: string) {
-  const res = await safeTry(api.search.history[":targetId"].$post({ param: { targetId } }));
+  const res = await safeTry(post<number>("/search/history/" + targetId));
 
   if (res.error) throw new Error(res.error.message);
   if (!res.result.ok) throw new Error("Fail to search user.");
 
-  const { result: data } = await safeTry(res.result.json());
-
-  if (!data) return null;
-
-  return data;
+  return res.result.data;
 }
 
 export default function SearchForm() {

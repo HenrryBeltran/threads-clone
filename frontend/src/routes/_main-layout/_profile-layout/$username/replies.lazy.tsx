@@ -1,6 +1,7 @@
-import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
-import { UserAccount, api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { ReplyThread, ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
+import { UserAccount } from "@/lib/api";
+import { get } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { createLazyFileRoute, useRouteContext } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_main-layout/_profile-layout/$username/replies")({
@@ -25,21 +26,12 @@ function ProfileReplies() {
   }
 
   async function profilePostsFetcher({ pageParam }: { pageParam: number }) {
-    const res = await safeTry(
-      api.threads.replies.posts[":userId"].$get({
-        param: { userId: profile?.id! },
-        query: { page: pageParam.toString() },
-      }),
-    );
+    const response = await safeTry(get<ReplyThread[]>("/threads/replies/posts/" + profile?.id!, { page: pageParam }));
 
-    if (res.error) throw new Error("Something went wrong");
-    if (!res.result.ok) throw new Error("Something went wrong");
+    if (response.error) throw new Error("Something went wrong");
+    if (!response.result.ok) throw new Error("Something went wrong");
 
-    const { error, result } = await safeTry(res.result.json());
-
-    if (error) throw new Error("Something went wrong");
-
-    return result;
+    return response.result.data;
   }
 
   return (

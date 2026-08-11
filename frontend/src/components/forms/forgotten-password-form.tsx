@@ -1,10 +1,10 @@
 import { Loading03AnimatedIcon } from "@/components/icons/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { emailSchema } from "@server/common/schemas";
-import { safeTry } from "@server/lib/safe-try";
+import { emailSchema } from "@/lib/schemas";
+import { post } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ export default function ForgottenPasswordForm() {
   });
 
   async function onSubmit(data: z.infer<typeof emailSchema>) {
-    const res = await safeTry(api.auth["forgotten-password"].$post({ json: data }));
+    const res = await safeTry(post<{ message: string }>("/auth/forgotten-password", data));
 
     if (res.error) {
       form.setError("root", { message: "Something went wrong." });
@@ -27,20 +27,13 @@ export default function ForgottenPasswordForm() {
     }
 
     if (!res.result.ok) {
-      const { message, path } = (await res.result.json()) as { message?: string; path?: string };
+      const { message, path } = res.result.data as { message?: string; path?: string };
 
       form.setError((path as "email" | "root") ?? "root", { message });
       return;
     }
 
-    const { result } = await safeTry(res.result.json());
-
-    if (!result) {
-      form.setError("root", { message: "Something went wrong." });
-      return;
-    }
-
-    toast(result.message, {
+    toast(res.result.data.message, {
       position: "bottom-center",
       classNames: {
         title: "text-base text-center",

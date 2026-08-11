@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { get } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { UserImage } from "./user-image";
@@ -16,16 +16,16 @@ export function TestAccountsPopover({ setUsername, setPassword }: Props) {
   const testAccounts = useQuery({
     queryKey: ["test", "accounts"],
     queryFn: async () => {
-      const res = await safeTry(api.user["test-accounts"].$get());
+      const response = await safeTry(
+        get<{ username: string; password: string; name: string; profilePictureId: string | null }[]>(
+          "/user/test-accounts",
+        ),
+      );
 
-      if (res.error !== null) return null;
-      if (!res.result.ok) return null;
+      if (response.error !== null) return null;
+      if (!response.result.ok) return null;
 
-      const { error, result } = await safeTry(res.result.json());
-
-      if (error !== null) return null;
-
-      return result;
+      return response.result.data;
     },
     refetchOnMount: false,
     refetchOnReconnect: false,

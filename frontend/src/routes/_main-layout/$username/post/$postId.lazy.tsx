@@ -3,8 +3,9 @@ import { LinkThreadNotFound } from "@/components/link-thread-not-found";
 import { Replies } from "@/components/replies";
 import { Thread } from "@/components/thread";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { type ThreadRow } from "@/lib/api";
+import { get } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { useQuery } from "@tanstack/react-query";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -15,29 +16,22 @@ export const Route = createLazyFileRoute("/_main-layout/$username/post/$postId")
 });
 
 async function getPost(username: string, postId: string) {
-  const res = await safeTry(api.threads.post[":username"][":postId"].$get({ param: { username, postId } }));
+  const response = await safeTry(get<ThreadRow>("/threads/post/" + username + "/" + postId));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error(JSON.stringify({ message: "Something went wrong", status: res.result.status }));
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok)
+    throw new Error(JSON.stringify({ message: "Something went wrong", status: response.result.status }));
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 async function getPostById(id: string) {
-  const res = await safeTry(api.threads.post[":id"].$get({ param: { id } }));
+  const response = await safeTry(get<ThreadRow>("/threads/post/" + id));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error(JSON.stringify({ status: res.result.status, message: "Something went wrong" }));
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok) throw new Error(JSON.stringify({ status: response.result.status, message: "Something went wrong" }));
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 function Post() {

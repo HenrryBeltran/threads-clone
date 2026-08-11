@@ -1,21 +1,19 @@
 import { useCountdown } from "@/hooks/countdown";
-import { api } from "@/lib/api";
-import { safeTry } from "@server/lib/safe-try";
+import { get } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation } from "@tanstack/react-query";
 
 export function OTPResendButton() {
   const mutation = useMutation({
     mutationFn: async () => {
-      const { error, result } = await safeTry(api.auth["verify-account"].resend.$get());
+      const { error, result } = await safeTry(
+        get<{ sended: boolean; timeLeft: number }>("/auth/verify-account/resend"),
+      );
 
       if (error) throw new Error("Server error");
       if (!result.ok) throw new Error("Something went wrong");
 
-      const { result: data } = await safeTry(result.json());
-
-      if (!data) throw new Error("JSON parse fail.");
-
-      return data;
+      return result.data;
     },
   });
 
@@ -31,16 +29,10 @@ export function OTPResendButton() {
         </span>
       </p>
       {mutation.isPending && <p className="text-center font-bold">Sending...</p>}
-      {mutation.isSuccess && mutation.data.sended && (
-        <p className="text-center font-bold">Sended.</p>
-      )}
-      {mutation.isSuccess && !mutation.data.sended && (
-        <ResendCountdown waitTime={mutation.data.timeLeft} />
-      )}
+      {mutation.isSuccess && mutation.data.sended && <p className="text-center font-bold">Sended.</p>}
+      {mutation.isSuccess && !mutation.data.sended && <ResendCountdown waitTime={mutation.data.timeLeft} />}
       {mutation.isError && (
-        <p className="text-center text-destructive dark:text-red-400">
-          Something went wrong. Try again.
-        </p>
+        <p className="text-center text-destructive dark:text-red-400">Something went wrong. Try again.</p>
       )}
     </>
   );
@@ -50,12 +42,6 @@ export function ResendCountdown({ waitTime }: { waitTime: number }) {
   const { timeLeft } = useCountdown(waitTime);
 
   return (
-    <>
-      {timeLeft > 0 && (
-        <p className="text-center text-destructive dark:text-red-400">
-          Wait {timeLeft}s to resend.
-        </p>
-      )}
-    </>
+    <>{timeLeft > 0 && <p className="text-center text-destructive dark:text-red-400">Wait {timeLeft}s to resend.</p>}</>
   );
 }

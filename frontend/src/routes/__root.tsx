@@ -3,9 +3,10 @@ import { CreateThread } from "@/components/create-thread";
 import { ErrorComponent } from "@/components/error";
 import { NotFound } from "@/components/not-found";
 import { Toaster } from "@/components/ui/sonner";
-import { api, userAccountQueryOptions } from "@/lib/api";
+import { userAccountQueryOptions } from "@/lib/api";
 import { accountVerificationQueryOptions } from "@/lib/api/get-account-verification-query";
-import { safeTry } from "@server/lib/safe-try";
+import { post } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
 
@@ -82,17 +83,13 @@ function RootLayout() {
   useQuery({
     queryKey: ["sync"],
     queryFn: async () => {
-      const res = await safeTry(api.account.user.sync.$post());
+      const response = await safeTry(post("/account/user/sync"));
 
-      if (res.error !== null) return Error("Something went wrong");
-      if (!res.result.ok) return Error("Something went wrong");
-
-      const { error, result } = await safeTry(res.result.json());
-
-      if (error !== null) return Error("Something went wrong");
+      if (response.error !== null) return Error("Something went wrong");
+      if (!response.result.ok) return Error("Something went wrong");
 
       queryClient.invalidateQueries({ queryKey: ["user", "account"] });
-      return result;
+      return response.result.data;
     },
     staleTime: Infinity,
     refetchOnMount: false,

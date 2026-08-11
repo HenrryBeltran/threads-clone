@@ -1,8 +1,7 @@
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { inputOTPSchema } from "@server/common/schemas/auth";
-import { safeTry } from "@server/lib/safe-try";
+import { inputOTPSchema } from "@/lib/schemas/auth";
+import { safeTry } from "@/lib/safe-try";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -11,6 +10,7 @@ import { Loading03AnimatedIcon } from "../icons/hugeicons";
 import { OTPResendButton } from "../otp-resend-button";
 import { Button } from "../ui/button";
 import { FormField } from "../ui/form";
+import { post } from "@/lib/api/client";
 
 type OTPForm = z.infer<typeof inputOTPSchema>;
 
@@ -23,7 +23,7 @@ export function OTPForm() {
   });
   const mutation = useMutation({
     mutationFn: async () => {
-      const { error } = await safeTry(api.auth.logout.$post());
+      const { error } = await safeTry(post("/auth/logout"));
 
       if (error) {
         return null;
@@ -36,7 +36,7 @@ export function OTPForm() {
   });
 
   const onSubmit: SubmitHandler<OTPForm> = async (value) => {
-    const res = await safeTry(api.auth["verify-account"].$post({ json: value }));
+    const res = await safeTry(post("/auth/verify-account", value));
 
     if (res.error) {
       form.setError("root", { message: "Something went wrong." });
@@ -44,7 +44,7 @@ export function OTPForm() {
     }
 
     if (!res.result.ok) {
-      const { message, path } = (await res.result.json()) as {
+      const { message, path } = res.result.data as {
         message?: string;
         path?: string;
       };

@@ -1,0 +1,157 @@
+generator client {
+    provider     = "prisma-client"
+    output       = "../generated/prisma"
+    moduleFormat = "cjs"
+}
+
+datasource db {
+    provider = "sqlite"
+}
+
+model activities {
+    id           String  @id
+    senderId     String  @map("sender")
+    receiverId   String  @map("receiver")
+    message      String
+    type         String
+    readStatus   Int?    @default(dbgenerated("false")) @map("read_status")
+    threadPostId String? @map("thread_post_id")
+    createdAt    String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt    String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    sender       users   @relation("ActivitiesSender", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    receiver     users   @relation("ActivitiesReceiver", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model follows {
+    id         String @id
+    followerId String @map("user_id")
+    targetId   String @map("target_id")
+    createdAt  String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt  String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    follower   users  @relation("FollowsFollower", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    target     users  @relation("FollowsTarget", fields: [targetId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+    @@unique([followerId, targetId], map: "follows_user_id_target_id_unique")
+}
+
+model likes {
+    id         String  @id
+    postId     String  @map("liked_post")
+    userId     String  @map("user_like")
+    createdAt  String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt  String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    users      users   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    threads    threads @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model saved {
+    id          String  @id
+    ownerId     String  @map("owner")
+    savedPostId String  @map("saved_post")
+    createdAt   String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt   String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    owner       users   @relation("SavedOwner", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    savedPost   threads @relation("SavedPost", fields: [savedPostId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+    @@unique([ownerId, savedPostId], map: "saved_owner_post_unique")
+}
+
+model reset_password {
+    id        String @id
+    email     String @unique(map: "reset_password_email_unique")
+    token     String @unique(map: "reset_password_token_unique")
+    expires   String
+    createdAt String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt String @default("CURRENT_TIMESTAMP") @map("updated_at")
+}
+
+model search_history {
+    id           String @id
+    ownerId      String @map("owner")
+    userSearch   String @map("user_search")
+    createdAt    String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt    String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    owner        users  @relation("SearchHistoryOwner", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    searchedUser users  @relation("SearchHistorySearched", fields: [userSearch], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model sessions {
+    id           String  @id
+    token        String  @unique(map: "sessions_token_unique")
+    userId       String  @map("user_id")
+    expires      String
+    deviceName   String? @map("device_name")
+    deviceType   String? @map("device_type")
+    ipAddress    String? @map("ip_address")
+    lastActiveAt String? @map("last_active_at")
+    userAgent    String? @map("user_agent")
+    createdAt    String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt    String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    users        users   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model threads {
+    id           String  @id
+    postId       String  @map("post_id")
+    authorId     String  @map("author_id")
+    rootId       String  @map("root_id")
+    parentId     String? @map("parent_id")
+    text         String
+    resources    String?
+    hashtags     String?
+    mentions     String?
+    likesCount   Int     @default(0) @map("likes_count")
+    repliesCount Int     @default(0) @map("replies_count")
+    createdAt    String  @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt    String  @default("CURRENT_TIMESTAMP") @map("updated_at")
+    likes        likes[]
+    savedBy      saved[] @relation("SavedPost")
+    users        users   @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users {
+    id                 String           @id
+    email              String           @unique(map: "users_email_unique")
+    username           String           @unique(map: "users_username_unique")
+    password           String
+    name               String
+    bio                String
+    link               String?
+    profilePictureId   String?          @map("profile_picture_id")
+    roles              String           @default("user")
+    followersCount     Int              @default(0) @map("followers_count")
+    followingsCount    Int              @default(0) @map("followings_count")
+    emailVerified      String?          @map("email_verified")
+    createdAt          String           @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt          String           @default("CURRENT_TIMESTAMP") @map("updated_at")
+    sentActivities     activities[]     @relation("ActivitiesSender")
+    receivedActivities activities[]     @relation("ActivitiesReceiver")
+    following          follows[]        @relation("FollowsFollower")
+    followers          follows[]        @relation("FollowsTarget")
+    likes              likes[]
+    saved              saved[]         @relation("SavedOwner")
+    ownedSearchHistory search_history[] @relation("SearchHistoryOwner")
+    searchedHistory    search_history[] @relation("SearchHistorySearched")
+    sessions           sessions[]
+    threads            threads[]
+}
+
+model verify_email {
+    id        String @id
+    newEmail  String @map("new_email")
+    token     String @unique(map: "verify_email_token_unique")
+    expires   String
+    createdAt String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt String @default("CURRENT_TIMESTAMP") @map("updated_at")
+    oldEmail  String @map("old_email")
+}
+
+model verify_user {
+    id        String @id
+    email     String @unique(map: "verify_user_email_unique")
+    token     String @unique(map: "verify_user_token_unique")
+    code      String
+    expires   String
+    createdAt String @default("CURRENT_TIMESTAMP") @map("created_at")
+    updatedAt String @default("CURRENT_TIMESTAMP") @map("updated_at")
+}

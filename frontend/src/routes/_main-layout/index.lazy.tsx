@@ -2,9 +2,10 @@ import { NewPostThread } from "@/components/new-post-thread";
 import { ThreadsInfiniteScroll } from "@/components/threads-infinite-scroll";
 import { Button } from "@/components/ui/button";
 import { UserImage } from "@/components/user-image";
-import { UserAccount, api } from "@/lib/api";
+import { UserAccount, type ThreadRow } from "@/lib/api";
+import { get } from "@/lib/api/client";
 import { useThreadModalStore } from "@/store";
-import { safeTry } from "@server/lib/safe-try";
+import { safeTry } from "@/lib/safe-try";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
 
@@ -13,16 +14,12 @@ export const Route = createLazyFileRoute("/_main-layout/")({
 });
 
 async function postsFetcher({ pageParam }: { pageParam: number }) {
-  const res = await safeTry(api.threads.posts.$get({ query: { page: pageParam.toString() } }));
+  const response = await safeTry(get<ThreadRow[]>("/threads/posts", { page: pageParam }));
 
-  if (res.error) throw new Error("Something went wrong");
-  if (!res.result.ok) throw new Error("Something went wrong");
+  if (response.error) throw new Error("Something went wrong");
+  if (!response.result.ok) throw new Error("Something went wrong");
 
-  const { error, result } = await safeTry(res.result.json());
-
-  if (error) throw new Error("Something went wrong");
-
-  return result;
+  return response.result.data;
 }
 
 function Index() {

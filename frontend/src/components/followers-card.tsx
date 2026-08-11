@@ -1,10 +1,19 @@
-import { api } from "@/lib/api";
+import { get } from "@/lib/api/client";
+import { safeTry } from "@/lib/safe-try";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Loading03AnimatedIcon } from "./icons/hugeicons";
 import { ProfileRow } from "./profile-row";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+
+export type FollowUser = {
+  id: string;
+  username: string;
+  name: string;
+  profilePictureId: string | null;
+  followStatus: number;
+};
 
 type Props = {
   followersCount: number;
@@ -51,12 +60,12 @@ function FollowersContent({ userId, targetId, handleOnClick }: FollowsProps) {
   const followers = useInfiniteQuery({
     queryKey: ["followers", targetId],
     queryFn: async ({ pageParam }) => {
-      const res = await api.account.profile.followers[":targetId"].$get({
-        param: { targetId },
-        query: { page: pageParam.toString() },
-      });
-      const data = await res.json();
-      return data;
+      const response = await safeTry(get<FollowUser[]>("/account/profile/followers/" + targetId, { page: pageParam }));
+
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
+
+      return response.result.data;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
@@ -124,12 +133,12 @@ function FollowingsContent({ userId, targetId, handleOnClick: onClick }: Follows
   const followings = useInfiniteQuery({
     queryKey: ["followings", targetId],
     queryFn: async ({ pageParam }) => {
-      const res = await api.account.profile.followings[":targetId"].$get({
-        param: { targetId },
-        query: { page: pageParam.toString() },
-      });
-      const data = await res.json();
-      return data;
+      const response = await safeTry(get<FollowUser[]>("/account/profile/followings/" + targetId, { page: pageParam }));
+
+      if (response.error) throw new Error("Something went wrong");
+      if (!response.result.ok) throw new Error("Something went wrong");
+
+      return response.result.data;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
