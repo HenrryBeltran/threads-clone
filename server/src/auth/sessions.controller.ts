@@ -20,11 +20,11 @@ export class SessionsController {
         @Req() request: AuthRequest,
         @Res({ passthrough: true }) response: Response,
     ) {
-        await this.sessionsService.deleteOne(id, request.user!.id, request.sessionId!, response);
+        return this.sessionsService.deleteOne(id, request.user!.id, request.sessionId!, response);
     }
 
     @Delete('/')
-    async deleteAll(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
-        await this.sessionsService.deleteAll(request.user!.id, request.sessionId!, response);
+    async deleteAll(@Req() request: AuthRequest) {
+        return this.sessionsService.deleteAll(request.user!.id, request.sessionId!);
     }
 }

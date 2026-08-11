@@ -4,6 +4,7 @@ import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { AccountUserService } from './account-user.service';
 import { GetUserGuard } from 'src/auth/guards/get-user.guard';
 import { AuthRequest } from 'src/auth/auth-request';
+import { NoContentException } from 'src/common/no-content.exception';
 import { ProfileDto } from './dto/profile.dto';
 import { NewEmailDto } from './dto/new-email.dto';
 import { NewUsernameDto } from './dto/new-username.dto';
@@ -15,10 +16,9 @@ export class AccountUserController {
     constructor(private readonly accountUserService: AccountUserService) {}
 
     @Get('/')
-    async getUserAccount(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
+    getUserAccount(@Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.accountUserService.getAccount(request.user);
     }
@@ -26,38 +26,27 @@ export class AccountUserController {
     @UseGuards(ThrottlerGuard)
     @Throttle({ default: { limit: 10, ttl: 900_000 } })
     @Put('/')
-    async updateUserAccount(
-        @Body() dto: ProfileDto,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async updateUserAccount(@Body() dto: ProfileDto, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
-        await this.accountUserService.updateProfile(request.user, dto, response);
+        return this.accountUserService.updateProfile(request.user, dto);
     }
 
     @Delete('/')
     async deleteUserAccount(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
-        await this.accountUserService.deleteAccount(request.user, response);
+        return this.accountUserService.deleteAccount(request.user, response);
     }
 
     @UseGuards(ThrottlerGuard)
     @Throttle({ default: { limit: 3, ttl: 120_000 } })
     @Post('/email')
-    async updateEmail(
-        @Body() dto: NewEmailDto,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async updateEmail(@Body() dto: NewEmailDto, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.accountUserService.updateEmail(request.user, dto);
     }
@@ -65,49 +54,33 @@ export class AccountUserController {
     @UseGuards(ThrottlerGuard)
     @Throttle({ default: { limit: 5, ttl: 600_000 } })
     @Post('/email/verification')
-    async verifyNewEmail(
-        @Query('token') token: string,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async verifyNewEmail(@Query('token') token: string, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.accountUserService.verifyNewEmail(request.user, token);
     }
 
     @Post('/username')
-    async updateUsername(
-        @Body() dto: NewUsernameDto,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async updateUsername(@Body() dto: NewUsernameDto, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.accountUserService.updateUsername(request.user, dto);
     }
 
     @Post('/password')
-    async updatePassword(
-        @Body() dto: ResetPasswordDto,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async updatePassword(@Body() dto: ResetPasswordDto, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.accountUserService.updatePassword(request.user, dto);
     }
 
     @Post('/sync')
-    async syncAccount(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
+    async syncAccount(@Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.accountUserService.syncAccount(request.user);
     }

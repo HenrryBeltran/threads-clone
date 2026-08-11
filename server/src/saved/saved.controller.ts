@@ -1,7 +1,7 @@
-import { Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthRequest } from 'src/auth/auth-request';
 import { GetUserGuard } from 'src/auth/guards/get-user.guard';
+import { NoContentException } from 'src/common/no-content.exception';
 import { SavedService } from './saved.service';
 
 @Controller('thread/post')
@@ -10,42 +10,27 @@ export class SavedController {
     constructor(private readonly savedService: SavedService) {}
 
     @Get('/save/:threadId')
-    async getSave(
-        @Param('threadId') threadId: string,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async getSave(@Param('threadId') threadId: string, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.savedService.getSave(request.user.id, threadId);
     }
 
     @Post('/save/:threadId')
-    async saveThread(
-        @Param('threadId') threadId: string,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async saveThread(@Param('threadId') threadId: string, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.savedService.saveThread(request.user.id, threadId);
     }
 
     @Post('/unsave/:threadId')
-    async unsaveThread(
-        @Param('threadId') threadId: string,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async unsaveThread(@Param('threadId') threadId: string, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.savedService.unsaveThread(request.user.id, threadId);

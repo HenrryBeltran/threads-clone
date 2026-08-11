@@ -55,7 +55,7 @@ export class PrismaActivityRepository implements ActivityRepository {
                 receiver: { select: { username: true, profilePictureId: true } },
             },
             where: { receiverId: userId },
-            orderBy: { readStatus: 'asc', updatedAt: 'desc' },
+            orderBy: [{ readStatus: 'asc' }, { updatedAt: 'desc' }],
             take: limit,
             skip: offset,
         });

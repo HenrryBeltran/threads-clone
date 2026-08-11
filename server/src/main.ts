@@ -9,6 +9,7 @@ async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     app.setGlobalPrefix('api');
     app.set('trust proxy', 1);
+    app.useBodyParser('json', { limit: '50mb' });
     app.enableShutdownHooks();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     app.use(cookieParser());

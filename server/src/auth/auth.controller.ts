@@ -1,4 +1,4 @@
-import { Body, Controller, Injectable, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, Injectable, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
@@ -15,8 +15,9 @@ export class AuthController {
     @UseGuards(ThrottlerGuard)
     @Throttle({ default: { limit: 10, ttl: 300_000 } })
     @Post('/login')
+    @HttpCode(200)
     async login(@Body() loginDto: LoginDto, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
-        await this.authService.login(
+        return this.authService.login(
             loginDto.username,
             loginDto.password,
             request.get('user-agent') ?? '',
@@ -29,12 +30,13 @@ export class AuthController {
     @Throttle({ default: { limit: 5, ttl: 600_000 } })
     @Post('/sign-up')
     async signUp(@Body() signUpDto: SignUpDto, @Res({ passthrough: true }) response: Response) {
-        await this.authService.signUp(signUpDto, response);
+        return this.authService.signUp(signUpDto, response);
     }
 
     @Post('/logout')
+    @HttpCode(200)
     @UseGuards(SessionGuard)
     async logout(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
-        await this.authService.logout(request.sessionId!, response);
+        return this.authService.logout(request.sessionId!, response);
     }
 }

@@ -1,8 +1,8 @@
-import { Controller, Delete, Get, HttpCode, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Delete, Get, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthRequest } from 'src/auth/auth-request';
 import { GetUserGuard } from 'src/auth/guards/get-user.guard';
 import { SessionGuard } from 'src/auth/guards/session.guard';
+import { NoContentException } from 'src/common/no-content.exception';
 import { SearchService } from './search.service';
 
 @Controller('search')
@@ -16,10 +16,9 @@ export class SearchController {
 
     @Get('/history')
     @UseGuards(GetUserGuard)
-    getHistory(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
+    getHistory(@Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.searchService.getHistory(request.user.id);
@@ -28,42 +27,31 @@ export class SearchController {
     @Post('/history/:targetId')
     @HttpCode(200)
     @UseGuards(GetUserGuard)
-    async addHistory(
-        @Param('targetId') targetId: string,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async addHistory(@Param('targetId') targetId: string, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
-        await this.searchService.addHistory(request.user.id, targetId, response);
+        return this.searchService.addHistory(request.user.id, targetId);
     }
 
     @Delete('/history')
     @UseGuards(GetUserGuard)
-    async clearHistory(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
+    async clearHistory(@Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
-        await this.searchService.clearHistory(request.user.id, response);
+        return this.searchService.clearHistory(request.user.id);
     }
 
     @Delete('/history/:rowId')
     @UseGuards(SessionGuard)
-    async deleteRow(
-        @Param('rowId') rowId: string,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async deleteRow(@Param('rowId') rowId: string, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
-        await this.searchService.deleteRow(rowId, response);
+        return this.searchService.deleteRow(rowId);
     }
 }

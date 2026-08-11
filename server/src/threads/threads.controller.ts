@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthRequest } from 'src/auth/auth-request';
 import { GetUserGuard } from 'src/auth/guards/get-user.guard';
+import { NoContentException } from 'src/common/no-content.exception';
 import { ThreadsService } from './threads.service';
 import { CreateThreadDto } from './dto/create-thread.dto';
 
@@ -16,15 +16,9 @@ export class ThreadsController {
 
     @Get('/posts/search')
     @UseGuards(GetUserGuard)
-    getPostsSearch(
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-        @Query('q') q?: string,
-        @Query('page') page?: string,
-    ) {
+    getPostsSearch(@Req() request: AuthRequest, @Query('q') q?: string, @Query('page') page?: string) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.threadsService.getPostsSearch(q, page);
@@ -37,14 +31,9 @@ export class ThreadsController {
 
     @Get('/liked/posts')
     @UseGuards(GetUserGuard)
-    getLikedPosts(
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-        @Query('page') page?: string,
-    ) {
+    getLikedPosts(@Req() request: AuthRequest, @Query('page') page?: string) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.threadsService.getLikedPosts(request.user.id, page);
@@ -52,14 +41,9 @@ export class ThreadsController {
 
     @Get('/saved/posts')
     @UseGuards(GetUserGuard)
-    getSavedPosts(
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-        @Query('page') page?: string,
-    ) {
+    getSavedPosts(@Req() request: AuthRequest, @Query('page') page?: string) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.threadsService.getSavedPosts(request.user.id, page);
@@ -77,14 +61,9 @@ export class ThreadsController {
 
     @Post('/post')
     @UseGuards(GetUserGuard)
-    createThreads(
-        @Body() body: CreateThreadDto,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    createThreads(@Body() body: CreateThreadDto, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.threadsService.createThreads(request.user, body);
@@ -92,14 +71,9 @@ export class ThreadsController {
 
     @Delete('/post/:threadId')
     @UseGuards(GetUserGuard)
-    deleteThread(
-        @Param('threadId') threadId: string,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    deleteThread(@Param('threadId') threadId: string, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
 
         return this.threadsService.deleteThread(request.user.id, threadId);

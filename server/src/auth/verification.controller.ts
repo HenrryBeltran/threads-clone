@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Injectable, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Injectable, Post, Req, UseGuards } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { Response } from 'express';
 import { VerifyPinDto } from './dto/verify-pin.dto';
 import { GetUserGuard } from './guards/get-user.guard';
 import { AuthRequest } from './auth-request';
+import { NoContentException } from 'src/common/no-content.exception';
 import { VerificationService } from './verification.service';
 
 @Injectable()
@@ -14,32 +14,25 @@ export class VerificationController {
     constructor(private readonly verificationService: VerificationService) {}
 
     @Post('/')
-    async verifyAccount(
-        @Body() dto: VerifyPinDto,
-        @Req() request: AuthRequest,
-        @Res({ passthrough: true }) response: Response,
-    ) {
+    async verifyAccount(@Body() dto: VerifyPinDto, @Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.verificationService.verifyAccount(request.user, dto.pin);
     }
 
     @Get('/token')
-    async getToken(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
+    async getToken(@Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.verificationService.getVerificationToken(request.user);
     }
 
     @Get('/resend')
-    async resend(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
+    async resend(@Req() request: AuthRequest) {
         if (!request.user) {
-            response.status(204).send();
-            return;
+            throw new NoContentException();
         }
         return this.verificationService.resend(request.user);
     }

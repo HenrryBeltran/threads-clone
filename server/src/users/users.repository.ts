@@ -7,6 +7,7 @@ export type UserProfile = {
     profilePictureId: string | null;
     followersCount: number;
     followingsCount: number;
+    targetId: { userId: { profilePictureId: string | null } }[];
 };
 
 export type TestAccount = {

@@ -17,7 +17,7 @@ export async function userSearch(userId?: string, keywords?: string) {
 
   const res = await safeTry(
     get<{ id: string; username: string; name: string; profilePictureId: string | null; followStatus: number }[]>(
-      "/search/" + userId + "/" + keywords,
+      "/search/" + userId + "/" + encodeURIComponent(keywords),
     ),
   );
 

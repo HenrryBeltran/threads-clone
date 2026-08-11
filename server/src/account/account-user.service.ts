@@ -30,7 +30,7 @@ export class AccountUserService {
         return user;
     }
 
-    async updateProfile(user: AuthUser, dto: ProfileDto, response: Response): Promise<void> {
+    async updateProfile(user: AuthUser, dto: ProfileDto): Promise<number> {
         let profilePictureId: string | null = user.profilePictureId;
 
         if (dto.profilePicture) {
@@ -65,10 +65,10 @@ export class AccountUserService {
             throw new InternalServerErrorException('Something went wrong');
         }
 
-        response.json(200);
+        return 200;
     }
 
-    async deleteAccount(user: AuthUser, response: Response): Promise<void> {
+    async deleteAccount(user: AuthUser, response: Response): Promise<number> {
         if (user.roles === 'viewer') {
             throw new HttpException({ message: 'Unauthorized' }, 401);
         }
@@ -81,7 +81,7 @@ export class AccountUserService {
         }
 
         this.cookieService.clearSession(response);
-        response.json(200);
+        return 200;
     }
 
     async updateEmail(user: AuthUser, dto: NewEmailDto): Promise<{ message: string }> {

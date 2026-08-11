@@ -25,7 +25,7 @@ export class SessionsService {
         });
     }
 
-    async deleteOne(sessionId: string, userId: string, currentSessionId: string, response: Response): Promise<void> {
+    async deleteOne(sessionId: string, userId: string, currentSessionId: string, response: Response): Promise<number> {
         let deleted = false;
         try {
             deleted = await this.repo.deleteUserSession(sessionId, userId);
@@ -40,16 +40,16 @@ export class SessionsService {
             this.cookieService.clearSession(response);
         }
 
-        response.json(200);
+        return 200;
     }
 
-    async deleteAll(userId: string, currentSessionId: string, response: Response): Promise<void> {
+    async deleteAll(userId: string, currentSessionId: string): Promise<number> {
         try {
             await this.repo.deleteSessionsByUserId(userId, currentSessionId);
         } catch (e) {
             Logger.log(e);
             throw new InternalServerErrorException('Something went wrong');
         }
-        response.json(200);
+        return 200;
     }
 }

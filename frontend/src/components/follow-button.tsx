@@ -48,7 +48,7 @@ export function FollowButton({ className, targetUsername, followStatus }: Props)
   const unfollowMutation = useMutation({
     mutationKey: ["follow", targetUsername],
     mutationFn: async () => {
-      const response = await safeTry(post<{ follow: boolean }>("/account/profile/unfollow" + targetUsername));
+      const response = await safeTry(post<{ follow: boolean }>("/account/profile/unfollow/" + targetUsername));
 
       if (response.error) throw new Error("Something went wrong");
       if (!response.result.ok) throw new Error("Something went wrong");

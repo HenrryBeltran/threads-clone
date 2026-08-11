@@ -73,7 +73,6 @@ export const userAccountQueryOptions = queryOptions({
   queryKey: ["user", "account"],
   queryFn: getUserAccount,
   retry: true,
-  refetchOnWindowFocus: true,
   refetchOnReconnect: true,
   staleTime: Infinity,
 });

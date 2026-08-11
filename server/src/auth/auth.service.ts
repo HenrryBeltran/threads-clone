@@ -92,7 +92,7 @@ export class AuthService {
             throw new HttpException({ token }, HttpStatus.TEMPORARY_REDIRECT);
         }
 
-        response.json(200);
+        return 200;
     }
 
     async signUp(body: SignUpDto, response: Response) {
@@ -166,7 +166,7 @@ export class AuthService {
             throw new HttpException({ token }, HttpStatus.TEMPORARY_REDIRECT);
         }
 
-        response.status(201).json({ token });
+        return { token };
     }
 
     async logout(sessionId: string, response: Response) {
@@ -178,6 +178,6 @@ export class AuthService {
         }
 
         this.cookieService.clearSession(response);
-        response.json(200);
+        return 200;
     }
 }

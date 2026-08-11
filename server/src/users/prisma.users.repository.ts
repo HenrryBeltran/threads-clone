@@ -7,7 +7,7 @@ export class PrismaUsersRepository implements UsersRepository {
     constructor(private readonly prisma: PrismaService) {}
 
     async getProfileByUsername(username: string): Promise<UserProfile | null> {
-        return await this.prisma.users.findUnique({
+        const user = await this.prisma.users.findUnique({
             where: { username },
             select: {
                 id: true,
@@ -18,8 +18,22 @@ export class PrismaUsersRepository implements UsersRepository {
                 profilePictureId: true,
                 followersCount: true,
                 followingsCount: true,
+                followers: {
+                    select: { follower: { select: { profilePictureId: true } } },
+                    orderBy: { createdAt: 'desc' },
+                    take: 2,
+                },
             },
         });
+
+        if (!user) return null;
+
+        const { followers, ...profile } = user;
+
+        return {
+            ...profile,
+            targetId: followers.map((f) => ({ userId: { profilePictureId: f.follower.profilePictureId } })),
+        };
     }
 
     async getTestAccounts(): Promise<TestAccount[]> {
