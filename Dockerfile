@@ -14,8 +14,6 @@ RUN apt-get update -qq && \
 COPY server/package.json server/package-lock.json ./
 RUN npm ci
 
-ENV DATABASE_URL=file:/app/server/dev.db
-
 COPY server/ ./
 RUN npx prisma generate
 RUN npm run build
