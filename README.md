@@ -18,9 +18,12 @@ A full-stack Threads (Meta) clone — text-first posting, replies, mentions, lik
 - [Architecture](#architecture-modular-monolith)
 - [System diagram](#system-diagram)
 - [Repository Pattern](#repository-pattern)
-- [Authentication & Sessions](#authentication-sessions)
-- [Frontend](#frontend-react-tanstack-router-query-zustand)
+- [Authentication & Sessions](#authentication-&-sessions)
+- [Frontend](#frontend-react-+-tanstack-router-+-query-+-zustand)
 - [Data model](#data-model-11-tables)
+- [Testing strategy](#-testing-strategy)
+- [Running locally](#-running-locally)
+- [Contact](#-contact)
 
 ## Project purpose
 
@@ -342,28 +345,30 @@ erDiagram
 
 ## Testing strategy
 
-| Layer   | Tool                 | Status                              |
-| ------- | -------------------- | ----------------------------------- |
-| Unit    | Jest                 | Services vs mocked repos            |
-| API E2E | Jest + supertest     | HTTP contracts, guards, rate limits |
-| UI E2E  | Playwright           | Login + home feed journey           |
+| Layer   | Tool             | Status                              |
+| ------- | ---------------- | ----------------------------------- |
+| Unit    | Jest             | Services vs mocked repos            |
+| API E2E | Jest + supertest | HTTP contracts, guards, rate limits |
+| UI E2E  | Playwright       | Login + home feed journey           |
 
 Unit and API E2E run against a throwaway SQLite file (`file:./test.e2e.db`); the Playwright suite boots the real stack (NestJS + Vite + SQLite).
 
-**Combined coverage** (unit + e2e · `test:cov:all`): **72% stmts · 65% branches · 57% funcs · 71% lines** — thresholds enforced in CI (60/50/50/60).
+**Combined coverage** (unit + e2e · `test:cov:all`): **72% stmts · 65% branches · 57% funcs · 71% lines**. Reported for visibility; no hard percentage gate in CI.
 
 ```bash
 # Backend (from ./server)
 npm run test          # unit tests (152)
 npm run test:e2e      # API e2e with supertest (32)
-npm run test:cov:all  # combined coverage, enforces thresholds
+npm run test:cov:all  # combined coverage report
 
-# UI e2e (from ./e2e) — boots NestJS + Vite, then runs Playwright
-npm run test          # playwright test (chromium)
+# UI e2e (from ./e2e) — needs the stack running, then runs Playwright
+npm run dev:backend   # term 1: seeds test db + starts NestJS on :3000
+npm run dev:frontend  # term 2: starts Vite on :5173
+npm run test          # term 3: playwright test (chromium)
 npx playwright install chromium   # first time only
 ```
 
-CI runs all of the above on every push/PR: `server` tests + coverage, `frontend` lint + build, and the Playwright full-stack suite.
+CI runs the server Jest suites + coverage report on every push/PR. Playwright is run locally, not in CI.
 
 ---
 

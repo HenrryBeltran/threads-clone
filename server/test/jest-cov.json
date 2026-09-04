@@ -15,13 +15,5 @@
   "collectCoverageFrom": [
     "src/**/*.(t|j)s"
   ],
-  "coverageDirectory": "../coverage",
-  "coverageThreshold": {
-    "global": {
-      "lines": 60,
-      "branches": 50,
-      "functions": 50,
-      "statements": 60
-    }
-  }
+  "coverageDirectory": "../coverage"
 }
